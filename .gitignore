@@ -1,0 +1,10 @@
+temp_frontend/.next
+temp_frontend/node_modules
+
+
+**/__pycache__
+
+
+# or any name that you used for your virtual environment
+venv/
+.env/
