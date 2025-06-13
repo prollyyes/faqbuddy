@@ -1,0 +1,26 @@
+# Python cache
+__pycache__/
+*.pyc
+.env
+
+# Environment
+.env
+.venv/
+env/
+venv/
+
+# Models
+models/
+*.gguf
+*.bin
+*.safetensors
+
+# Database
+*.db
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

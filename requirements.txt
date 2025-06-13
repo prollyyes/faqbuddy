@@ -1,0 +1,8 @@
+# Core dependencies
+torch>=2.1
+sentence-transformers>=2.6
+pinecone-client>=3.0.0
+python-dotenv>=1.0
+
+# Optional: for data processing
+pandas>=2.2
