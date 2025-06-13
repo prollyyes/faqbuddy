@@ -9,3 +9,7 @@ frontend/node_modules
 # or any name that you used for your virtual environment
 venv/
 .env/
+
+# environment
+.env
+.env.local
