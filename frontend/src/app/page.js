@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import { useState } from "react";
 
 export default function Home() {
@@ -11,7 +12,7 @@ export default function Home() {
     if (!input.trim()) return;
     setLoading(true);
     setMessages((msgs) => [...msgs, { role: "user", text: input }]);
-    const res = await fetch("http://localhost:8000/classify", {
+    const res = await fetch("http://localhost:8000/t2sql", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question: input }),
@@ -24,11 +25,30 @@ export default function Home() {
         text: (
           <>
             <div>
-              <b>Chosen:</b> {data.chosen}
-              {data.fallback_used ? (
-                <span className="ml-2 text-yellow-700">(Fallback on LLM)</span>
+              <b>Chosen:</b>{" "}
+              {Array.isArray(data.chosen) && data.chosen.length > 0 ? (
+                <table className="text-xs border mt-2">
+                  <thead>
+                    <tr>
+                      {Object.keys(data.chosen[0]).map((col) => (
+                        <th key={col} className="border px-1">{col}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.chosen.map((row, idx) => (
+                      <tr key={idx}>
+                        {Object.values(row).map((val, i) => (
+                          <td key={i} className="border px-1">{val}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : typeof data.chosen === "string" ? (
+                data.chosen
               ) : (
-                <span className="ml-2 text-green-700">(ML used)</span>
+                JSON.stringify(data.chosen)
               )}
             </div>
             <div>
@@ -60,7 +80,17 @@ export default function Home() {
             }`}
           >
             <b>{msg.role === "user" ? "Tu" : "Bot"}:</b>{" "}
-            {typeof msg.text === "string" ? msg.text : msg.text}
+            {React.isValidElement(msg.text)
+              ? msg.text
+              : typeof msg.text === "string"
+                ? msg.text
+                : Array.isArray(msg.text)
+                  ? (
+                      <pre className="whitespace-pre-wrap text-xs">
+                        {JSON.stringify(msg.text, null, 2)}
+                      </pre>
+                    )
+                  : JSON.stringify(msg.text)}
           </div>
         ))}
         {loading && <div className="text-gray-800">Sto pensando...</div>}
