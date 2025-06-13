@@ -1,4 +1,9 @@
-def extract_features(question):
+from sentence_transformers import SentenceTransformer
+import numpy as np
+
+model = SentenceTransformer("all-MiniLM-L6-v2")
+
+def extract_hand_features(question):
     connectives = [" e ", " oppure", "se ", "quando", "come", "perché", "quali", "quale", "posso", "strategia", "passi"]
     modal_verbs = ["posso", "devo", "vorrei", "potrei", "dovrei", "suggerisci", "consigli", "preferirei"]
     q = question.lower()
@@ -14,3 +19,8 @@ def extract_features(question):
         int(" e " in q or " oppure " in q),
         int(any(q.startswith(w) for w in ["come", "quali", "quale", "perché"])),
     ]
+
+def extract_features(question):
+    hand = extract_hand_features(question)
+    semantic = model.encode(question)
+    return np.concatenate([hand, semantic])

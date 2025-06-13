@@ -4,9 +4,10 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 import joblib
 from ml_utils import extract_features
+import numpy as np
+import os
 
-# Dataset
-# need to bee expanded with more examples
+# Dataset base (espandilo con più esempi reali!)
 data = [
     # Simple
     {"question": "Quanti crediti vale il corso di informatica?", "label": "simple"},
@@ -42,29 +43,42 @@ data = [
     {"question": "Quali soluzioni ci sono se due esami obbligatori si sovrappongono?", "label": "complex"},
 ]
 
-# Carica il CSV generato automaticamente
-df_csv = pd.read_csv("dataset_domande.csv")
+# Carica il CSV generato automaticamente, se esiste
+csv_path = "dataset_domande.csv"
+if os.path.exists(csv_path):
+    df_csv = pd.read_csv(csv_path)
+    print(f"Caricato {csv_path} con {len(df_csv)} domande.")
+else:
+    df_csv = pd.DataFrame(columns=["question", "label"])
+    print(f"Attenzione: {csv_path} non trovato, uso solo dataset base.")
 
 # Unisci i due dataset
 df_original = pd.DataFrame(data)
 df = pd.concat([df_original, df_csv], ignore_index=True)
+print(f"Totale domande in training: {len(df)}")
 
+# Estrai feature e label
+print("Estrazione delle feature...")
+X = np.stack([extract_features(q) for q in df["question"]])
+y = df["label"].to_numpy(dtype=str)  # Conversione sicura per stratify
 
-X = df["question"].apply(extract_features).tolist()
-y = df["label"]
+# Train/test split stratificato
+# forse è meglio k cross validation ?
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.4, random_state=42, stratify=y
+)
+print(f"Train set: {len(X_train)}, Test set: {len(X_test)}")
 
-# Split train/test
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=42)
-
-# Training
-clf = LogisticRegression()
+# Train model
+clf = LogisticRegression(max_iter=1000)
 clf.fit(X_train, y_train)
 
-# Test
+# Evaluation
 y_pred = clf.predict(X_test)
-print("Accuracy:", accuracy_score(y_test, y_pred))
-print(classification_report(y_test, y_pred))
+print("\n--- Risultati ---")
+print(f"Accuracy: {accuracy_score(y_test, y_pred):.3f}")
+print(classification_report(y_test, y_pred, digits=3))
 
-# Salva il modello
+# Save model
 joblib.dump(clf, "ml_model.joblib")
 print("Modello ML salvato su ml_model.joblib")
