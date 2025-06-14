@@ -18,11 +18,13 @@ class T2SQLRequest(BaseModel):
 
 @app.post("/t2sql")
 def t2sql_endpoint(req: T2SQLRequest):
+
     conn = get_db_connection()
     converter = TextToSQLConverter()
     schema = get_database_schema(conn)
     print("SCHEMA PER IL PROMPT:\n", schema)
     prompt = converter.create_prompt(req.question, schema)
+    
     # Chiamata a Ollama e print della risposta grezza
     raw_response = converter.query_ollama(prompt)
     print("RISPOSTA GREZZA OLLAMA:", repr(raw_response))
@@ -43,15 +45,11 @@ def t2sql_endpoint(req: T2SQLRequest):
         cur.close()
         conn.close()
         return {
-            "chosen": result,
-            "ml_model": "T2SQL",
-            "ml_confidence": 1.0,
-            "gemma3_4b": sql_query
+            "result": result,
+            "query": sql_query
         }
     except Exception as e:
         return {
-            "chosen": str(e),
-            "ml_model": "T2SQL",
-            "ml_confidence": 0.0,
-            "gemma3_4b": sql_query
+            "result": str(e),
+            "query": sql_query
         }

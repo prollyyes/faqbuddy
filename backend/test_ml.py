@@ -1,8 +1,7 @@
 import joblib
 import time
 from sklearn.metrics import classification_report, precision_score, recall_score, f1_score
-from ml_utils import extract_features
-from switchPOC_main import classify_question
+from ml_utils import extract_features, classify_question
 
 # Carica il modello ML già addestrato
 clf = joblib.load("ml_model.joblib")

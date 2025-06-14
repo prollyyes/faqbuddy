@@ -1,5 +1,9 @@
+##########################################
+# INUTILIZZATO PER IL MOMENTO #
+##########################################
+
 import pandas as pd
-from switchPOC_main import classify_question
+from ml_utils import classify_question
 
 # Parametri
 N_SIMPLE = 20
