@@ -17,5 +17,5 @@ create and populate with sample data:
 ```sh
 psql -h localhost -p 5433 -U db_user -d faqbuddy_db -f schema.sql
 psql -h localhost -p 5433 -U db_user -d faqbuddy_db -f sample_data.sql
-python create_db.py
+python test_db.py
 ```
