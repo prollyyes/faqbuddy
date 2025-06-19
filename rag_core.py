@@ -1,11 +1,11 @@
 import os
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Generator
 from dotenv import load_dotenv
 import torch
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone
 import numpy as np
-from utils.local_llm import generate_answer
+from utils.local_llm import generate_answer, generate_answer_streaming
 import time
 
 class RAGSystem:
@@ -88,6 +88,53 @@ class RAGSystem:
         )
         
         return results.matches
+
+    def generate_response_streaming(self, 
+                                  query: str, 
+                                  top_k: int = 5,
+                                  filter: Dict = None) -> Dict[str, Any]:
+        """
+        Generate a streaming response using the RAG pipeline.
+        
+        Args:
+            query: The user's question
+            top_k: Number of relevant documents to retrieve
+            filter: Optional metadata filter
+            
+        Returns:
+            Dictionary containing the response stream and timing information
+        """
+        start_time = time.time()
+        
+        # Step 1: Retrieve relevant documents
+        retrieval_start = time.time()
+        matches = self.query(query, top_k=top_k, filter=filter)
+        retrieval_time = time.time() - retrieval_start
+        
+        if not matches:
+            return {
+                "response_stream": ["I couldn't find any relevant information to answer your question."],
+                "retrieval_time": retrieval_time,
+                "generation_time": 0,
+                "total_time": time.time() - start_time,
+                "context_used": []
+            }
+        
+        # Step 2: Prepare context
+        context = "\n\n".join([match.metadata.get("text", "") for match in matches])
+        
+        # Step 3: Generate streaming response
+        generation_start = time.time()
+        response_stream = generate_answer_streaming(context, query)
+        generation_time = time.time() - generation_start
+        
+        return {
+            "response_stream": response_stream,
+            "retrieval_time": retrieval_time,
+            "generation_time": generation_time,
+            "total_time": time.time() - start_time,
+            "context_used": [match.metadata.get("text", "") for match in matches]
+        }
 
     def generate_response(self, 
                          query: str, 

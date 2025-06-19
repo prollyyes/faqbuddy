@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - /app/frontend
+    environment:
+      - PYTHONPATH=/app
+      - PINECONE_API_KEY=${PINECONE_API_KEY}
+      - PINECONE_HOST=${PINECONE_HOST}
+      - PINECONE_INDEX=${PINECONE_INDEX}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+
+  frontend:
+    build: 
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/src:/app/src:delegated
+      - ./frontend/public:/app/public:delegated
+      - /app/node_modules
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - NODE_ENV=development
+    depends_on:
+      - backend 

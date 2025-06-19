@@ -1,8 +1,21 @@
 # Core dependencies
 torch>=2.1
 sentence-transformers>=2.6
-pinecone-client>=3.0.0
+pinecone>=3.0
 python-dotenv>=1.0
+
+# FastAPI backend
+fastapi>=0.104
+uvicorn[standard]>=0.24
+pydantic>=2.5
+
+# Database
+psycopg2-binary>=2.9
 
 # Optional: for data processing
 pandas>=2.2
+
+# Security
+python-jose[cryptography]>=3.3
+passlib[bcrypt]>=1.7
+python-multipart>=0.0.6

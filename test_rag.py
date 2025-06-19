@@ -5,6 +5,7 @@ import sys
 import time
 import json
 from datetime import datetime
+from utils.db import get_connection
 
 def run_benchmark(rag, queries, num_runs=3):
     """
@@ -128,11 +129,16 @@ def test_rag():
         
         # Test queries
         queries = [
-            "What exams were given by Professor Smith in 2023?",
-            "Which textbooks were used in the Database Systems course?",
-            "List all exams held in room A101",
-            "What courses were taught by Professor Johnson?",
-            "Show me all exams from 2022 that used Machine Learning textbooks"
+            "List all degree courses offered by the Faculty of Ingegneria dell'Informazione, Informatica e Statistica.",
+            "Who is the president of the Faculty of Ingegneria dell'Informazione, Informatica e Statistica?",
+            "Show all courses in the degree program Ingegneria Informatica e Automatica.",
+            "Who teaches Fondamenti di Informatica in 2023?",
+            "What is the schedule for Fondamenti di Informatica in the academic year 2023?",
+            "List all students enrolled in Ingegneria Informatica e Automatica.",
+            "Show all teaching materials for Fondamenti di Informatica.",
+            "What is the average rating of materials uploaded for Fondamenti di Informatica?",
+            "List all reviews for Fondamenti di Informatica in 2023.",
+            "Which department does the Faculty of Ingegneria dell'Informazione, Informatica e Statistica belong to?"
         ]
         
         # Run benchmark
