@@ -29,3 +29,9 @@ su un altro terminale:
 cd temp_frontend
 npm i && npm run dev
 ```
+
+
+Se volete guardare lo schema del db 
+```sh
+docker exec -it FaqBuddy_db psql -U FaqBuddy_user -d FaqBuddy_db
+```
