@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: FaqBuddy_db
+    environment:
+      POSTGRES_USER: FaqBuddy_user
+      POSTGRES_PASSWORD: pwd
+      POSTGRES_DB: FaqBuddy_db
+    volumes:
+      - ./db/data:/var/lib/postgresql/data  # Mappa una cartella per persistenza dei dati
+    ports:
+      - "5432:5432"  # Espone la porta 5432 per la connessione
+    networks:
+      - ticketing_network
+    restart: always
+
+networks:
+  ticketing_network:
+    driver: bridge
