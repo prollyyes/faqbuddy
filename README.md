@@ -81,7 +81,7 @@ A streamlined Retrieval-Augmented Generation (RAG) system that combines vector s
 
 ## 🚀 Usage
 
-** To run the test UI, run `./run.sh` **
+**To run the test UI, run `./run.sh`**
 
 1. **Run Benchmark Tests**
    ```bash
