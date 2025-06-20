@@ -1,6 +1,7 @@
 frontend/.next
 frontend/node_modules
 
+backend/models
 
 **/.DS_Store
 **/__pycache__
