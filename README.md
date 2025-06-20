@@ -46,7 +46,7 @@ DB_PORT=5433
 cd backend/src
 export PYTHONPATH=$(pwd)
 ```
-Io sinceramente preferisco isnerirlo direttamente dentro `~/.zshrc`, ma fate voi
+Io sinceramente preferisco inserirlo direttamente dentro `~/.zshrc`, ma fate voi
 
 ---
 
@@ -60,7 +60,7 @@ Consulta la cartella `/db` e leggi il relativo `README.md` per le istruzioni su 
 
 ```sh
 cd backend/src
-python create_MLmodel.py
+python switcher/create_MLmodel.py
 python rag/embed_and_index.py
 ```
 
