@@ -34,7 +34,25 @@ def classify_question(question: str) -> str:
     risposta = result["choices"][0]["text"].strip().lower().split()[0] # why error?
     return risposta
 
+
 def generate_answer(context: str, question: str) -> str:
     prompt = f"[INST] Context:\n{context}\n\nQuestion:\n{question} [/INST]"
     output = llm_mistral(prompt, max_tokens=256, stop=["</s>"])
     return output["choices"][0]["text"].strip()
+
+def generate_answer_streaming(context: str, question: str) -> list:
+    """Generate an answer token by token."""
+    prompt = f"[INST] Context:\n{context}\n\nQuestion:\n{question} [/INST]"
+    
+    # Use the streaming API
+    stream = llm_mistral(prompt, max_tokens=256, stop=["</s>"], stream=True)
+    
+    tokens = []
+    for chunk in stream:
+        if chunk["choices"][0]["finish_reason"] is not None:
+            break
+        token = chunk["choices"][0]["delta"].get("content", "")
+        if token:
+            tokens.append(token)
+    
+    return tokens

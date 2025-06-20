@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import os
 # Constants for Pinecone index
 INDEX_NAME = "exams-index"
-NAMESPACE = "v2"
+NAMESPACE = "v4"
 
 load_dotenv()  # Load environment variables from .env file  
 
