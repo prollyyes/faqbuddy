@@ -4,6 +4,8 @@
 
 CREATE TYPE attend_status AS ENUM ('attivo','completato','abbandonato');
 CREATE TYPE tipoCorso AS ENUM ('triennale','magistrale','ciclo unico');
+CREATE DOMAIN semestre AS TEXT 
+  CHECK (VALUE ~ '^(S[12])/[0-9]{4}$');
 
 ------------------------------------------------
 -- 1. Utente (studenti/insegnanti)
@@ -73,7 +75,7 @@ CREATE TABLE Corso (
 CREATE TABLE EdizioneCorso (
     id         UUID PRIMARY KEY REFERENCES Corso(id),
     insegnante UUID NOT NULL REFERENCES Insegnanti(id),
-    aa         DATE NOT NULL,
+    data       semestre NOT NULL,
     orario     TEXT,
     esonero    BOOLEAN NOT NULL,
     mod_Esame  TEXT NOT NULL
