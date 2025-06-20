@@ -2,12 +2,11 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
-import joblib
 from ml_utils import extract_features
 import numpy as np
 import os
 
-# Dataset base (espandilo con più esempi reali!)
+# Dataset base
 data = [
     # Simple
     {"question": "Quanti crediti vale il corso di informatica?", "label": "simple"},
@@ -43,8 +42,8 @@ data = [
     {"question": "Quali soluzioni ci sono se due esami obbligatori si sovrappongono?", "label": "complex"},
 ]
 
-# Carica il CSV generato automaticamente, se esiste
-csv_path = "dataset_domande.csv"
+# Carica il CSV, se esiste
+csv_path = os.path.join(os.path.dirname(__file__), "dataset_domande.csv")
 if os.path.exists(csv_path):
     df_csv = pd.read_csv(csv_path)
     print(f"Caricato {csv_path} con {len(df_csv)} domande.")
@@ -79,6 +78,8 @@ print("\n--- Risultati ---")
 print(f"Accuracy: {accuracy_score(y_test, y_pred):.3f}")
 print(classification_report(y_test, y_pred, digits=3))
 
-# Save model
-joblib.dump(clf, "ml_model.joblib")
-print("Modello ML salvato su ml_model.joblib")
+# Save model inside the models directory
+import joblib
+model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'models', 'ml_model.joblib'))
+joblib.dump(clf, model_path)
+print(f"Modello salvato in: {model_path}")
