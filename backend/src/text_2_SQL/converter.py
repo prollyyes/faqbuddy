@@ -1,11 +1,10 @@
-import requests
 import re
 from typing import Optional
+from src.local_llm import llm_mistral
 
 class TextToSQLConverter:
-    def __init__(self, ollama_url="http://localhost:11434", default_model="gemma3:4b"):
-        self.ollama_url = ollama_url
-        self.default_model = default_model
+    def __init__(self):
+        pass
 
     def create_prompt(self, question: str, schema: str) -> str:
         prompt = f"""
@@ -58,38 +57,35 @@ SQL:
 """
         return prompt
 
-    def query_ollama(self, prompt: str, model: Optional[str] = None) -> str:
-        if model is None:
-            model = self.default_model
-        response = requests.post(
-            f"{self.ollama_url}/api/generate",
-            json={
-                "model": model,
-                "prompt": prompt,
-                "stream": False,
-                "options": {
-                    "temperature": 0.1,
-                    "top_p": 0.9,
-                    "top_k": 10,
-                    "num_predict": 150,
-                    "repeat_penalty": 1.1,
-                    "stop": ["\n\n", "Domanda:", "SQL:", "```"]
-                }
-            },
-            timeout=45
-        )
-        result = response.json()
-        return result.get("response", "").strip()
-
-    def clean_sql_response(self, sql_response: str) -> str:
-        if not sql_response:
-            return "INVALID_QUERY"
-        sql_response = re.sub(r'```sql\s*', '', sql_response, flags=re.IGNORECASE)
-        sql_response = re.sub(r'```\s*', '', sql_response)
-        sql_response = re.sub(r'^(SQL:\s*|Query:\s*|Risposta:\s*)', '', sql_response, flags=re.IGNORECASE)
-        sql_response = sql_response.strip()
-        if "INVALID_QUERY" in sql_response.upper():
-            return "INVALID_QUERY"
-        if not sql_response.endswith(";"):
-            sql_response += ";"
+    def query_llm(self, prompt: str) -> str:
+        # Usa il modello locale Mistral
+        result = llm_mistral(prompt, max_tokens=150)
+        # Compatibilità output (dict o string)
+        if isinstance(result, dict):
+            sql_response = result["choices"][0]["text"].strip()
+        else:
+            sql_response = result.strip() # why error?
         return sql_response
+
+    
+    
+    def clean_sql_response(self, sql_response: str) -> str:
+        import re
+        # Cerca la query che inizia con SELECT e termina con ;
+        match = re.search(r"(SELECT[\s\S]+?;)", sql_response, re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+        # Se manca il punto e virgola, prendi tutte le righe che iniziano con SELECT o continuano la query
+        lines = []
+        recording = False
+        for line in sql_response.split('\n'):
+            if line.strip().lower().startswith('select'):
+                recording = True
+            if recording:
+                lines.append(line.strip())
+        if lines:
+            query = ' '.join(lines)
+            if not query.endswith(';'):
+                query += ';'
+            return query
+        return "INVALID_QUERY"

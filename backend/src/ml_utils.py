@@ -7,8 +7,8 @@ print("Loading SentenceTransformer model...")
 model = SentenceTransformer("all-MiniLM-L6-v2")
 print("Model loaded successfully.")
 
-OLLAMA_URL = "http://localhost:11434/api/generate"
-OLLAMA_MODEL = "gemma3:4b"  # o modello caricato
+""" OLLAMA_URL = "http://localhost:11434/api/generate"
+OLLAMA_MODEL = "gemma3:4b"  # o modello caricato """
 
 def extract_hand_features(question):
     connectives = [" e ", " oppure", "se ", "quando", "come", "perché", "quali", "quale", "posso", "strategia", "passi"]
@@ -33,7 +33,7 @@ def extract_features(question):
     return np.concatenate([hand, semantic])
 
 
-def query_ollama(prompt: str) -> str:
+""" def query_ollama(prompt: str) -> str:
     response = requests.post(OLLAMA_URL, json={
         "model": OLLAMA_MODEL,
         "prompt": prompt,
@@ -52,4 +52,4 @@ def classify_question(question: str) -> str:
     )
     result = query_ollama(prompt)
     # Cerca la parola chiave nella risposta
-    return result.lower()
+    return result.lower() """

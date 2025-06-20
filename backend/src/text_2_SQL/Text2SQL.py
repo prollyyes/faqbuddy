@@ -26,12 +26,12 @@ def t2sql_endpoint(req: T2SQLRequest):
     prompt = converter.create_prompt(req.question, schema)
     
     # Chiamata a Ollama e print della risposta grezza
-    raw_response = converter.query_ollama(prompt)
-    print("RISPOSTA GREZZA OLLAMA:", repr(raw_response))
+    raw_response = converter.query_llm(prompt)
+    print("RISPOSTA GREZZA MISTRAL:", repr(raw_response))
     sql_query = converter.clean_sql_response(raw_response)
     print("QUERY SQL GENERATA:\n", sql_query)
     if not is_sql_safe(sql_query):
-        return {"chosen": "INVALID_QUERY", "ml_model": "T2SQL", "ml_confidence": 0.0, "gemma3_4b": sql_query}
+        return {"chosen": "INVALID_QUERY", "ml_model": "T2SQL", "ml_confidence": 0.0, "mistral7B": sql_query}
     try:
         cur = conn.cursor()
         cur.execute(sql_query)
