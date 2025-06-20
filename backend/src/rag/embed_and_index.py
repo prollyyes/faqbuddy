@@ -22,8 +22,8 @@ def embed_and_index():
         for i, (vec, text) in enumerate(zip(embeddings, chunks))
     ]
 
-    upsert_vectors(items_to_upsert, namespace="v2")
-    print("✅ Chunks indexed in Pinecone (namespace='v2').")
+    upsert_vectors(items_to_upsert, namespace="v4") # before v4, use v2
+    print("✅ Chunks indexed in Pinecone (namespace='v4').")
 
 if __name__ == "__main__":
     embed_and_index()

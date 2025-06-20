@@ -11,22 +11,34 @@ import joblib
 model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'models', 'ml_model.joblib'))
 clf = joblib.load(model_path)
 
+"""     "Mostra tutti i materiali didattici per il corso Fondamenti di Informatica",
+    "Quanti studenti sono iscritti in totale?",
+    "Quali sono i corsi con frequenza obbligatoria?",
+    "Quali sono le edizioni del corso Fondamenti di Informatica nel semestre S1/2023?",
+    "Mostra tutte le tesi caricate dagli studenti",
+    "Quali studenti hanno completato il corso Fondamenti di Informatica?",
+
+    "Quali strategie posso adottare per migliorare la mia media degli esami?",
+    "Cosa devo fare se voglio cambiare corso di laurea?",
+    "Quali sono le procedure per il riconoscimento di esami sostenuti all’estero?",
+"""
 
 # Domande di test
 test_questions = [
+    # Domande "simple" (Text2SQL)
     "Elenca tutti i professori",
-    "Mostra tutti i libri",
-    "Quali esami ci sono nel 2024?",
-    "Elenca tutti i libri",
-    "Quanti libri ci sono in tutto?",
-    "Quanti professori insegnano nella stanza C305?",
-    "Come posso organizzare il piano di studi per laurearmi in 3 anni?",
-    "Quali esami posso sostenere in parallelo senza problemi di sovrapposizioni??",
+    "Mostra tutti i corsi di laurea",
+    "Quali studenti sono iscritti al corso di laurea Ingegneria Informatica e Automatica?",
+    "Quali sono i professori che hanno tenuto corsi nel semestre S2/2023?",
+
+    # Domande "complex" (RAG)
+    "Come posso organizzare il mio piano di studi per laurearmi in 3 anni?",
+    "Come posso conciliare lavoro e studio durante l’università?",
 ]
 
 # Setup T2SQL
 conn = get_db_connection()
-schema = get_database_schema(conn)
+schema = get_database_schema(conn) # static schema for now
 converter = TextToSQLConverter()
 
 # Setup RAG
