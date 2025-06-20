@@ -1,11 +1,14 @@
-import joblib
 import time
-from ml_utils import extract_features, classify_question
-from text_2_SQL.converter import TextToSQLConverter
-from text_2_SQL.db_utils import get_db_connection, get_database_schema
+from src.ml_utils import extract_features
+from src.local_llm import classify_question
+from src.text_2_SQL.converter import TextToSQLConverter
+from src.text_2_SQL.db_utils import get_db_connection, get_database_schema
 
 # Carica il modello ML già addestrato
-clf = joblib.load("ml_model.joblib")
+import os
+import joblib
+model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'models', 'ml_model.joblib'))
+clf = joblib.load(model_path)
 
 # Domande di test
 test_questions = [
@@ -51,7 +54,7 @@ for q in test_questions:
     # 3. Routing finale
     if final_pred == "simple":
         prompt = converter.create_prompt(q, schema)
-        raw_response = converter.query_ollama(prompt)
+        raw_response = converter.query_llm(prompt)
         sql_query = converter.clean_sql_response(raw_response)
         print(f"SQL: {sql_query}")
         if sql_query != "INVALID_QUERY":
