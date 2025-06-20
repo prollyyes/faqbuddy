@@ -8,14 +8,7 @@ docker run --name faqbuddy_postgres_db \
   -d postgres:13
 ```
 
-to see if everything works:
-```sh
-docker exec -it faqbuddy_postgres_db psql -U db_user -d faqbuddy_db
-```
-
 create and populate with sample data:
 ```sh
-psql -h localhost -p 5433 -U db_user -d faqbuddy_db -f schema.sql
-psql -h localhost -p 5433 -U db_user -d faqbuddy_db -f sample_data.sql
-python test_db.py
+python create_db.py
 ```
