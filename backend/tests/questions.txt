@@ -28,3 +28,36 @@ Se dovessi cambiare facoltà, potrei portarmi dietro alcuni esami?
 Dami tutti gli appunti di Ingegneria.
 Quali documenti servono per la domanda di laurea?
 Come posso migliorare la mia media degli esami?
+
+
+
+
+######DOMANDE prova
+Quali libri sono stati utilizzati dal professor John Smith?
+Dammi i libri per preparare l'esame di Data Structures and Algorithms.
+Quali sono le tempistiche e le modalità per presentare una richiesta di trasferimento ad un altro ateneo?
+
+
+Elenca tutti i professori.
+Mostra tutti i libri disponibili.
+Quali esami sono previsti nel 2024?
+Quali sono i titoli dei libri usati negli esami del 2023?
+Quanti professori hanno la stanza C305?
+Quali professori hanno tenuto esami nel 2022?
+Mostra nome e cognome dei professori che hanno tenuto esami nel 2024.
+Quanti libri sono presenti in totale?
+Quali libri sono stati utilizzati dal professor John Smith?
+Quali esami sono associati al libro "Database Systems"?
+
+--
+
+Come posso organizzare il mio piano di studi per laurearmi in 3 anni?
+Quali strategie posso adottare per migliorare la mia media degli esami?
+Cosa devo fare se voglio cambiare corso di laurea?
+Quali sono le procedure per il riconoscimento di esami sostenuti all’estero?
+Come posso conciliare lavoro e studio durante l’università?
+
+--
+Fallback:
+
+Quali documenti servono per la domanda di laurea?
