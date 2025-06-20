@@ -3,12 +3,14 @@ from src.ml_utils import extract_features
 from src.local_llm import classify_question
 from src.text_2_SQL.converter import TextToSQLConverter
 from src.text_2_SQL.db_utils import get_db_connection, get_database_schema
+from src.rag.rag_core import RAGSystem
 
 # Carica il modello ML già addestrato
 import os
 import joblib
 model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'models', 'ml_model.joblib'))
 clf = joblib.load(model_path)
+
 
 # Domande di test
 test_questions = [
@@ -27,6 +29,9 @@ conn = get_db_connection()
 schema = get_database_schema(conn)
 converter = TextToSQLConverter()
 
+# Setup RAG
+rag = RAGSystem()
+
 print("\n--- Benchmark: Switcher ML + fallback LLM + T2SQL ---")
 correct_sql = 0
 correct_rag = 0
@@ -36,22 +41,19 @@ for q in test_questions:
     print(f"\nDomanda: {q}")
     start = time.time()
 
-    # 1. Switcher ML con confidenza
     features = [extract_features(q)]
     ml_pred = clf.predict(features)[0]
     proba = max(clf.predict_proba(features)[0])
     print(f"ML: {ml_pred} (confidenza: {proba:.2f})")
 
-    # 2. Se confidenza < 0.7, fallback su LLM
-    trashold = 0.7
-    if proba < trashold:
+    threshold = 0.7
+    if proba < threshold:
         llm_pred = classify_question(q)
         print(f"LLM: {llm_pred}")
         final_pred = llm_pred.strip().lower()
     else:
         final_pred = ml_pred.strip().lower()
 
-    # 3. Routing finale
     if final_pred == "simple":
         prompt = converter.create_prompt(q, schema)
         raw_response = converter.query_llm(prompt)
@@ -61,6 +63,8 @@ for q in test_questions:
             correct_sql += 1
     else:
         print("Risposta: RAG di default")
+        rag_result = rag.generate_response(q)
+        print("RAG response:", rag_result["response"])
         correct_rag += 1
 
     times.append(time.time() - start)
