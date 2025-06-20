@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from src.text_2_SQL.converter import TextToSQLConverter
 from src.text_2_SQL.db_utils import get_db_connection, get_database_schema, is_sql_safe
-from src.ml_utils import extract_features
+from src.switcher.ml_utils import extract_features
 from src.local_llm import classify_question
 from src.rag.rag_core import RAGSystem
 import os

@@ -3,7 +3,7 @@
 ##########################################
 
 import pandas as pd
-from ml_utils import classify_question
+from src.local_llm import classify_question
 
 # Parametri
 N_SIMPLE = 20

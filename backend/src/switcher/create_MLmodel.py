@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
-from ml_utils import extract_features
+from src.switcher.ml_utils import extract_features
 import numpy as np
 import os
 
@@ -80,6 +80,6 @@ print(classification_report(y_test, y_pred, digits=3))
 
 # Save model inside the models directory
 import joblib
-model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'models', 'ml_model.joblib'))
+model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'models', 'ml_model.joblib'))
 joblib.dump(clf, model_path)
 print(f"Modello salvato in: {model_path}")
