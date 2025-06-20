@@ -57,10 +57,10 @@ const Chat = () => {
                   placeholder="Scrivi un messaggio..."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="flex-1 border border-gray-300 rounded-full px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#800020]"
+                  className="flex-1 border border-gray-300 rounded-full px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#800020] transition duration-200 hover:shadow-md"
                 />
                 <button
-                  className="text-[#800020] hover:text-[#a32230] transition"
+                  className="group bg-white text-[#800020] hover:bg-[#800020] p-2 rounded-full transition-all duration-200"
                   onClick={() => {
                     if (message.trim()) {
                       setChatExpanded(true);
@@ -68,7 +68,7 @@ const Chat = () => {
                     }
                   }}
                 >
-                  <IoSendSharp className="text-[1.65rem]" />
+                  <IoSendSharp className="text-[1.65rem] group-hover:text-white" />
                 </button>
               </div>
             </motion.div>
