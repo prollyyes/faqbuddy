@@ -116,6 +116,11 @@ export default function Home() {
                   <pre className="bg-gray-100 rounded p-2 mt-1 text-xs overflow-x-auto text-black">{data.context_used}</pre>
                 </div>
               )}
+              {data?.fallback_gemma && (
+                <div className="text-yellow-600 font-semibold">
+                  Fallback su Gemma LLM attivato per questa domanda!
+                </div>
+              )}
             </div>
           </div>
         )}        
