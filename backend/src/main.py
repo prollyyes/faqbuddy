@@ -40,9 +40,11 @@ def t2sql_endpoint(req: T2SQLRequest):
 
     # 2. Fallback LLM se confidenza bassa
     threshold = 0.7
+    fallback = False
     if proba < threshold:
         llm_pred = classify_question(question)
         final_pred = llm_pred.strip().lower()
+        fallback = True
     else:
         final_pred = ml_pred.strip().lower()
 
@@ -77,7 +79,8 @@ def t2sql_endpoint(req: T2SQLRequest):
                 "query": sql_query,
                 "chosen": "T2SQL",
                 "ml_model": ml_pred,
-                "ml_confidence": proba
+                "ml_confidence": proba,
+                "fallback_gemma": fallback
             }
         except Exception as e:
             return {
@@ -85,7 +88,8 @@ def t2sql_endpoint(req: T2SQLRequest):
                 "query": sql_query,
                 "chosen": "T2SQL",
                 "ml_model": ml_pred,
-                "ml_confidence": proba
+                "ml_confidence": proba,
+                "fallback_gemma": fallback
             }
     else:
         # Fallback RAG
