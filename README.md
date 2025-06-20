@@ -41,17 +41,22 @@ DB_HOST=localhost
 DB_PORT=5433
 ```
 
-> **Nota:** imposta il `PYTHONPATH` per puntare a `backend/src` se necessario.
+### 4. imposta il `PYTHONPATH` per puntare a `backend/src` se necessario.
+```sh
+cd backend/src
+export PYTHONPATH=$(pwd)
+```
+Io sinceramente preferisco isnerirlo direttamente dentro `~/.zshrc`, ma fate voi
 
 ---
 
-### 4. Setup del database
+### 5. Setup del database
 
 Consulta la cartella `/db` e leggi il relativo `README.md` per le istruzioni su come creare e popolare il database.
 
 ---
 
-### 5. Prepara i modelli ML e RAG
+### 6. Prepara i modelli ML e RAG
 
 ```sh
 cd backend/src
@@ -61,7 +66,7 @@ python rag/embed_and_index.py
 
 ---
 
-### 6. Esegui i test
+### 7. Esegui i test
 
 ```sh
 cd ..
@@ -72,7 +77,7 @@ python src/rag/test_rag.py
 
 ---
 
-### 7. Avvia il backend e la UI
+### 8. Avvia il backend e la UI
 
 **Backend (FastAPI):**
 ```sh
@@ -89,7 +94,7 @@ npm run dev
 
 ---
 
-## 💡 Esempi di domande complex gestite dal RAG
+## Esempi di domande complex gestite dal RAG
 
 Queste domande richiedono ragionamento, spiegazioni o informazioni non strutturate e **non possono essere risolte con una semplice query SQL**:
 
