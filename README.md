@@ -1,5 +1,7 @@
 ## Setup rapido
 
+**Per un setup piu' rapido possibile, esegui ./setup.sh dalla root**
+
 ### 1. Crea e attiva l’ambiente virtuale
 
 ```sh
