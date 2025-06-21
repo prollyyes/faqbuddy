@@ -15,20 +15,29 @@ const NavBar = () => {
       initial={{ x: -100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="fixed bottom-0 w-full flex justify-around bg-white border-t border-gray-300 py-4 z-50"
+      className="fixed bottom-0 w-full flex justify-around bg-white border-t border-gray-300 py-3.5 z-50"
     >
-      <Link href="/menu" className="group flex flex-col items-center text-[14px] text-[#800020] hover:bg-[#800020] rounded-full p-2 transition-all duration-200">
-        <MdMenuBook className="text-3xl group-hover:text-white" />
+      <Link
+        href="/homepage/materials"
+        className={`group flex flex-col items-center text-[14px] rounded-full p-2 transition-all duration-200 ${
+          pathname === '/homepage/materials' ? 'bg-[#800020]' : ''
+        }`}
+      >
+        <MdMenuBook
+          className={`text-3xl ${
+            pathname === '/homepage/materials' ? 'text-white' : 'text-[#800020]'
+          }`}
+        />
       </Link>
       <Link
-        href="/chat"
+        href="/homepage/chat"
         className={`group flex flex-col items-center text-[14px] rounded-full p-2 transition-all duration-200 ${
-          pathname === '/chat' ? 'bg-[#800020]' : ''
+          pathname === '/homepage/chat' ? 'bg-[#800020]' : ''
         }`}
       >
         <RiWechatLine
           className={`text-3xl ${
-            pathname === '/chat' ? 'text-white' : 'text-[#800020]'
+            pathname === '/homepage/chat' ? 'text-white' : 'text-[#800020]'
           }`}
         />
       </Link>

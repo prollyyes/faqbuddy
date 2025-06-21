@@ -3,8 +3,8 @@ import React, { useState } from 'react'
 import Link from 'next/link';
 import { VscMortarBoard } from "react-icons/vsc";
 import { LuUserRound } from "react-icons/lu";
-import { RiBookShelfLine } from "react-icons/ri";
 import { LuLogOut } from "react-icons/lu";
+import { IoStatsChart } from "react-icons/io5";
 import { motion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 
@@ -17,7 +17,7 @@ const ProfileNavBar = () => {
       initial={{ x: 100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="fixed bottom-0 w-full flex justify-around bg-white border-t border-gray-300 py-4 z-50"
+      className="fixed bottom-0 w-full flex justify-around bg-white border-t border-gray-300 py-3.5 z-50"
     >
       <Link
         href="/profile/personalInfo"
@@ -38,20 +38,20 @@ const ProfileNavBar = () => {
         }`}
       >
         <VscMortarBoard
-          className={`text-4xl ${
+          className={`text-3xl ${
             pathname === '/profile/courses' ? 'text-white' : 'text-[#800020] group-hover:text-white'
           }`}
         />
       </Link>
       <Link
-        href="/materiali"
+        href="/profile/stats"
         className={`group flex flex-col items-center text-[14px] rounded-full p-2 transition-all duration-200 ${
-          pathname === '/profile/materiali' ? 'bg-[#800020]' : 'hover:bg-[#800020]'
+          pathname === '/profile/stats' ? 'bg-[#800020]' : 'hover:bg-[#800020]'
         }`}
       >
-        <RiBookShelfLine
+        <IoStatsChart
           className={`text-3xl ${
-            pathname === '/profile/materiali' ? 'text-white' : 'text-[#800020] group-hover:text-white'
+            pathname === '/profile/stats' ? 'text-white' : 'text-[#800020] group-hover:text-white'
           }`}
         />
       </Link>
