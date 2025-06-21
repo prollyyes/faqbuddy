@@ -118,7 +118,7 @@ python rag/embed_and_index.py
 echo "🧪 Running backend tests..."
 cd ..
 python tests/test_ml.py
-python tests/test_pipeline.py
+python -m pytest -s tests/test_pipeline.py
 python src/rag/test_rag.py
 
 # Step 9: Final instructions
