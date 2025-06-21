@@ -73,7 +73,7 @@ python rag/embed_and_index.py
 ```sh
 cd ..
 python tests/test_ml.py
-python tests/test_pipeline.py
+python -m pytest -s tests/test_pipeline.py
 python src/rag/test_rag.py
 ```
 
