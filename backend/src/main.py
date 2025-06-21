@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from src.text_2_SQL.converter import TextToSQLConverter
 from src.text_2_SQL.db_utils import get_db_connection, get_database_schema, is_sql_safe
 from src.switcher.ml_utils import extract_features
-from src.local_llm import classify_question
+from src.utils.utils_llm import classify_question
 from src.rag.rag_core import RAGSystem
 import os
 import joblib
@@ -26,6 +26,7 @@ model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'mode
 clf = joblib.load(model_path)
 converter = TextToSQLConverter()
 rag = RAGSystem()  # Usa la tua classe già pronta
+
 
 @app.post("/t2sql")
 def t2sql_endpoint(req: T2SQLRequest):
@@ -52,15 +53,23 @@ def t2sql_endpoint(req: T2SQLRequest):
     if final_pred == "simple":
         prompt = converter.create_prompt(question, schema)
         raw_response = converter.query_llm(prompt)
-        print("RISPOSTA GREZZA MISTRAL:", repr(raw_response))
         sql_query = converter.clean_sql_response(raw_response)
-        print("QUERY SQL GENERATA:\n", sql_query)
-        if not is_sql_safe(sql_query):
+        if not is_sql_safe(sql_query) or sql_query == "INVALID_QUERY":
+            # Fallback RAG se query non valida o INVALID_QUERY
+            print("Falling back to RAG due to invalid SQL query.")
+            print(f"SQL Query: {sql_query}")
+            rag_result = rag.generate_response(question)
             return {
-                "chosen": "INVALID_QUERY",
+                "result": rag_result["response"],
+                "chosen": "RAG",
                 "ml_model": ml_pred,
                 "ml_confidence": proba,
-                "mistral7B": sql_query
+                "fallback_gemma": fallback,
+                "llm_pred": final_pred if fallback else "",
+                "retrieval_time": rag_result["retrieval_time"],
+                "generation_time": rag_result["generation_time"],
+                "total_time": rag_result["total_time"],
+                "context_used": rag_result["context_used"]
             }
         try:
             cur = conn.cursor()
@@ -69,36 +78,64 @@ def t2sql_endpoint(req: T2SQLRequest):
             if cur.description is not None:
                 columns = [desc[0] for desc in cur.description]
                 result = [dict(zip(columns, row)) for row in rows]
+                natural_response = converter.from_sql_to_text(question, result)
             else:
-                columns = []
                 result = []
+                natural_response = "La query non restituisce colonne."
             cur.close()
             conn.close()
+            if not result:
+                print("Falling back to RAG due to empty result set.")
+                print(f"SQL Query: {sql_query}")
+                rag_result = rag.generate_response(question)
+                return {
+                    "result": rag_result["response"],
+                    "chosen": "RAG",
+                    "ml_model": ml_pred,
+                    "ml_confidence": proba,
+                    "fallback_gemma": fallback,
+                    "llm_pred": final_pred if fallback else "",
+                    "retrieval_time": rag_result["retrieval_time"],
+                    "generation_time": rag_result["generation_time"],
+                    "total_time": rag_result["total_time"],
+                    "context_used": rag_result["context_used"]
+                }
+            print("T2SQL")
             return {
                 "result": result,
                 "query": sql_query,
+                "natural_response": natural_response,
                 "chosen": "T2SQL",
                 "ml_model": ml_pred,
-                "ml_confidence": proba,
-                "fallback_gemma": fallback
+                "ml_confidence": proba
             }
         except Exception as e:
+            print("Error executing SQL query, falling back to RAG.")
+            print(f"SQL Query: {sql_query}")
+            rag_result = rag.generate_response(question)
             return {
-                "result": str(e),
-                "query": sql_query,
-                "chosen": "T2SQL",
+                "result": rag_result["response"],
+                "chosen": "RAG",
                 "ml_model": ml_pred,
                 "ml_confidence": proba,
-                "fallback_gemma": fallback
+                "fallback_gemma": fallback,
+                "llm_pred": final_pred if fallback else "",
+                "retrieval_time": rag_result["retrieval_time"],
+                "generation_time": rag_result["generation_time"],
+                "total_time": rag_result["total_time"],
+                "context_used": rag_result["context_used"],
+                "error": str(e)
             }
     else:
-        # Fallback RAG
+        print("falling back to RAG for complex question prediction.")
         rag_result = rag.generate_response(question)
         return {
             "result": rag_result["response"],
             "chosen": "RAG",
             "ml_model": ml_pred,
             "ml_confidence": proba,
+            "fallback_gemma": fallback,
+            "llm_pred": final_pred if fallback else "",
             "retrieval_time": rag_result["retrieval_time"],
             "generation_time": rag_result["generation_time"],
             "total_time": rag_result["total_time"],

@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import torch
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone
-from src.local_llm import generate_answer, generate_answer_streaming
+from src.utils.utils_llm import generate_answer, generate_answer_streaming
 import time
 
 class RAGSystem:

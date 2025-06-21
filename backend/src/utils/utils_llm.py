@@ -1,25 +1,4 @@
-import os
-from llama_cpp import Llama
-
-mistral_model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'models', 'mistral-7b-instruct-v0.2.Q4_K_M.gguf'))
-gemma_model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'models', 'gemma-3-4b-it-Q4_1.gguf'))
-
-llm_mistral = Llama(
-    model_path=mistral_model_path,
-    n_ctx=2048,
-    n_threads=6,
-    n_gpu_layers=-1,
-    verbose=True
-)
-
-llm_gemma = Llama(
-    model_path=gemma_model_path,
-    n_ctx=2048,
-    n_threads=6,
-    n_gpu_layers=-1,
-    verbose=True
-)
-
+from src.utils.local_llm import llm_mistral
 
 def classify_question(question: str) -> str:
     prompt = (
@@ -30,10 +9,12 @@ def classify_question(question: str) -> str:
         "Domanda: Come posso organizzare il piano di studi per laurearmi in 3 anni?\nRisposta: complex\n"
         f"Domanda: {question}\nRisposta:"
     )
+    from src.utils.local_llm import llm_gemma
     result = llm_gemma(prompt, max_tokens=2)
-    risposta = result["choices"][0]["text"].strip().lower().split()[0] # why error?
-    return risposta
-
+    text = result["choices"][0].get("text", "").strip().lower()
+    if not text:
+        return "simple"
+    return text.split()[0]
 
 def generate_answer(context: str, question: str) -> str:
     prompt = f"[INST] Context:\n{context}\n\nQuestion:\n{question} [/INST]"
@@ -41,18 +22,25 @@ def generate_answer(context: str, question: str) -> str:
     return output["choices"][0]["text"].strip()
 
 def generate_answer_streaming(context: str, question: str) -> list:
-    """Generate an answer token by token."""
     prompt = f"[INST] Context:\n{context}\n\nQuestion:\n{question} [/INST]"
-    
-    # Use the streaming API
     stream = llm_mistral(prompt, max_tokens=256, stop=["</s>"], stream=True)
-    
     tokens = []
     for chunk in stream:
         if chunk["choices"][0]["finish_reason"] is not None:
             break
-        token = chunk["choices"][0]["delta"].get("content", "")
-        if token:
+    token = chunk["choices"][0]["delta"].get("content", "")
+    if token:
             tokens.append(token)
-    
     return tokens
+
+
+def sql_results_to_text(question: str, results: list) -> str:
+    prompt = (
+        "Rispondi in italiano in modo naturale e discorsivo alla seguente domanda, "
+        "usando SOLO i dati forniti qui sotto.\n\n"
+        f"Domanda: {question}\n"
+        f"Dati:\n{results}\n\n"
+        "Risposta:"
+    )
+    output = llm_mistral(prompt, max_tokens=150, stop=["</s>"])
+    return output["choices"][0]["text"].strip()

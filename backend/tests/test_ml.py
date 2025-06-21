@@ -1,7 +1,7 @@
 import time
 from sklearn.metrics import classification_report, precision_score, recall_score, f1_score
 from src.switcher.ml_utils import extract_features
-from src.local_llm import classify_question
+from src.utils.utils_llm import classify_question
 
 # Carica il modello ML già addestrato
 import os
