@@ -1,5 +1,6 @@
 'use client'
 import React from 'react'
+import Button from '../utils/Button';
 
 const PersonalInfo = () => {
 
@@ -24,10 +25,10 @@ const PersonalInfo = () => {
           ))}
         </div>
       </div>
-      <div className="fixed bottom-28 left-0 w-full flex justify-center">
-        <button className="px-6 py-2 bg-white text-[#800020] border-2 border-[#800020] rounded-md hover:bg-[#800020] hover:text-white transition font-semibold">
+      <div className="fixed bottom-33 left-0 w-full flex justify-center">
+        <Button className="text-2xl font-bold">
           Modifica Profilo
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -9,12 +9,6 @@ const Chat = () => {
     const [message, setMessage] = React.useState('');
     return (
         <div className="bg-white text-black min-h-screen">
-            <header className="w-full flex items-center justify-center text-[#822433] pt-2 fixed top-0 bg-white z-50 shadow-sm">
-                <img src="/logo.png" alt="logo_img" className="w-10 h-10 object-contain mb-1" />
-                <Link href="/" className="text-3xl font-bold tracking-wider">
-                FAQBuddy
-                </Link>
-            </header>
             <motion.div
                 initial={{ height: 'auto' }}
                 animate={{ height: chatExpanded ? '100vh' : 'auto' }}
@@ -47,7 +41,7 @@ const Chat = () => {
               transition={{ type: "spring", stiffness: 200, damping: 20 }}
               className={`${
                 chatExpanded
-                  ? "fixed bottom-16 left-0 w-full px-4 pb-4 z-40 bg-white"
+                  ? "fixed bottom-18 left-0 w-full px-4 pb-4 z-40 bg-white"
                   : "w-full max-w-md mx-auto mt-2 px-4"
               }`}
             >
