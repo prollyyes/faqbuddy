@@ -1,0 +1,63 @@
+Domande simple:
+
+Quanti crediti vale il corso di informatica?
+Quando si tiene l’esame di matematica 2?
+Qual è l’aula della lezione di diritto?
+Chi è il docente di economia politica?
+Qual è la durata della prova scritta?
+Dove si trova la segreteria studenti?
+Quanti appelli sono previsti per ogni esame?
+Qual è il voto minimo per superare l’esame?
+
+Domande complex:
+Come posso organizzare il piano di studi per laurearmi in 3 anni?
+Quali esami posso sostenere in parallelo senza problemi di sovrapposizioni?
+Se salto l’esame di statistica a giugno, quando posso riprovare e quali sono le conseguenze?
+Come posso recuperare un esame non superato senza ritardare la laurea?
+Quali strategie posso adottare per migliorare la media voti?
+Come posso conciliare lavoro e studio durante il semestre?
+Quali sono i passi per cambiare corso di laurea senza perdere crediti?
+Come posso pianificare gli esami per evitare sovrapposizioni e ritardi?
+Quali sono i vantaggi e gli svantaggi di scegliere un curriculum internazionale?
+Come posso ottenere una borsa di studio e quali sono i requisiti?
+
+Domande borderline (per testare il fallback):
+
+Elenca i corsi della Facoltà di Ingegneria Informatica.
+Se dovessi cambiare facoltà, potrei portarmi dietro alcuni esami?
+Dami tutti gli appunti di Ingegneria.
+Quali documenti servono per la domanda di laurea?
+Come posso migliorare la mia media degli esami?
+
+
+
+
+######DOMANDE prova
+Quali libri sono stati utilizzati dal professor John Smith?
+Dammi i libri per preparare l'esame di Data Structures and Algorithms.
+Quali sono le tempistiche e le modalità per presentare una richiesta di trasferimento ad un altro ateneo?
+
+
+Elenca tutti i professori.
+Mostra tutti i libri disponibili.
+Quali esami sono previsti nel 2024?
+Quali sono i titoli dei libri usati negli esami del 2023?
+Quanti professori hanno la stanza C305?
+Quali professori hanno tenuto esami nel 2022?
+Mostra nome e cognome dei professori che hanno tenuto esami nel 2024.
+Quanti libri sono presenti in totale?
+Quali libri sono stati utilizzati dal professor John Smith?
+Quali esami sono associati al libro "Database Systems"?
+
+--
+
+Come posso organizzare il mio piano di studi per laurearmi in 3 anni?
+Quali strategie posso adottare per migliorare la mia media degli esami?
+Cosa devo fare se voglio cambiare corso di laurea?
+Quali sono le procedure per il riconoscimento di esami sostenuti all’estero?
+Come posso conciliare lavoro e studio durante l’università?
+
+--
+Fallback:
+
+Quali documenti servono per la domanda di laurea?

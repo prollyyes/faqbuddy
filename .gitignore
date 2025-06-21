@@ -1,0 +1,16 @@
+frontend/.next
+frontend/node_modules
+
+backend/models
+
+**/.DS_Store
+**/__pycache__
+
+
+# or any name that you used for your virtual environment
+venv/
+.env/
+
+# environment
+.env
+.env.local
