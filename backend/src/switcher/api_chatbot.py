@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import joblib
 from src.switcher.ml_utils import extract_features
-from src.local_llm import classify_question
+from src.utils.local_llm import classify_question
 
 
 app = FastAPI()
