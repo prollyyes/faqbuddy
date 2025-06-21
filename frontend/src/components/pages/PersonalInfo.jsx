@@ -1,12 +1,18 @@
 'use client'
 import React from 'react'
 import Button from '../utils/Button';
+import { motion } from 'framer-motion';
 
 const PersonalInfo = () => {
 
   return (
-    <div className="bg-white min-h-screen text-black p-6">
-      <div className="max-w-md mx-auto text-center">
+    <motion.div
+      className="bg-white min-h-screen text-black p-6"
+      initial={{ x: -50 }}
+      animate={{ x: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="max-w-md mx-auto text-center pt-12">
         <h1 className="text-2xl font-bold text-[#800020] mb-6">Profilo Studente</h1>
         <div className="text-left space-y-4">
           {[
@@ -25,12 +31,12 @@ const PersonalInfo = () => {
           ))}
         </div>
       </div>
-      <div className="fixed bottom-33 left-0 w-full flex justify-center">
+      <div className="pt-12 flex justify-center">
         <Button className="text-2xl font-bold">
           Modifica Profilo
         </Button>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

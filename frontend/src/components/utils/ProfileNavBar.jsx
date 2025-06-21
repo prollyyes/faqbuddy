@@ -22,44 +22,44 @@ const ProfileNavBar = () => {
       <Link
         href="/profile/personalInfo"
         className={`group flex flex-col items-center text-[14px] rounded-full p-2 transition-all duration-200 ${
-          pathname === '/profile/personalInfo' ? 'bg-[#800020]' : 'hover:bg-[#800020]'
+          pathname === '/profile/personalInfo' ? 'bg-[#800020]' : 'hover:bg-[#800020] active:bg-[#800020]'
         }`}
       >
         <LuUserRound
           className={`text-3xl ${
-            pathname === '/profile/personalInfo' ? 'text-white' : 'text-[#800020] group-hover:text-white'
+            pathname === '/profile/personalInfo' ? 'text-white' : 'text-[#800020] group-hover:text-white active:text-white'
           }`}
         />
       </Link>
       <Link
         href="/profile/courses"
         className={`group flex flex-col items-center text-[14px] rounded-full p-2 transition-all duration-200 ${
-          pathname === '/profile/courses' ? 'bg-[#800020]' : 'hover:bg-[#800020]'
+          pathname === '/profile/courses' ? 'bg-[#800020]' : 'hover:bg-[#800020] active:bg-[#800020]'
         }`}
       >
         <VscMortarBoard
           className={`text-3xl ${
-            pathname === '/profile/courses' ? 'text-white' : 'text-[#800020] group-hover:text-white'
+            pathname === '/profile/courses' ? 'text-white' : 'text-[#800020] group-hover:text-white active:text-white'
           }`}
         />
       </Link>
       <Link
         href="/profile/stats"
         className={`group flex flex-col items-center text-[14px] rounded-full p-2 transition-all duration-200 ${
-          pathname === '/profile/stats' ? 'bg-[#800020]' : 'hover:bg-[#800020]'
+          pathname === '/profile/stats' ? 'bg-[#800020]' : 'hover:bg-[#800020] active:bg-[#800020]'
         }`}
       >
         <IoStatsChart
           className={`text-3xl ${
-            pathname === '/profile/stats' ? 'text-white' : 'text-[#800020] group-hover:text-white'
+            pathname === '/profile/stats' ? 'text-white' : 'text-[#800020] group-hover:text-white active:text-white'
           }`}
         />
       </Link>
       <button
         onClick={() => setShowLogoutPopup(true)}
-        className={`group flex flex-col items-center text-[14px] rounded-full p-2 transition-all duration-200 hover:bg-[#800020]`}
+        className={`group flex flex-col items-center text-[14px] rounded-full p-2 transition-all duration-200 hover:bg-[#800020] active:bg-[#800020]`}
       >
-        <LuLogOut className="text-3xl text-[#800020] group-hover:text-white" />
+        <LuLogOut className="text-3xl text-[#800020] group-hover:text-white active:text-white" />
       </button>
       {showLogoutPopup && (
         <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">

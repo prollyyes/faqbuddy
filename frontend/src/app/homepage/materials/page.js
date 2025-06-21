@@ -1,12 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Button from "@/components/utils/Button";
-import { IoReturnUpBackOutline } from "react-icons/io5";
+import BackButton from "@/components/utils/BackButton";
 import { AnimatePresence, motion } from "framer-motion";
 
 export default function MaterialsPage() {
   const [view, setView] = useState("default"); // default, research, upload
+  const [hovered, setHovered] = useState(null);
+  const [active, setActive] = useState(null);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+  useEffect(() => {
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    setIsTouchDevice(isTouch);
+  }, []);
 
   const renderContent = () => {
     let content;
@@ -16,21 +24,16 @@ export default function MaterialsPage() {
         content = (
           <motion.div
             key="research"
-            initial={{ opacity: 0, x: 50 }}
+            initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
+            exit={{ opacity: 0, x: 50 }}
             transition={{ duration: 0.3 }}
             className="w-full max-w-xl px-6 pb-36 text-[#822433] space-y-6 flex flex-col justify-center items-center pt-24"
           >
-            {/* Bottone per tornare indietro */}
-            <div className="absolute top-16 left-4">
-              <Button onClick={() => setView("default")}>
-                <IoReturnUpBackOutline className="text-xl" />
-              </Button>
-            </div>
+            <BackButton onClick={() => setView("default")} />
 
             {/* Intestazione */}
-            <h2 className="text-2xl font-bold pt-12 self-start">Ricerca Materiali</h2>
+            <h2 className="text-2xl font-bold pt-4 self-start">Ricerca Materiali</h2>
 
             {/* Select per Corso di Laurea */}
             <div className="space-y-2 w-full max-w-md">
@@ -75,21 +78,16 @@ export default function MaterialsPage() {
         content = (
           <motion.div
             key="upload"
-            initial={{ opacity: 0, x: 50 }}
+            initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
+            exit={{ opacity: 0, x: 50 }}
             transition={{ duration: 0.3 }}
-            className="w-full max-w-xl px-6 pb-35 text-[#822433] space-y-6 flex flex-col justify-start"
+            className="w-full max-w-xl px-6 pb-35 text-[#822433] space-y-6 flex flex-col justify-start pt-16"
           >
-            {/* Bottone per tornare indietro */}
-            <div className="absolute top-16 left-4">
-              <Button onClick={() => setView("default")}>
-                <IoReturnUpBackOutline className="text-xl" />
-              </Button>
-            </div>
+            <BackButton onClick={() => setView("default")} />
 
             {/* Intestazione */}
-            <h2 className="text-2xl font-bold pt-12">Carica materiale</h2>
+            <h2 className="text-2xl font-bold pt-4">Carica materiale</h2>
 
             {/* Input per Corso di Laurea */}
             <div className="space-y-2">
@@ -125,27 +123,61 @@ export default function MaterialsPage() {
         content = (
           <motion.div
             key="default"
-            initial={{ opacity: 0, x: 50 }}
+            initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
+            exit={{ opacity: 0, x: 50 }}
             transition={{ duration: 0.3 }}
             className="w-full flex flex-col items-center space-y-6"
           >
             <div className="flex justify-center">
-              <Button
-                className="text-xl py-4 px-6 w-full max-w-md"
-                onClick={() => setView("upload")}
+              <button
+                className={`flex flex-col items-center justify-center gap-4 text-xl py-10 px-8 w-full h-56 max-w-md border-2 rounded-xl shadow-lg transition-colors duration-300 ${
+                  hovered === 'help' || active === 'help'
+                    ? 'bg-white text-[#822433] border-[#822433]'
+                    : 'bg-[#822433] text-white border-[#822433]'
+                }`}
+                onClick={() => {
+                  setActive("help");
+                  setTimeout(() => {
+                    setActive(null);
+                    setView("upload");
+                  }, 200);
+                }}
+                onMouseEnter={!isTouchDevice ? () => setHovered('help') : undefined}
+                onMouseLeave={!isTouchDevice ? () => setHovered(null) : undefined}
               >
-                Aiuta il tuo Buddy
-              </Button>
+                <span>Aiuta il tuo Buddy</span>
+                <img
+                  src={(hovered === 'help' || active === 'help') ? "/images/Help.png" : "/images/HelpW.png"}
+                  alt="Aiuta il tuo Buddy"
+                  className="w-24 h-24 transition-all duration-300"
+                />
+              </button>
             </div>
-            <div className="flex justify-center w-full max-w-md mx-auto">
-              <Button
-                className="text-xl py-3 px-6 w-full"
-                onClick={() => setView("research")}
+            <div className="flex justify-center">
+              <button
+                className={`flex flex-col items-center justify-center gap-4 text-xl py-10 px-8 w-full h-56 max-w-md border-2 rounded-xl shadow-lg transition-colors duration-300 ${
+                  hovered === 'search' || active === 'search'
+                    ? 'bg-white text-[#822433] border-[#822433]'
+                    : 'bg-[#822433] text-white border-[#822433]'
+                }`}
+                onClick={() => {
+                  setActive("search");
+                  setTimeout(() => {
+                    setActive(null);
+                    setView("research");
+                  }, 200);
+                }}
+                onMouseEnter={!isTouchDevice ? () => setHovered('search') : undefined}
+                onMouseLeave={!isTouchDevice ? () => setHovered(null) : undefined}
               >
-                Ricerca Materiali
-              </Button>
+                <span>Ricerca Materiali</span>
+                <img
+                  src={(hovered === 'search' || active === 'search') ? "/images/Search.png" : "/images/SearchW.png"}
+                  alt="Ricerca Materiali"
+                  className="w-24 h-24 transition-all duration-300"
+                />
+              </button>
             </div>
           </motion.div>
         );
