@@ -1,4 +1,4 @@
-from src.text_2_SQL.db_utils import get_db_connection
+from src.utils.db_utils import get_db_connection
 from dotenv import load_dotenv
 from typing import List
 

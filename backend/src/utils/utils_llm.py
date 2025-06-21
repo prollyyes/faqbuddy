@@ -32,15 +32,3 @@ def generate_answer_streaming(context: str, question: str) -> list:
     if token:
             tokens.append(token)
     return tokens
-
-
-def sql_results_to_text(question: str, results: list) -> str:
-    prompt = (
-        "Rispondi in italiano in modo naturale e discorsivo alla seguente domanda, "
-        "usando SOLO i dati forniti qui sotto.\n\n"
-        f"Domanda: {question}\n"
-        f"Dati:\n{results}\n\n"
-        "Risposta:"
-    )
-    output = llm_mistral(prompt, max_tokens=150, stop=["</s>"])
-    return output["choices"][0]["text"].strip()

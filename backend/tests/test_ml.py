@@ -1,13 +1,10 @@
 import time
-from sklearn.metrics import classification_report, precision_score, recall_score, f1_score
-from src.switcher.ml_utils import extract_features
+from sklearn.metrics import classification_report
+from src.switcher.MLmodel import MLModel
 from src.utils.utils_llm import classify_question
 
-# Carica il modello ML già addestrato
-import os
-import joblib
-model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'models', 'ml_model.joblib'))
-clf = joblib.load(model_path)
+# Inizializza il modello ML centralizzato
+ml_model = MLModel()
 
 # Domande di test aggiuntive (mai viste dal modello)
 test_questions = [
@@ -38,9 +35,7 @@ gemma_true = []
 start_ml = time.time()
 ml_preds = []
 for q in test_questions:
-    features = [extract_features(q)]
-    ml_pred = clf.predict(features)[0]
-    proba = max(clf.predict_proba(features)[0])
+    ml_pred, proba = ml_model.inference(q)
     ml_preds.append(ml_pred)
     ml_confidences.append(proba)
 elapsed_ml = time.time() - start_ml

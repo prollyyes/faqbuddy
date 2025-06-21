@@ -2,12 +2,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from src.text_2_SQL.converter import TextToSQLConverter
-from src.text_2_SQL.db_utils import get_db_connection, get_database_schema, is_sql_safe
-from src.switcher.ml_utils import extract_features
+from src.utils.db_utils import get_db_connection
 from src.utils.utils_llm import classify_question
 from src.rag.rag_core import RAGSystem
-import os
-import joblib
+from src.utils.db_handler import DBHandler
+from src.switcher.MLmodel import MLModel
 
 app = FastAPI()
 app.add_middleware(
@@ -21,23 +20,27 @@ app.add_middleware(
 class T2SQLRequest(BaseModel):
     question: str
 
-# Carica il modello ML una sola volta
-model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'models', 'ml_model.joblib'))
-clf = joblib.load(model_path)
+# Inizializza modello ML
+ml_model = MLModel()
+
+# Inizializza converter Text-to-SQL
 converter = TextToSQLConverter()
-rag = RAGSystem()  # Usa la tua classe già pronta
+
+# Inizializza RAG
+rag = RAGSystem()
+
 
 
 @app.post("/t2sql")
 def t2sql_endpoint(req: T2SQLRequest):
-    conn = get_db_connection()
-    schema = get_database_schema(conn)
     question = req.question
 
-    # 1. Switcher ML
-    features = [extract_features(question)]
-    ml_pred = clf.predict(features)[0]
-    proba = max(clf.predict_proba(features)[0])
+    # Inizializza DBHandler
+    db = DBHandler(get_db_connection())
+    schema = db.get_schema()
+
+     # 1. Switcher ML
+    ml_pred, proba = ml_model.inference(question)
 
     # 2. Fallback LLM se confidenza bassa
     threshold = 0.7
@@ -51,84 +54,60 @@ def t2sql_endpoint(req: T2SQLRequest):
 
     # 3. Routing finale
     if final_pred == "simple":
-        prompt = converter.create_prompt(question, schema)
-        raw_response = converter.query_llm(prompt)
-        sql_query = converter.clean_sql_response(raw_response)
-        if not is_sql_safe(sql_query) or sql_query == "INVALID_QUERY":
-            # Fallback RAG se query non valida o INVALID_QUERY
-            print("Falling back to RAG due to invalid SQL query.")
+        max_attempts = 3
+        attempt = 0
+        while attempt < max_attempts:
+            prompt = converter.create_prompt(question, schema)
+            raw_response = converter.query_llm(prompt)
+            sql_query = converter.clean_sql_response(raw_response)
             print(f"SQL Query: {sql_query}")
-            rag_result = rag.generate_response(question)
-            return {
-                "result": rag_result["response"],
-                "chosen": "RAG",
-                "ml_model": ml_pred,
-                "ml_confidence": proba,
-                "fallback_gemma": fallback,
-                "llm_pred": final_pred if fallback else "",
-                "retrieval_time": rag_result["retrieval_time"],
-                "generation_time": rag_result["generation_time"],
-                "total_time": rag_result["total_time"],
-                "context_used": rag_result["context_used"]
-            }
-        try:
-            cur = conn.cursor()
-            cur.execute(sql_query)
-            rows = cur.fetchall()
-            if cur.description is not None:
-                columns = [desc[0] for desc in cur.description]
+            if not converter.is_sql_safe(sql_query) or sql_query == "INVALID_QUERY":
+                print(f"Attempt {attempt+1}: Invalid SQL query, retrying...")
+                attempt += 1
+                continue
+            try:
+                rows, columns = db.run_query(sql_query, fetch=True, columns=True)
                 result = [dict(zip(columns, row)) for row in rows]
-                natural_response = converter.from_sql_to_text(question, result)
-            else:
-                result = []
-                natural_response = "La query non restituisce colonne."
-            cur.close()
-            conn.close()
-            if not result:
-                print("Falling back to RAG due to empty result set.")
-                print(f"SQL Query: {sql_query}")
-                rag_result = rag.generate_response(question)
-                return {
-                    "result": rag_result["response"],
-                    "chosen": "RAG",
-                    "ml_model": ml_pred,
-                    "ml_confidence": proba,
-                    "fallback_gemma": fallback,
-                    "llm_pred": final_pred if fallback else "",
-                    "retrieval_time": rag_result["retrieval_time"],
-                    "generation_time": rag_result["generation_time"],
-                    "total_time": rag_result["total_time"],
-                    "context_used": rag_result["context_used"]
-                }
-            print("T2SQL")
-            return {
-                "result": result,
-                "query": sql_query,
-                "natural_response": natural_response,
-                "chosen": "T2SQL",
-                "ml_model": ml_pred,
-                "ml_confidence": proba
-            }
-        except Exception as e:
-            print("Error executing SQL query, falling back to RAG.")
-            print(f"SQL Query: {sql_query}")
-            rag_result = rag.generate_response(question)
-            return {
-                "result": rag_result["response"],
-                "chosen": "RAG",
-                "ml_model": ml_pred,
-                "ml_confidence": proba,
-                "fallback_gemma": fallback,
-                "llm_pred": final_pred if fallback else "",
-                "retrieval_time": rag_result["retrieval_time"],
-                "generation_time": rag_result["generation_time"],
-                "total_time": rag_result["total_time"],
-                "context_used": rag_result["context_used"],
-                "error": str(e)
-            }
+                if result:
+                    natural_response = converter.from_sql_to_text(question, result)
+                    db.close_connection()
+                    print("T2SQL")
+                    return {
+                        "result": result,
+                        "query": sql_query,
+                        "natural_response": natural_response,
+                        "chosen": "T2SQL",
+                        "ml_model": ml_pred,
+                        "ml_confidence": proba
+                    }
+                else:
+                    print(f"Attempt {attempt+1}: Query returned no results, retrying...")
+                    attempt += 1
+            except Exception as e:
+                db.connection_rollback()
+                print(f"Attempt {attempt+1}: Error executing SQL query, retrying... {e}")
+                attempt += 1
+
+        # Dopo 3 tentativi falliti, fallback RAG
+        print("Fallback to RAG after 3 failed attempts.")
+        rag_result = rag.generate_response(question)
+        db.close_connection()
+        return {
+            "result": rag_result["response"],
+            "chosen": "RAG",
+            "ml_model": ml_pred,
+            "ml_confidence": proba,
+            "fallback_gemma": fallback,
+            "llm_pred": final_pred if fallback else "",
+            "retrieval_time": rag_result["retrieval_time"],
+            "generation_time": rag_result["generation_time"],
+            "total_time": rag_result["total_time"],
+            "context_used": rag_result["context_used"]
+        }
     else:
         print("falling back to RAG for complex question prediction.")
         rag_result = rag.generate_response(question)
+        db.close_connection()
         return {
             "result": rag_result["response"],
             "chosen": "RAG",

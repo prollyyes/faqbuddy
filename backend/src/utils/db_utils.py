@@ -31,7 +31,3 @@ def get_database_schema(conn) -> str:
         schema_str += f"Table: {table}\n  " + ", ".join(cols) + "\n"
     cur.close()
     return schema_str
-
-def is_sql_safe(sql_query: str) -> bool:
-    sql = sql_query.strip().upper()
-    return sql.startswith("SELECT") or sql.startswith("WITH")
