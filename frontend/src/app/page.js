@@ -62,23 +62,33 @@ export default function Home() {
             Tempo di risposta: <span className="font-mono">{elapsed} s</span>
           </div>
         )}
-        {query && (
+        {/* {query && (
           <div className="mb-4">
             <div className="font-semibold text-black">Query SQL generata:</div>
             <pre className="bg-gray-100 rounded p-2 mt-1 text-sm overflow-x-auto text-black">{query}</pre>
           </div>
-        )}        
+        )}
+        {data?.natural_response && (
+          <div className="mb-4">
+            <div className="font-semibold text-black">Risposta in linguaggio naturale:</div>
+            <div className="bg-green-50 rounded p-2 mt-1 text-base text-black whitespace-pre-line">
+              {data.natural_response}
+            </div>
+          </div>
+        )}
         {result && (
           <div>
             <div className="font-semibold text-black">Risultato:</div>
-            {Array.isArray(result) ? (
-              <pre className="bg-gray-100 rounded p-2 mt-1 text-sm overflow-x-auto text-black">
-                {JSON.stringify(result, null, 2)}
-              </pre>
-            ) : (
-              <pre className="bg-gray-100 rounded p-2 mt-1 text-sm overflow-x-auto text-black">{result}</pre>
-            )}
-            {/* Mostra info aggiuntive se presenti */}
+              {Array.isArray(result) ? (
+                <pre className="bg-gray-100 rounded p-2 mt-1 text-sm overflow-x-auto text-black">
+                  {JSON.stringify(result, null, 2)}
+                </pre>
+              ) : (
+                <div className="bg-green-50 rounded p-2 mt-1 text-base text-black whitespace-pre-line">
+                  {result}
+                </div>
+              )}
+            
             <div className="mt-4 text-black text-sm">
               {data?.chosen && (
                 <div>
@@ -123,7 +133,24 @@ export default function Home() {
               )}
             </div>
           </div>
-        )}        
+        )} */}
+        {data && (
+          <div className="mt-6 w-full">
+            <div className="font-semibold text-black mb-2">Dettaglio risposta backend:</div>
+            <div className="bg-gray-50 rounded p-3 text-black text-sm overflow-x-auto">
+              {Object.entries(data).map(([key, value]) => (
+                <div key={key} className="mb-1">
+                  <span className="font-mono font-semibold">{key}:</span>{" "}
+                  {typeof value === "object" && value !== null ? (
+                    <pre className="inline bg-gray-100 rounded p-1">{JSON.stringify(value, null, 2)}</pre>
+                  ) : (
+                    <span>{String(value)}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}   
       </div>
     </main>
   );
