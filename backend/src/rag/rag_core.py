@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 import torch
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone
+from rank_bm25 import BM25Okapi
+import numpy as np
 from src.local_llm import generate_answer, generate_answer_streaming
 import time
 
@@ -33,6 +35,29 @@ class RAGSystem:
         self.index = self.pc.Index(index_name)
         self.namespace = namespace
     
+    def _rerank_with_bm25(self, query: str, documents: List[str], top_n: int = 5) -> List[str]:
+        """
+        Reranks a list of documents based on BM25 scores.
+
+        Args:
+            query (str): The query string.
+            documents (List[str]): The list of documents to rerank.
+            top_n (int): The number of top documents to return.
+
+        Returns:
+            List[str]: The reranked list of documents.
+        """
+        tokenized_corpus = [doc.split(" ") for doc in documents]
+        bm25 = BM25Okapi(tokenized_corpus)
+        tokenized_query = query.split(" ")
+        doc_scores = bm25.get_scores(tokenized_query)
+        
+        # Get the top N indices
+        top_n_indices = np.argsort(doc_scores)[::-1][:top_n]
+        
+        # Return the top N documents
+        return [documents[i] for i in top_n_indices]
+
     def embed_text(self, text: str) -> List[float]:
         """Generate embeddings for a single text."""
         return self.model.encode(text).tolist()
@@ -64,14 +89,16 @@ class RAGSystem:
     
     def query(self, 
              query_text: str, 
-             top_k: int = 5,
+             top_k: int = 20,
+             rerank_top_k: int = 5,
              filter: Dict = None) -> List[Dict[str, Any]]:
         """
-        Query the vector store for similar documents.
+        Query the vector store for similar documents, then rerank with BM25.
         
         Args:
             query_text: The query text
-            top_k: Number of results to return
+            top_k: Number of results to return from vector store
+            rerank_top_k: Number of results to return after BM25 reranking
             filter: Optional metadata filter
             
         Returns:
@@ -86,11 +113,30 @@ class RAGSystem:
             filter=filter
         )
         
-        return results.matches
+        matches = results.matches
+        
+        if not matches:
+            return []
+
+        # Rerank with BM25
+        documents_to_rerank = [match.metadata['text'] for match in matches]
+        reranked_documents = self._rerank_with_bm25(
+            query_text, documents_to_rerank, top_n=rerank_top_k
+        )
+        
+        # Filter original matches to only include reranked ones
+        reranked_texts = set(reranked_documents)
+        final_matches = [match for match in matches if match.metadata['text'] in reranked_texts]
+
+        # Sort final_matches based on the order of reranked_documents
+        final_matches.sort(key=lambda x: reranked_documents.index(x.metadata['text']))
+        
+        return final_matches
 
     def generate_response_streaming(self, 
                                   query: str, 
-                                  top_k: int = 5,
+                                  top_k: int = 20,
+                                  rerank_top_k: int = 5,
                                   filter: Dict = None) -> Dict[str, Any]:
         """
         Generate a streaming response using the RAG pipeline.
@@ -98,6 +144,7 @@ class RAGSystem:
         Args:
             query: The user's question
             top_k: Number of relevant documents to retrieve
+            rerank_top_k: Number of results to return after BM25 reranking
             filter: Optional metadata filter
             
         Returns:
@@ -105,9 +152,9 @@ class RAGSystem:
         """
         start_time = time.time()
         
-        # Step 1: Retrieve relevant documents
+        # Step 1: Retrieve and rerank relevant documents
         retrieval_start = time.time()
-        matches = self.query(query, top_k=top_k, filter=filter)
+        matches = self.query(query, top_k=top_k, rerank_top_k=rerank_top_k, filter=filter)
         retrieval_time = time.time() - retrieval_start
         
         if not matches:
@@ -137,7 +184,8 @@ class RAGSystem:
 
     def generate_response(self, 
                          query: str, 
-                         top_k: int = 5,
+                         top_k: int = 20,
+                         rerank_top_k: int = 5,
                          filter: Dict = None) -> Dict[str, Any]:
         """
         Generate a response using the RAG pipeline.
@@ -145,6 +193,7 @@ class RAGSystem:
         Args:
             query: The user's question
             top_k: Number of relevant documents to retrieve
+            rerank_top_k: Number of results to return after BM25 reranking
             filter: Optional metadata filter
             
         Returns:
@@ -152,9 +201,9 @@ class RAGSystem:
         """
         start_time = time.time()
         
-        # Step 1: Retrieve relevant documents
+        # Step 1: Retrieve and rerank relevant documents
         retrieval_start = time.time()
-        matches = self.query(query, top_k=top_k, filter=filter)
+        matches = self.query(query, top_k=top_k, rerank_top_k=rerank_top_k, filter=filter)
         retrieval_time = time.time() - retrieval_start
         
         if not matches:
