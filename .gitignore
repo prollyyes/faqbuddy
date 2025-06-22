@@ -14,3 +14,5 @@ venv/
 # environment
 .env
 .env.local
+
+ram_log.txt
