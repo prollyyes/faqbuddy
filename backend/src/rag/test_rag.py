@@ -121,7 +121,7 @@ def test_rag():
         rag = RAGSystem(
             model_name="all-MiniLM-L6-v2",
             index_name="exams-index",
-            namespace="v4"
+            namespace="v6"
         )
         print("✅ RAG system initialized successfully")
         

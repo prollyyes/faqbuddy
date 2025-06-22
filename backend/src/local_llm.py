@@ -59,7 +59,7 @@ def get_language_instruction(question: str) -> str:
 def generate_answer(context: str, question: str) -> str:
     language_instruction = get_language_instruction(question)
     prompt = f"[INST] You are FAQBuddy, a helpful assistant for a university portal that answers questions about the university, their courses, professors, materials and any problem a student can have. Teachers are also using the platform, so keep a professional but friendly tone. Refrain from answering general questions. {language_instruction} Context:\n{context}\n\nQuestion:\n{question} [/INST]"
-    output = llm_mistral(prompt, max_tokens=256, stop=["</s>"])
+    output = llm_mistral(prompt, max_tokens=512, stop=["</s>"])
     return output["choices"][0]["text"].strip()
 
 def generate_answer_streaming(context: str, question: str) -> list:
@@ -68,7 +68,7 @@ def generate_answer_streaming(context: str, question: str) -> list:
     prompt = f"[INST] You are FAQBuddy, a helpful assistant for a university portal that answers questions about the university, their courses, professors, materials and any problem a student can have. Teachers are also using the platform, so keep a professional but friendly tone. Refrain from answering general questions. {language_instruction} Context:\n{context}\n\nQuestion:\n{question} [/INST]"
     
     # Use the streaming API
-    stream = llm_mistral(prompt, max_tokens=256, stop=["</s>"], stream=True)
+    stream = llm_mistral(prompt, max_tokens=512, stop=["</s>"], stream=True)
     
     tokens = []
     for chunk in stream:

@@ -1,4 +1,7 @@
 ## Setup rapido
+*Nota*: per un setup veloce, `./setup.sh` contiene tutti i passi necessari preparare l'avvio dell'applicazione.
+Se ci sono problemi di permessi, basta garantire permessi di esecuzione al file: `chmod +x setup.sh`.
+
 
 ### 1. Crea e attiva l’ambiente virtuale
 
@@ -91,6 +94,10 @@ cd frontend
 npm install
 npm run dev
 ```
+### Dev test sul RAG
+
+Per testare solo le funzionalita' del RAG, potete eseguire il file `interactive_test.py`, trovato in `/backend/src/rag/`.
+Il resto delle operazioni deve essere fatto, e' semplicemente un basico modo per interagire da CL con il modello e testare velocemente le funzionalita'.
 
 ---
 
