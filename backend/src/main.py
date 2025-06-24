@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from src.text_2_SQL.converter import TextToSQLConverter
@@ -39,15 +39,17 @@ def t2sql_endpoint(req: T2SQLRequest):
     db = DBHandler(get_db_connection())
     schema = db.get_schema()
 
-     # 1. Switcher ML
+    # 1. Switcher ML
     ml_pred, proba = ml_model.inference(question)
 
     # 2. Fallback LLM se confidenza bassa
     threshold = 0.7
     fallback = False
     if proba < threshold:
-        llm_pred = classify_question(question)
-        final_pred = llm_pred.strip().lower()
+        final_pred = "complex"
+        
+        # llm_pred = classify_question(question)
+        # final_pred = llm_pred.strip().lower()
         fallback = True
     else:
         final_pred = ml_pred.strip().lower()
@@ -120,3 +122,54 @@ def t2sql_endpoint(req: T2SQLRequest):
             "total_time": rag_result["total_time"],
             "context_used": rag_result["context_used"]
         }
+
+TEMPLATES = [
+    "Mostra tutti i corsi del primo semestre",
+    "Elenca tutti i corsi di {corso_laurea}",
+    "Chi è il docente di {nome_corso}?",
+    "Mostra i materiali didattici per il corso {nome_corso}",
+    "Quali sono gli orari di ricevimento dei professori?",
+    "Quali corsi prevedono la frequenza obbligatoria?",
+    "Mostra tutte le informazioni sul corso {nome_corso}",
+    "Elenca i professori che ricevono il {giorno_settimana}",
+    "Quali sono le tesi disponibili nel dipartimento di {nome_dipartimento}?",
+    "Mostra tutti i corsi tenuti dal professor {nome_professore}",
+    "Elenca gli studenti iscritti al corso di laurea in {corso_laurea}",
+    "Elenca i corsi che utilizzano la piattaforma {nome_piattaforma}",
+]
+
+def expand_templates(templates, db):
+    # Ottieni i valori dinamici dal DB
+    corsi_laurea = [row[0] for row in db.run_query("SELECT nome FROM Corso_di_Laurea", fetch=True)]
+    nomi_corso = [row[0] for row in db.run_query("SELECT nome FROM Corso", fetch=True)]
+    nomi_prof = [row[0] for row in db.run_query("SELECT nome FROM Utente WHERE id IN (SELECT id FROM Insegnanti)", fetch=True)]
+    piattaforme = [row[0] for row in db.run_query("SELECT Nome FROM Piattaforme", fetch=True)]
+    dipartimenti = [row[0] for row in db.run_query("SELECT nome FROM Dipartimento", fetch=True)]
+    giorni = ["lunedì", "martedì", "mercoledì", "giovedì", "venerdì"]
+
+    expanded = []
+    for t in templates:
+        if "{corso_laurea}" in t:
+            expanded += [t.replace("{corso_laurea}", cl) for cl in corsi_laurea]
+        elif "{nome_corso}" in t:
+            expanded += [t.replace("{nome_corso}", nc) for nc in nomi_corso]
+        elif "{nome_professore}" in t:
+            expanded += [t.replace("{nome_professore}", np) for np in nomi_prof]
+        elif "{nome_piattaforma}" in t:
+            expanded += [t.replace("{nome_piattaforma}", p) for p in piattaforme]
+        elif "{nome_dipartimento}" in t:
+            expanded += [t.replace("{nome_dipartimento}", d) for d in dipartimenti]
+        elif "{giorno_settimana}" in t:
+            expanded += [t.replace("{giorno_settimana}", g) for g in giorni]
+        else:
+            expanded.append(t)
+    return expanded
+
+@app.get("/autocomplete")
+def autocomplete_suggestions(q: str = Query(..., min_length=1)):
+    db = DBHandler(get_db_connection())
+    templates_expanded = expand_templates(TEMPLATES, db)
+    db.close_connection()
+    q_lower = q.lower()
+    suggestions = [t for t in templates_expanded if t.lower().startswith(q_lower) or q_lower in t.lower()]
+    return {"suggestions": suggestions[:5]}
