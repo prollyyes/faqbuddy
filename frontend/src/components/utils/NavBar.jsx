@@ -20,30 +20,30 @@ const NavBar = () => {
       <Link
         href="/homepage/materials"
         className={`group flex flex-col items-center text-[14px] rounded-full p-2 transition-all duration-200 ${
-          pathname === '/homepage/materials' ? 'bg-[#800020]' : 'hover:bg-[#800020] active:bg-[#800020]'
+          pathname === '/homepage/materials' ? 'bg-[#822433]' : 'hover:bg-[#822433] active:bg-[#822433]'
         }`}
       >
         <MdMenuBook
           className={`text-3xl ${
-            pathname === '/homepage/materials' ? 'text-white' : 'text-[#800020] group-hover:text-white active:text-white'
+            pathname === '/homepage/materials' ? 'text-white' : 'text-[#822433] group-hover:text-white active:text-white'
           }`}
         />
       </Link>
       <Link
         href="/homepage/chat"
         className={`group flex flex-col items-center text-[14px] rounded-full p-2 transition-all duration-200 ${
-          pathname === '/homepage/chat' ? 'bg-[#800020]' : 'hover:bg-[#800020] active:bg-[#800020]'
+          pathname === '/homepage/chat' ? 'bg-[#822433]' : 'hover:bg-[#822433] active:bg-[#822433]'
         }`}
       >
         <RiWechatLine
           className={`text-3xl ${
-            pathname === '/homepage/chat' ? 'text-white' : 'text-[#800020] group-hover:text-white active:text-white'
+            pathname === '/homepage/chat' ? 'text-white' : 'text-[#822433] group-hover:text-white active:text-white'
           }`}
         />
       </Link>
       <Link
         href="/profile/personalInfo"
-        className="group flex flex-col items-center text-[14px] text-[#800020] hover:bg-[#800020] active:bg-[#800020] rounded-full p-2 transition-all duration-200"
+        className="group flex flex-col items-center text-[14px] text-[#822433] hover:bg-[#822433] active:bg-[#822433] rounded-full p-2 transition-all duration-200"
       >
         <PiStudentBold className="text-3xl group-hover:text-white active:text-white" />
       </Link>
