@@ -17,7 +17,7 @@ const PersonalInfo = () => {
     >
       <div className={dimBackground ? 'opacity-40' : 'opacity-100'}>
         <div className="max-w-md mx-auto text-center pt-12">
-          <h1 className="text-2xl font-bold text-[#800020] mb-6">Profilo Studente</h1>
+          <h1 className="text-2xl font-bold text-[#822433] mb-6">Profilo Studente</h1>
           <div className="text-left space-y-4">
             {[
               { label: 'Nome', value: 'Mario Rossi' },
@@ -27,21 +27,21 @@ const PersonalInfo = () => {
             ].map((field, index) => (
               <div
                 key={index}
-                className="w-full border-b border-[#800020] pb-3"
+                className="w-full border-b border-[#822433] pb-3"
               >
-                <p className="text-sm text-[#800020] font-extrabold">{field.label}</p>
+                <p className="text-sm text-[#822433] font-extrabold">{field.label}</p>
                 <p className="text-lg font-medium">{field.value}</p>
               </div>
             ))}
             <div className="w-full pt-6 relative">
               <div className="flex justify-between items-center">
-                <p className="text-sm text-[#800020] font-semibold">Rating</p>
+                <p className="text-sm text-[#822433] font-semibold">Rating</p>
                 <button
                   onClick={() => {
                     setShowInfo(true);
                     setDimBackground(true);
                   }}
-                  className="text-[#800020] text-xl hover:text-[#a00028] pt-2"
+                  className="text-[#822433] text-xl hover:text-[#a00028] pt-2"
                   title="Info"
                 >
                   <HiOutlineInformationCircle />
@@ -49,7 +49,7 @@ const PersonalInfo = () => {
               </div>
               <p className="text-sm pt-2 text-black">Livello 7</p>
               <div className="w-full bg-gray-200 rounded-full h-4 mt-1">
-                <div className="bg-[#800020] h-4 rounded-full" style={{ width: '70%' }}></div>
+                <div className="bg-[#822433] h-4 rounded-full" style={{ width: '70%' }}></div>
               </div>
               <p className="text-sm mt-1 text-right text-gray-600">70%</p>
             </div>
@@ -64,7 +64,7 @@ const PersonalInfo = () => {
 
       {showInfo && (
         <div className="fixed inset-0 backdrop-brightness-75 flex items-center justify-center z-40">
-          <div className="bg-white backdrop-blur-md border border-[#800020] rounded-lg shadow-lg p-4 text-sm w-64 h-60 text-center relative">
+          <div className="bg-white backdrop-blur-md border border-[#822433] rounded-lg shadow-lg p-4 text-sm w-64 h-60 text-center relative">
             <p className="text-black">
               Con un rating di livello 5 o superiore sei considerato abbastanza affidabile da poter caricare materiale senza necessità di verifica dei contenuti.<br /><br />Puoi aumentare il tuo rating tramite 'Like' ai materiali che pubblichi.
             </p>
@@ -73,7 +73,7 @@ const PersonalInfo = () => {
                 setShowInfo(false);
                 setDimBackground(false);
               }}
-              className="mt-6 text-[#800020] font-semibold hover:underline text-center w-full"
+              className="mt-6 text-[#822433] font-semibold hover:underline text-center w-full"
             >
               Chiudi
             </button>

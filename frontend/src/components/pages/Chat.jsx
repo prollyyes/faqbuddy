@@ -33,7 +33,7 @@ const Chat = () => {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5 }}
-                                className="text-lg font-semibold text-[#800020] mb-2"
+                                className="text-lg font-semibold text-[#822433] mb-2"
                             >
                                 Fai una domanda al tuo <span className="italic">FAQbuddy</span>!
                             </motion.p>
@@ -56,10 +56,10 @@ const Chat = () => {
                       placeholder="Scrivi un messaggio..."
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      className="flex-1 border border-gray-300 rounded-full px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#800020] transition duration-200 hover:shadow-md"
+                      className="flex-1 border border-gray-300 rounded-full px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#822433] transition duration-200 hover:shadow-md"
                     />
                     <button
-                      className="group bg-white text-[#800020] hover:bg-[#800020] p-2 rounded-full transition-all duration-200"
+                      className="group bg-white text-[#822433] hover:bg-[#822433] p-2 rounded-full transition-all duration-200"
                       onClick={() => {
                         if (message.trim()) {
                           setChatExpanded(true);
