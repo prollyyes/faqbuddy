@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function Home() {
   const [input, setInput] = useState("");
@@ -7,8 +7,24 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [elapsed, setElapsed] = useState(null);
-
+  const [inlineSuggestion, setInlineSuggestion] = useState("");
   const [data, setData] = useState(null);
+
+  // Inline autocomplete logic
+  useEffect(() => {
+    if (input.length > 0) {
+      fetch(`http://localhost:8000/autocomplete?q=${encodeURIComponent(input)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          const sug = (data.suggestions || []).find(s => s.toLowerCase().startsWith(input.toLowerCase()));
+          setInlineSuggestion(sug && sug.length > input.length ? sug : "");
+        })
+        .catch(() => setInlineSuggestion(""));
+    } else {
+      setInlineSuggestion("");
+    }
+  }, [input]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -26,7 +42,7 @@ export default function Home() {
       const data = await res.json();
       setResult(data.result);
       setQuery(data.query);
-      setData(data); // salva tutta la risposta per info extra
+      setData(data);
     } catch (err) {
       setResult("Errore nella richiesta");
       setQuery("");
@@ -37,22 +53,84 @@ export default function Home() {
     setLoading(false);
   };
 
+  // Ref per focus input
+  const inputRef = useRef(null);
+
   return (
     <main className="min-h-screen flex flex-col items-center justify-start bg-white py-12">
       <div className="w-full max-w-xl bg-white rounded-lg shadow p-8 text-black">
         <h1 className="text-2xl font-bold mb-6 text-center text-black">FAQBuddy</h1>
-        <form onSubmit={handleSubmit} className="flex gap-2 mb-4">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Fai una domanda..."
-            className="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 text-black bg-white"
-          />
+        
+        <form onSubmit={handleSubmit} className="mb-4">
+          <div
+            className="flex-1 border border-gray-300 rounded px-3 py-2 focus-within:ring-2 focus-within:ring-blue-400 bg-white flex items-center relative"
+            style={{
+              minHeight: "2.5rem",
+              fontSize: "1rem",
+              cursor: "text",
+              fontFamily: "inherit",
+              overflow: "hidden",
+            }}
+            onClick={() => inputRef.current && inputRef.current.focus()}
+          >
+            {/* Testo digitato + suggerimento inline, tutto in una sola riga */}
+            <span
+              style={{
+                position: "absolute",
+                left: 12, // px-3 = 12px
+                top: "50%",
+                transform: "translateY(-50%)",
+                fontFamily: "inherit",
+                fontSize: "1rem",
+                pointerEvents: "none",
+                color: "#111",
+                whiteSpace: "pre",
+                zIndex: 1,
+              }}
+            >
+              {input}
+              <span style={{ color: "#bbb" }}>
+                {inlineSuggestion && inlineSuggestion.startsWith(input) ? inlineSuggestion.slice(input.length) : ""}
+              </span>
+            </span>
+            {/* Input vero, trasparente sopra */}
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Fai una domanda..."
+              autoComplete="off"
+              style={{
+                position: "absolute",
+                left: 0,
+                top: 0,
+                width: "100%",
+                height: "100%",
+                background: "transparent",
+                color: "transparent",
+                caretColor: "#111",
+                border: "none",
+                outline: "none",
+                fontFamily: "inherit",
+                fontSize: "1rem",
+                zIndex: 2,
+                boxSizing: "border-box",
+                paddingLeft: 12,
+                paddingRight: 12,
+              }}
+              onKeyDown={e => {
+                if (e.key === "Tab" && inlineSuggestion && inlineSuggestion.startsWith(input)) {
+                  e.preventDefault();
+                  setInput(inlineSuggestion);
+                }
+              }}
+            />
+          </div>
           <button
             type="submit"
             disabled={loading}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition mt-2 w-full"
           >
             {loading ? "Attendi..." : "Invia"}
           </button>
@@ -62,78 +140,7 @@ export default function Home() {
             Tempo di risposta: <span className="font-mono">{elapsed} s</span>
           </div>
         )}
-        {/* {query && (
-          <div className="mb-4">
-            <div className="font-semibold text-black">Query SQL generata:</div>
-            <pre className="bg-gray-100 rounded p-2 mt-1 text-sm overflow-x-auto text-black">{query}</pre>
-          </div>
-        )}
-        {data?.natural_response && (
-          <div className="mb-4">
-            <div className="font-semibold text-black">Risposta in linguaggio naturale:</div>
-            <div className="bg-green-50 rounded p-2 mt-1 text-base text-black whitespace-pre-line">
-              {data.natural_response}
-            </div>
-          </div>
-        )}
-        {result && (
-          <div>
-            <div className="font-semibold text-black">Risultato:</div>
-              {Array.isArray(result) ? (
-                <pre className="bg-gray-100 rounded p-2 mt-1 text-sm overflow-x-auto text-black">
-                  {JSON.stringify(result, null, 2)}
-                </pre>
-              ) : (
-                <div className="bg-green-50 rounded p-2 mt-1 text-base text-black whitespace-pre-line">
-                  {result}
-                </div>
-              )}
-            
-            <div className="mt-4 text-black text-sm">
-              {data?.chosen && (
-                <div>
-                  <span className="font-semibold">Pipeline scelta:</span> {data.chosen}
-                </div>
-              )}
-              {data?.ml_model && (
-                <div>
-                  <span className="font-semibold">ML model:</span> {data.ml_model}
-                </div>
-              )}
-              {typeof data?.ml_confidence === "number" && (
-                <div>
-                  <span className="font-semibold">Confidenza ML:</span> {data.ml_confidence.toFixed(2)}
-                </div>
-              )}
-              {data?.retrieval_time && (
-                <div>
-                  <span className="font-semibold">Retrieval time (RAG):</span> {data.retrieval_time}s
-                </div>
-              )}
-              {data?.generation_time && (
-                <div>
-                  <span className="font-semibold">Generation time (RAG):</span> {data.generation_time}s
-                </div>
-              )}
-              {data?.total_time && (
-                <div>
-                  <span className="font-semibold">Total time (RAG):</span> {data.total_time}s
-                </div>
-              )}
-              {data?.context_used && (
-                <div>
-                  <span className="font-semibold">Context usato (RAG):</span>
-                  <pre className="bg-gray-100 rounded p-2 mt-1 text-xs overflow-x-auto text-black">{data.context_used}</pre>
-                </div>
-              )}
-              {data?.fallback_gemma && (
-                <div className="text-yellow-600 font-semibold">
-                  Fallback su Gemma LLM attivato per questa domanda!
-                </div>
-              )}
-            </div>
-          </div>
-        )} */}
+
         {data && (
           <div className="mt-6 w-full">
             <div className="font-semibold text-black mb-2">Dettaglio risposta backend:</div>
@@ -150,7 +157,7 @@ export default function Home() {
               ))}
             </div>
           </div>
-        )}   
+        )}
       </div>
     </main>
   );
