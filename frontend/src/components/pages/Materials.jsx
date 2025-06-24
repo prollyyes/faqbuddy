@@ -39,7 +39,7 @@ export default function MaterialsPage() {
               setTimeout(() => {
                 setActive(null);
               }, 200);
-              router.push("/homepage/materials/research");
+              router.push("/homepage/materials/upload");
               }}
             onMouseEnter={!isTouchDevice ? () => setHovered('help') : undefined}
             onMouseLeave={!isTouchDevice ? () => setHovered(null) : undefined}
@@ -64,7 +64,7 @@ export default function MaterialsPage() {
               setTimeout(() => {
                 setActive(null);
               }, 200);
-              router.push("/homepage/materials/upload");
+              router.push("/homepage/materials/research");
             }}
             onMouseEnter={!isTouchDevice ? () => setHovered('search') : undefined}
             onMouseLeave={!isTouchDevice ? () => setHovered(null) : undefined}
