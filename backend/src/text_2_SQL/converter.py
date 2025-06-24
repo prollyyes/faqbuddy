@@ -1,11 +1,13 @@
 from src.utils.local_llm import llm_mistral
 from typing import Optional
+from src.text_2_SQL.test import extract_relevant_tables
 
 class TextToSQLConverter:
     def __init__(self):
         pass
 
     def create_prompt(self, question: str, schema: str) -> str:
+        resized_schema = extract_relevant_tables(schema, question)
         prompt = f"""
     Sei un assistente SQL esperto.
 
@@ -99,14 +101,15 @@ class TextToSQLConverter:
             return risposta
         return self.sql_results_to_text_llm(question, results)
         
-    # da migliorare assolutamente, forse agguingendo tanti pattern si riescono a coprire la maggior parte delle domande (?)
+    # da migliorare assolutamente, forse aggiungendo tanti pattern si riescono a coprire la maggior parte delle domande (?)
     def sql_results_to_text_pattern(self, question: str, results: list) -> Optional[str]:
         import re
-        # Primo: pattern "quali sono ... di ..."
-        match = re.search(r"(quali sono|dimmi|mostra|elenca)\s+([^\?]+?)\s+di\s+([\w\s']+)", question.lower())
+        # Pattern generale: esclude sempre "tutti i" dall'oggetto
+        match = re.search(r"(quali sono|dimmi|mostra|elenca)\s+(?:tutti i\s+)?([^\?]+)", question.lower())
         if match and results and isinstance(results[0], dict):
             oggetto = match.group(2).strip()
-            ambito = match.group(3).strip()
+            # Rimuovi eventuale "tutti i" residuo all'inizio dell'oggetto (per sicurezza)
+            oggetto = re.sub(r"^tutti i\s+", "", oggetto, flags=re.IGNORECASE)
             frasi = []
             for row in results:
                 parti = [f"{k}: {v}" for k, v in row.items() if v is not None]
@@ -114,26 +117,13 @@ class TextToSQLConverter:
                 if frase:
                     frasi.append(frase)
             if frasi:
-                return f"I {oggetto} di {ambito} sono:\n- " + "\n- ".join(frasi)
-            else:
-                return f"Nessun risultato trovato per {oggetto} di {ambito}."
-        # Secondo: pattern "mostra/elenca/dimmi/quali sono tutti i ..."
-        match2 = re.search(r"(quali sono|dimmi|mostra|elenca)\s+tutti i\s+([^\?]+)", question.lower())
-        if match2 and results and isinstance(results[0], dict):
-            oggetto = match2.group(2).strip()
-            frasi = []
-            for row in results:
-                parti = [f"{k}: {v}" for k, v in row.items() if v is not None]
-                frase = ", ".join(parti)
-                if frase:
-                    frasi.append(frase)
-            if frasi:
-                return f"Tutti i {oggetto} sono:\n- " + "\n- ".join(frasi)
+                return f"I {oggetto} sono:\n- " + "\n- ".join(frasi)
             else:
                 return f"Nessun risultato trovato per {oggetto}."
         return None
     
     def sql_results_to_text_llm(self, question: str, results: list) -> str:
+        from src.utils.local_llm import llm_gemma
         prompt = (
             "Rispondi in italiano in modo sintetico e diretto alla seguente domanda, "
             "usando SOLO i dati forniti qui sotto. Non aggiungere spiegazioni o ringraziamenti.\n\n"
@@ -141,7 +131,7 @@ class TextToSQLConverter:
             f"Dati:\n{results}\n\n"
             "Risposta breve:"
         )
-        output = llm_mistral(prompt, max_tokens=60, stop=["</s>"])
+        output = llm_gemma(prompt, max_tokens=60, stop=["</s>"])
         return output["choices"][0]["text"].strip()
 
 
