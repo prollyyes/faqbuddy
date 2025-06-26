@@ -15,7 +15,15 @@ CREATE TABLE Utente (
   email        TEXT  NOT NULL UNIQUE,
   pwd_hash     TEXT  NOT NULL,
   nome         TEXT  NOT NULL,
-  cognome      TEXT  NOT NULL
+  cognome      TEXT  NOT NULL,
+  email_verificata BOOLEAN NOT NULL DEFAULT FALSE -- serve per sapere se l'utente ha verificato la sua email
+);
+
+-- è una tabella con record temporanei, appena un utente è registrato viene inserito un record in questa tabella
+-- e poi viene cancellato quando l'utente verifica la sua email
+CREATE TABLE EmailVerification (
+    user_id UUID REFERENCES Utente(id),
+    token TEXT PRIMARY KEY
 );
 
 CREATE TABLE Insegnanti (
@@ -25,6 +33,8 @@ CREATE TABLE Insegnanti (
   cv           TEXT,
   ricevimento  TEXT
 );
+
+
 
 -- Student vedi dopo causa Foreign key
 
