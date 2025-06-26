@@ -1,0 +1,29 @@
+import os
+from llama_cpp import Llama
+
+mistral_model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'models', 'mistral-7b-instruct-v0.2.Q4_K_M.gguf'))
+
+llm_mistral = Llama(
+    model_path=mistral_model_path,
+    n_ctx=2048,
+    n_threads=6,
+    n_gpu_layers=-1,
+    verbose=False
+)
+
+def generate_answer(context: str, question: str) -> str:
+    prompt = f"[INST] Context:\n{context}\n\nQuestion:\n{question} [/INST]"
+    output = llm_mistral(prompt, max_tokens=256, stop=["</s>"])
+    return output["choices"][0]["text"].strip()
+
+def generate_answer_streaming(context: str, question: str) -> list:
+    prompt = f"[INST] Context:\n{context}\n\nQuestion:\n{question} [/INST]"
+    stream = llm_mistral(prompt, max_tokens=256, stop=["</s>"], stream=True)
+    tokens = []
+    for chunk in stream:
+        if chunk["choices"][0]["finish_reason"] is not None:
+            break
+    token = chunk["choices"][0]["delta"].get("content", "")
+    if token:
+            tokens.append(token)
+    return tokens

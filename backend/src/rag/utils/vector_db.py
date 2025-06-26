@@ -3,9 +3,10 @@ from src.rag.utils.embeddings import embed_texts
 from typing import List
 from dotenv import load_dotenv
 import os
+
 # Constants for Pinecone index
 INDEX_NAME = "exams-index"
-NAMESPACE = "v4"
+NAMESPACE = "v6"
 
 load_dotenv()  # Load environment variables from .env file  
 

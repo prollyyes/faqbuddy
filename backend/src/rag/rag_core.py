@@ -4,14 +4,15 @@ from dotenv import load_dotenv
 import torch
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone
-from src.utils.utils_llm import generate_answer, generate_answer_streaming
+from src.utils.llm_mistral import generate_answer, generate_answer_streaming
 import time
+from src.rag.utils.vector_db import NAMESPACE
 
 class RAGSystem:
     def __init__(self, 
                  model_name: str = "all-MiniLM-L6-v2",
                  index_name: str = "exams-index",
-                 namespace: str = "v4",
+                 namespace: str = NAMESPACE,
                  dimension: int = 384):
         """
         Initialize the RAG system with embedding model and vector store.
