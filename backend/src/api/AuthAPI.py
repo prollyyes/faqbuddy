@@ -1,26 +1,18 @@
-from fastapi import FastAPI, HTTPException, status
-from pydantic import BaseModel, EmailStr
 from uuid import uuid4
 import bcrypt
 from src.utils.db_utils import get_db_connection
 from src.utils.db_handler import DBHandler
-from fastapi.middleware.cors import CORSMiddleware
+
 from src.auth.jwt_handler import create_access_token
+from fastapi import APIRouter, HTTPException, status
+from src.api.BaseModel import LoginRequest, SignupRequest
 
 
 conn = get_db_connection()
 
 db_handler = DBHandler(conn)
 
-app = FastAPI(title="api")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+router = APIRouter()
 
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
@@ -28,17 +20,8 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
 
-class LoginRequest(BaseModel):
-    email: EmailStr
-    password: str
 
-class SignupRequest(BaseModel):
-    email: EmailStr
-    password: str
-    nome: str
-    cognome: str
-
-@app.post("/login")
+@router.post("/login")
 def login(data: LoginRequest):
     user = db_handler.run_query(
         "SELECT id, pwd_hash FROM Utente WHERE email = %s",
@@ -59,7 +42,7 @@ def login(data: LoginRequest):
     access_token = create_access_token({"user_id": user_id})
     return {"access_token": access_token}
 
-@app.post("/signup")
+@router.post("/signup")
 def signup(data: SignupRequest):
     existing = db_handler.run_query(
         "SELECT id FROM Utente WHERE email = %s",
