@@ -6,11 +6,17 @@ import { LuUserRound } from "react-icons/lu";
 import { LuLogOut } from "react-icons/lu";
 import { IoStatsChart } from "react-icons/io5";
 import { motion } from 'framer-motion';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 const ProfileNavBar = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    router.push('/auth');
+  };
 
   return (
     <motion.nav
@@ -78,7 +84,7 @@ const ProfileNavBar = () => {
                 No
               </button>
               <button
-                onClick={() => console.log('Logout confermato')} // Da sostituire con logica effettiva di logout
+                onClick={handleLogout}
                 className="px-4 py-2 border border-[#822433] bg-[#822433] text-white rounded-md hover:opacity-90 transition font-semibold"
               >
                 Sì
