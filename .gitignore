@@ -22,7 +22,7 @@ venv/
 # environment
 .env
 
-# Robe
+# Robe di Luca strane
 **/.DS_Store
 ram_log.txt
 mistral_sql_lora_schema
