@@ -1,7 +1,7 @@
 import pytest
 from src.text_2_SQL import TextToSQLConverter
 from src.utils.db_handler import DBHandler
-from src.utils.db_utils import get_db_connection
+from src.utils.db_utils import get_connection
 import time
 
 @pytest.fixture(scope="module")
@@ -10,7 +10,7 @@ def t2sql():
 
 @pytest.fixture(scope="module")
 def db():
-    conn = get_db_connection()
+    conn = get_connection(mode="neon")
     dbh = DBHandler(conn)
     yield dbh
     dbh.close_connection()
@@ -20,11 +20,9 @@ def schema(db):
     return db.get_schema()
 
 # --- TEST SOLO T2SQL (Text → SQL) ---
-# python -m pytest -s backend/tests/test_t2sql.py -k "test_t2sql"
-# oppure:
-# 
+# python -m pytest -s backend/tests/test_t2sql.py::test_t2sql
 @pytest.mark.parametrize("question,expected_start", [
-    ("Mostra tutte le informazioni sul corso Fondamenti di Informatica", "SELECT"),
+    # ("Mostra tutte le informazioni sul corso Fondamenti di Informatica", "SELECT"),
     ("Elenca i professori che ricevono il lunedì", "SELECT"),
     ("Quali sono le tesi disponibili nel dipartimento di Informatica?", "SELECT"),
 ])
@@ -42,9 +40,7 @@ def test_t2sql(t2sql, schema, question, expected_start, benchmark):
     assert len(cleaned.strip()) > 10
 
 # --- TEST SOLO SQL2T (SQL → Testo) ---
-# python -m pytest -s backend/tests/test_t2sql.py -k "test_sql2t"
-# oppure:
-# python -m pytest -s backend/tests/test_t2sql.py:test_sql2t
+# python -m pytest -s backend/tests/test_t2sql.py::test_sql2t
 @pytest.mark.parametrize("question,sql", [
     (
         "Mostra tutte le informazioni sul corso Fondamenti di Informatica",

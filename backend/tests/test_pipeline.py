@@ -2,9 +2,9 @@ import time
 import pytest
 from src.switcher.MLmodel import MLModel
 from src.text_2_SQL.converter import TextToSQLConverter
-from src.utils.db_utils import get_db_connection
+from src.utils.db_utils import get_connection
 from src.utils.db_handler import DBHandler
-from src.utils.utils_llm import classify_question
+from src.utils.llm_gemma import classify_question
 from src.rag.rag_core import RAGSystem
 
 # Inizializza risorse condivise
@@ -26,7 +26,7 @@ def test_question_pipeline(question):
     start = time.time()
 
     # Nuova connessione per ogni test
-    db = DBHandler(get_db_connection())
+    db = DBHandler(get_connection(mode="neon"))
     schema = db.get_schema()
 
     ml_pred, proba = ml_model.inference(question)
@@ -34,14 +34,16 @@ def test_question_pipeline(question):
 
     threshold = 0.7
     if proba < threshold:
-        llm_pred = classify_question(question)
-        print(f"LLM: {llm_pred}")
-        final_pred = llm_pred.strip().lower()
+        # come nel main.py, setto a "complex" di default se scendo sotto la soglia
+        # llm_pred = classify_question(question)
+        # print(f"LLM: {llm_pred}")
+        # final_pred = llm_pred.strip().lower()
+        final_pred = "complex"
     else:
         final_pred = ml_pred.strip().lower()
 
     if final_pred == "simple":
-        max_attempts = 3
+        max_attempts = 2
         attempt = 0
         while attempt < max_attempts:
             prompt = converter.create_prompt(question, schema)
@@ -69,8 +71,8 @@ def test_question_pipeline(question):
                 print(f"Attempt {attempt+1}: Errore nell'esecuzione della query: {e}")
                 attempt += 1
         else:
-            # Dopo 3 tentativi falliti, fallback RAG
-            print("Fallback to RAG after 3 failed attempts.")
+            # Dopo 2 tentativi falliti, fallback RAG
+            print("Fallback to RAG after 2 failed attempts.")
             rag_result = rag.generate_response(question)
             print("RAG response:", rag_result["response"])
             db.close_connection()
