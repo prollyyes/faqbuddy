@@ -98,7 +98,7 @@ CREATE TABLE Corsi_seguiti (
 CREATE TABLE Materiale_Didattico (
     id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     Utente_id    UUID NOT NULL REFERENCES Utente(id),
-    course_id  UUID NOT NULL REFERENCES Corso(id),    
+    course_id  UUID NOT NULL REFERENCES EdizioneCorso(id),    
     path_file  TEXT NOT NULL,
     tipo       TEXT,
     verificato BOOLEAN NOT NULL DEFAULT false,
