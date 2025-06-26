@@ -128,7 +128,7 @@ export default function Auth() {
     if (success) {
       const timer = setTimeout(() => {
         setSuccess('');
-      }, 5000);
+      }, 500);
       return () => clearTimeout(timer);
     }
   }, [success]);
