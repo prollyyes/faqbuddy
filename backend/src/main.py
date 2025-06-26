@@ -2,8 +2,8 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from src.text_2_SQL.converter import TextToSQLConverter
-from src.utils.db_utils import get_db_connection
-from src.utils.utils_llm import classify_question
+from src.utils.db_utils import get_connection
+
 from src.rag.rag_core import RAGSystem
 from src.utils.db_handler import DBHandler
 from src.switcher.MLmodel import MLModel
@@ -30,13 +30,12 @@ converter = TextToSQLConverter()
 rag = RAGSystem()
 
 
-
 @app.post("/t2sql")
 def t2sql_endpoint(req: T2SQLRequest):
     question = req.question
 
     # Inizializza DBHandler
-    db = DBHandler(get_db_connection())
+    db = DBHandler(get_connection(mode="neon"))
     schema = db.get_schema()
 
     # 1. Switcher ML
@@ -47,16 +46,18 @@ def t2sql_endpoint(req: T2SQLRequest):
     fallback = False
     if proba < threshold:
         final_pred = "complex"
-        
+        fallback = True
+        # dato che l'llm è torppo lento faccio direttamente il fallback a "complex" per passare al rag
+        # from src.utils.llm_gemma import classify_question
         # llm_pred = classify_question(question)
         # final_pred = llm_pred.strip().lower()
-        fallback = True
     else:
         final_pred = ml_pred.strip().lower()
 
     # 3. Routing finale
     if final_pred == "simple":
-        max_attempts = 3
+        # se entro 2 tentativi non riesco a generare una query SQL valida, faccio il fallback a RAG
+        max_attempts = 2
         attempt = 0
         while attempt < max_attempts:
             prompt = converter.create_prompt(question, schema)
@@ -90,8 +91,8 @@ def t2sql_endpoint(req: T2SQLRequest):
                 print(f"Attempt {attempt+1}: Error executing SQL query, retrying... {e}")
                 attempt += 1
 
-        # Dopo 3 tentativi falliti, fallback RAG
-        print("Fallback to RAG after 3 failed attempts.")
+        # Dopo 2 tentativi falliti, fallback RAG
+        print("Fallback to RAG after 2 failed attempts.")
         rag_result = rag.generate_response(question)
         db.close_connection()
         return {
@@ -123,6 +124,9 @@ def t2sql_endpoint(req: T2SQLRequest):
             "context_used": rag_result["context_used"]
         }
 
+
+######################################################################################################
+# Non sono troppo convinto di questo approccio, fatemi sapere guys
 TEMPLATES = [
     "Mostra tutti i corsi del primo semestre",
     "Elenca tutti i corsi di {corso_laurea}",
@@ -167,7 +171,7 @@ def expand_templates(templates, db):
 
 @app.get("/autocomplete")
 def autocomplete_suggestions(q: str = Query(..., min_length=1)):
-    db = DBHandler(get_db_connection())
+    db = DBHandler(get_connection(mode="neon"))
     templates_expanded = expand_templates(TEMPLATES, db)
     db.close_connection()
     q_lower = q.lower()
