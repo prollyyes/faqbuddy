@@ -75,12 +75,13 @@ CREATE TABLE Corso (
 );
 
 CREATE TABLE EdizioneCorso (
-    id         UUID PRIMARY KEY REFERENCES Corso(id),
+    id         UUID REFERENCES Corso(id),
     insegnante UUID NOT NULL REFERENCES Insegnanti(id),
     data       semestre NOT NULL,
     orario     TEXT,
     esonero    BOOLEAN NOT NULL,
-    mod_Esame  TEXT NOT NULL
+    mod_Esame  TEXT NOT NULL,
+    PRIMARY KEY (id, data)
 );
 
 CREATE TABLE Corsi_seguiti (
