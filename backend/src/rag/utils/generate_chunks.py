@@ -1,4 +1,4 @@
-from src.utils.db_utils import get_connection
+from src.utils.db_utils import get_connection, MODE
 from dotenv import load_dotenv
 from typing import List
 
@@ -7,7 +7,7 @@ load_dotenv()
 
 class ChunkGenerator:
     def __init__(self):
-        self.conn = get_connection(mode="neon")
+        self.conn = get_connection(mode=MODE)
         self.cur = self.conn.cursor()
         self._cache = {}
 

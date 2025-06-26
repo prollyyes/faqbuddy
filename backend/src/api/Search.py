@@ -1,12 +1,12 @@
 from uuid import uuid4
 import bcrypt
-from src.utils.db_utils import get_connection
+from src.utils.db_utils import get_connection, MODE
 from src.utils.db_handler import DBHandler
 from fastapi import APIRouter, HTTPException, status
 from src.api.BaseModel import SearchCorsi
 
 
-conn = get_connection(mode="neon")
+conn = get_connection(mode=MODE)
 
 db_handler = DBHandler(conn)
 

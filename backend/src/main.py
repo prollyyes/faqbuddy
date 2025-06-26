@@ -2,7 +2,7 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from src.text_2_SQL.converter import TextToSQLConverter
-from src.utils.db_utils import get_connection
+from src.utils.db_utils import get_connection, MODE
 
 from src.rag.rag_core import RAGSystem
 from src.utils.db_handler import DBHandler
@@ -35,7 +35,7 @@ def t2sql_endpoint(req: T2SQLRequest):
     question = req.question
 
     # Inizializza DBHandler
-    db = DBHandler(get_connection(mode="neon"))
+    db = DBHandler(get_connection(mode=MODE))
     schema = db.get_schema()
 
     # 1. Switcher ML
@@ -171,7 +171,7 @@ def expand_templates(templates, db):
 
 @app.get("/autocomplete")
 def autocomplete_suggestions(q: str = Query(..., min_length=1)):
-    db = DBHandler(get_connection(mode="neon"))
+    db = DBHandler(get_connection(mode=MODE))
     templates_expanded = expand_templates(TEMPLATES, db)
     db.close_connection()
     q_lower = q.lower()
