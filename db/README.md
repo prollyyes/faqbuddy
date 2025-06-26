@@ -5,5 +5,8 @@ docker run --name faqbuddy_postgres_db -e POSTGRES_PASSWORD=pwd -e POSTGRES_USER
 
 create and populate with sample data:
 ```sh
-python create_db.py
+python create_db.py local
 ```
+
+> **IMPORTANTE:**  
+> SE INVECE DI `local` INSERISCI `neon` DISTRUGGERAI E RICREERAI IL DB REMOTO, DA FARE SOLO SE NE SEI

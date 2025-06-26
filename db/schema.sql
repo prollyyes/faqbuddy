@@ -74,6 +74,12 @@ CREATE TABLE Corso (
     frequenza_obbligatoria TEXT
 );
 
+-- Creo prima Piattaforme altrimenti EdizioneCorso non può fare riferimento
+
+CREATE TABLE Piattaforme (
+    Nome    TEXT PRIMARY KEY
+);
+
 CREATE TABLE EdizioneCorso (
     id         UUID PRIMARY KEY REFERENCES Corso(id),
     insegnante UUID NOT NULL REFERENCES Insegnanti(id),
@@ -81,6 +87,14 @@ CREATE TABLE EdizioneCorso (
     orario     TEXT,
     esonero    BOOLEAN NOT NULL,
     mod_Esame  TEXT NOT NULL
+);
+
+-- Collegamento tra EdizioneCorso e Piattaforme con il codice del corso su quella piattaforma
+CREATE TABLE EdizioneCorso_Piattaforme (
+    edizione_id UUID NOT NULL REFERENCES EdizioneCorso(id),
+    piattaforma_nome TEXT NOT NULL REFERENCES Piattaforme(Nome),
+    codice TEXT,
+    PRIMARY KEY (edizione_id, piattaforma_nome)
 );
 
 CREATE TABLE Corsi_seguiti (
@@ -125,10 +139,6 @@ CREATE TABLE Review (
     voto       INT NOT NULL CHECK (voto BETWEEN 1 AND 5)
 );
 
-CREATE TABLE Piattaforme (
-    Nome    TEXT PRIMARY KEY,
-    Codice  TEXT
-);
 
 CREATE TABLE Tesi (
     id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -136,3 +146,7 @@ CREATE TABLE Tesi (
     corso_laurea_id UUID NOT NULL REFERENCES Corso_di_Laurea(id),
     file       TEXT NOT NULL
 );
+
+------------------------------------------------
+-- Definizione Trigger
+------------------------------------------------
