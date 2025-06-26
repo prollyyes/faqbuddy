@@ -211,6 +211,7 @@ def insert_course_editions(cur, course_ids, professor_ids):
     insert_platforms(cur, list(piattaforme_set))
 
     edition_ids = {}
+    
     for edition in editions:
         edition_id = course_ids[edition["corso"]]
         cur.execute(
@@ -228,17 +229,18 @@ def insert_course_editions(cur, course_ids, professor_ids):
                 edition["mod_Esame"]
             )
         )
-        edition_ids[f"{edition['corso']}_{edition['aa']}"] = edition_id
+        edition_ids[f"{edition['corso']}_{edition['aa']}"] = (edition_id, edition["aa"])
         # Inserisci nella tabella di relazione
         for p in edition["piattaforme"]:
             cur.execute(
                 """
                 INSERT INTO EdizioneCorso_Piattaforme
-                (edizione_id, piattaforma_nome, codice)
-                VALUES (%s, %s, %s)
+                (edizione_id, edizione_data, piattaforma_nome, codice)
+                VALUES (%s, %s, %s, %s)
                 """,
-                (edition_id, p["nome"], p["codice"])
+                (edition_id, edition["aa"], p["nome"], p["codice"])
             )
+
     print(f"✅ Inserted {len(editions)} course editions and platforms")
     return edition_ids
 

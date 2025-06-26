@@ -81,28 +81,33 @@ CREATE TABLE Piattaforme (
 );
 
 CREATE TABLE EdizioneCorso (
-    id         UUID PRIMARY KEY REFERENCES Corso(id),
+    id         UUID NOT NULL REFERENCES Corso(id),
     insegnante UUID NOT NULL REFERENCES Insegnanti(id),
     data       semestre NOT NULL,
     orario     TEXT,
     esonero    BOOLEAN NOT NULL,
-    mod_Esame  TEXT NOT NULL
+    mod_Esame  TEXT NOT NULL,
+    PRIMARY KEY (id, data)
 );
 
 -- Collegamento tra EdizioneCorso e Piattaforme con il codice del corso su quella piattaforma
 CREATE TABLE EdizioneCorso_Piattaforme (
-    edizione_id UUID NOT NULL REFERENCES EdizioneCorso(id),
+    edizione_id UUID NOT NULL,
+    edizione_data semestre NOT NULL,
     piattaforma_nome TEXT NOT NULL REFERENCES Piattaforme(Nome),
     codice TEXT,
-    PRIMARY KEY (edizione_id, piattaforma_nome)
+    PRIMARY KEY (edizione_id, edizione_data, piattaforma_nome),
+    FOREIGN KEY (edizione_id, edizione_data) REFERENCES EdizioneCorso(id, data)
 );
 
 CREATE TABLE Corsi_seguiti (
     student_id UUID NOT NULL REFERENCES Studenti(id),
-    edition_id UUID NOT NULL REFERENCES EdizioneCorso(id),
+    edition_id UUID NOT NULL,
+    edition_data semestre NOT NULL,
     stato      attend_status NOT NULL,
     voto       INT CHECK (voto BETWEEN 18 AND 31),
-    PRIMARY KEY (student_id,edition_id)
+    PRIMARY KEY (student_id, edition_id, edition_data),
+    FOREIGN KEY (edition_id, edition_data) REFERENCES EdizioneCorso(id, data)
 );
 
 ------------------------------------------------
@@ -134,9 +139,11 @@ CREATE TABLE Valutazione (
 CREATE TABLE Review (
     id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     student_id UUID NOT NULL REFERENCES Studenti(id),
-    edition_id UUID NOT NULL REFERENCES EdizioneCorso(id),
+    edition_id UUID NOT NULL,
+    edition_data semestre NOT NULL,
     descrizione TEXT,
-    voto       INT NOT NULL CHECK (voto BETWEEN 1 AND 5)
+    voto       INT NOT NULL CHECK (voto BETWEEN 1 AND 5),
+    FOREIGN KEY (edition_id, edition_data) REFERENCES EdizioneCorso(id, data)
 );
 
 
@@ -150,3 +157,42 @@ CREATE TABLE Tesi (
 ------------------------------------------------
 -- Definizione Trigger
 ------------------------------------------------
+
+-- Aggiorna rating_medio e numero_voti dopo INSERT o UPDATE su Valutazione
+CREATE OR REPLACE FUNCTION aggiorna_rating_materiale()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE Materiale_Didattico
+    SET 
+        rating_medio = (
+            SELECT AVG(voto)::FLOAT FROM Valutazione WHERE id_materiale = NEW.id_materiale
+        ),
+        numero_voti = (
+            SELECT COUNT(*) FROM Valutazione WHERE id_materiale = NEW.id_materiale
+        )
+    WHERE id = NEW.id_materiale;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- Trigger per aggiornare lo stato del corso a completato se il voto è >= 18
+CREATE TRIGGER trigger_aggiorna_rating_materiale
+AFTER INSERT OR UPDATE OR DELETE ON Valutazione
+FOR EACH ROW
+EXECUTE FUNCTION aggiorna_rating_materiale();
+
+CREATE OR REPLACE FUNCTION aggiorna_stato_corso()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.voto IS NOT NULL AND NEW.voto >= 18 THEN
+        NEW.stato := 'completato';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_aggiorna_stato_corso
+BEFORE INSERT OR UPDATE ON Corsi_seguiti
+FOR EACH ROW
+EXECUTE FUNCTION aggiorna_stato_corso();
