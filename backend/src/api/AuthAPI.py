@@ -1,6 +1,6 @@
 from uuid import uuid4
 import bcrypt
-from src.utils.db_utils import get_db_connection
+from src.utils.db_utils import get_connection
 from src.utils.db_handler import DBHandler
 
 from src.auth.jwt_handler import create_access_token
@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException, status
 from src.api.BaseModel import LoginRequest, SignupRequest
 
 
-conn = get_db_connection()
+conn = get_connection(mode="neon")
 
 db_handler = DBHandler(conn)
 
