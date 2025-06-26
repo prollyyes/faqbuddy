@@ -6,14 +6,13 @@ frontend/node_modules
 backend/models
 
 # pytest
-**/.benchmark
+**/.benchmarks
 **/.pytest_cache
 **/__pycache__
 
 #Token && Credentials google
 backend/src/token.json
 backend/src/credentials.json
-
 
 # or any name that you used for your virtual environment
 venv/
@@ -22,8 +21,10 @@ venv/
 # environment
 .env
 
-# Robe di Luca strane
+# macOS
 **/.DS_Store
+
+# Robe di Luca strane
 ram_log.txt
 mistral_sql_lora_schema
 finetune_pesante.py
