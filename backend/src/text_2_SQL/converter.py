@@ -1,13 +1,12 @@
-from src.utils.local_llm import llm_mistral
+from src.utils.llm_mistral import llm_mistral
 from typing import Optional
-from src.text_2_SQL.test import extract_relevant_tables
+
 
 class TextToSQLConverter:
     def __init__(self):
         pass
 
     def create_prompt(self, question: str, schema: str) -> str:
-        resized_schema = extract_relevant_tables(schema, question)
         prompt = f"""
     Sei un assistente SQL esperto.
 
@@ -56,7 +55,7 @@ class TextToSQLConverter:
 
     def query_llm(self, prompt: str) -> str:
         # Mistral LLM
-        result = llm_mistral(prompt, max_tokens=150)
+        result = llm_mistral(prompt, max_tokens=150, temperature=0.01)
         # Compatibilità output (dict o string)
         if isinstance(result, dict):
             sql_response = result["choices"][0]["text"].strip()
@@ -104,26 +103,51 @@ class TextToSQLConverter:
     # da migliorare assolutamente, forse aggiungendo tanti pattern si riescono a coprire la maggior parte delle domande (?)
     def sql_results_to_text_pattern(self, question: str, results: list) -> Optional[str]:
         import re
-        # Pattern generale: esclude sempre "tutti i" dall'oggetto
-        match = re.search(r"(quali sono|dimmi|mostra|elenca)\s+(?:tutti i\s+)?([^\?]+)", question.lower())
-        if match and results and isinstance(results[0], dict):
+        if not results or not isinstance(results, list) or len(results) == 0:
+            return "Nessun risultato trovato per la tua richiesta. Prova a riformulare la domanda o a visitare la nostra sezione per la ricerca manuale di informazioni."
+    
+        match = re.search(
+            r"(quali sono|dimmi|mostra|elenca)\s+(?:tutti i\s+|tutte le\s+)?([^\?]+)",
+            question.lower()
+        )
+        if match and isinstance(results[0], dict):
             oggetto = match.group(2).strip()
-            # Rimuovi eventuale "tutti i" residuo all'inizio dell'oggetto (per sicurezza)
-            oggetto = re.sub(r"^tutti i\s+", "", oggetto, flags=re.IGNORECASE)
+            oggetto = re.sub(r"^(tutti i|tutte le)\s+", "", oggetto, flags=re.IGNORECASE)
+    
+            # Prendi la prima parola significativa (escludi articoli già presenti)
+            parole = oggetto.split()
+            prima = parole[0]
+            maschili = {"corso", "corsi", "professore", "professori", "studente", "studenti", "materiale", "esame", "esami", "dipartimento", "docente", "docenti"}
+            femminili = {"informazione", "informazioni", "tesi", "facolta", "piattaforma", "piattaforme", "edizione", "edizioni"}
+    
+            # Se l'oggetto inizia già con un articolo, non aggiungerlo
+            articoli = {"i", "il", "gli", "le", "la", "l'"}
+            if prima in articoli:
+                articolo = ""
+            elif prima in maschili:
+                articolo = "I " if prima.endswith("i") else "Il "
+            elif prima in femminili:
+                articolo = "Le " if prima.endswith("i") or prima.endswith("e") else "La "
+            else:
+                articolo = ""
+    
+            # Ricostruisci l'oggetto senza doppio articolo
+            oggetto_finale = oggetto if articolo == "" else articolo + oggetto
+    
             frasi = []
             for row in results:
-                parti = [f"{k}: {v}" for k, v in row.items() if v is not None]
+                parti = [f"{k}: {v}" for k, v in row.items() if v is not None and 'id' not in k.lower()]
                 frase = ", ".join(parti)
                 if frase:
                     frasi.append(frase)
             if frasi:
-                return f"I {oggetto} sono:\n- " + "\n- ".join(frasi)
+                return f"{oggetto_finale.capitalize()} sono:\n- " + "\n- ".join(frasi)
             else:
                 return f"Nessun risultato trovato per {oggetto}."
         return None
     
     def sql_results_to_text_llm(self, question: str, results: list) -> str:
-        from src.utils.local_llm import llm_gemma
+        from src.utils.llm_gemma import llm_gemma
         prompt = (
             "Rispondi in italiano in modo sintetico e diretto alla seguente domanda, "
             "usando SOLO i dati forniti qui sotto. Non aggiungere spiegazioni o ringraziamenti.\n\n"
@@ -131,6 +155,7 @@ class TextToSQLConverter:
             f"Dati:\n{results}\n\n"
             "Risposta breve:"
         )
+        print("Fallback LLM")
         output = llm_gemma(prompt, max_tokens=60, stop=["</s>"])
         return output["choices"][0]["text"].strip()
 
