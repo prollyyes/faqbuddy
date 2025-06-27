@@ -92,7 +92,7 @@ const PersonalInfo = () => {
 
   return (
     <motion.div
-      className="bg-white min-h-screen text-black p-6"
+      className="bg-white min-h-screen text-black p-6 pt-10 pb-24"
       initial={{ x: -50 }}
       animate={{ x: 0 }}
       transition={{ duration: 0 }}

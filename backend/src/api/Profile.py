@@ -1,8 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request
-from src.api.BaseModel import (
-    UserProfileResponse, UserProfileUpdate, 
-    CourseInfo, StatsResponse, ExamInsertRequest
-)
+from src.api.BaseModel import *
 from typing import List
 from src.utils.db_utils import get_connection, MODE
 from src.utils.db_handler import DBHandler
@@ -117,17 +114,268 @@ def delete_file(file_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# # --- Endpoint: Corsi frequentati ---
-# @router.get("/profile/courses/current", response_model=List[CourseInfo])
-# def get_current_courses(current_user=Depends(...)):
-#     # Da implementare: restituisci corsi attivi
-#     pass
 
-# # --- Endpoint: Corsi completati ---
-# @router.get("/profile/courses/completed", response_model=List[CourseInfo])
-# def get_completed_courses(current_user=Depends(...)):
-#     # Da implementare: restituisci corsi completati
-#     pass
+
+
+
+
+# --- Endpoint: Corsi Disponibili ---
+@router.get("/courses/available", response_model=List[CourseBase])
+def get_available_courses(current_user=Depends(get_current_user)):
+    user_id = current_user["user_id"]
+    # Recupera il corso di laurea dello studente
+    query_cdl = "SELECT corso_laurea_id FROM Studenti WHERE id = %s"
+    result = db_handler.run_query(query_cdl, params=(user_id,), fetch=True)
+    if not result:
+        raise HTTPException(status_code=404, detail="Studente non trovato")
+    corso_laurea_id = result[0][0]
+    # Filtra i corsi per corso di laurea
+    query = "SELECT id, nome, cfu FROM Corso WHERE id_corso = %s"
+    results = db_handler.run_query(query, params=(corso_laurea_id,), fetch=True)
+    return [CourseBase(id=row[0], nome=row[1], cfu=row[2]) for row in results]
+
+
+# --- Endpoint: EdizioneCorsi Disponibili ---
+@router.get("/courses/{corso_id}/editions", response_model=List[CourseEditionResponse])
+def get_editions_for_course(corso_id: uuid.UUID):
+    query = """
+        SELECT e.id, e.data, u.nome as docente
+        FROM EdizioneCorso e
+        JOIN Insegnanti i ON e.insegnante = i.id
+        JOIN Utente u ON i.id = u.id
+        WHERE e.id = %s
+    """
+    results = db_handler.run_query(query, params=(str(corso_id),), fetch=True)
+    return [
+        CourseEditionResponse(id=row[0], data=row[1], docente=row[2])
+        for row in results
+    ]
+
+
+# --- Endpoint: Corsi frequentati dallo studente che è loggato---
+@router.get("/profile/courses/current", response_model=list[CourseResponse])
+def get_current_courses(current_user=Depends(get_current_user)):
+    user_id = current_user["user_id"]
+    query = """
+        SELECT c.id, c.nome, c.cfu, u.nome as docente, e.id as edition_id, e.data as edition_data, cs.stato
+        FROM Corsi_seguiti cs
+        JOIN EdizioneCorso e ON cs.edition_id = e.id AND cs.edition_data = e.data
+        JOIN Corso c ON e.id = c.id
+        LEFT JOIN Insegnanti i ON e.insegnante = i.id
+        LEFT JOIN Utente u ON i.id = u.id
+        WHERE cs.student_id = %s
+    """
+    results = db_handler.run_query(query, params=(user_id,), fetch=True)
+    print("Current courses query results:", results)  # Debugging line
+    return [
+        CourseResponse(
+            id=row[0],
+            nome=row[1],
+            cfu=row[2],
+            docente=row[3],
+            edition_id=row[4],
+            edition_data=row[5],
+            stato=row[6],
+        )
+        for row in results
+    ]
+
+
+# --- Endpoint: Corsi completati dallo studente che è loggato---
+@router.get("/profile/courses/completed", response_model=list[CourseResponse])
+def get_completed_courses(current_user=Depends(get_current_user)):
+    user_id = current_user["user_id"]
+    query = """
+        SELECT c.id, c.nome, c.cfu, u.nome as docente, e.id as edition_id, e.data as edition_data, cs.stato, cs.voto
+        FROM Corsi_seguiti cs
+        JOIN EdizioneCorso e ON cs.edition_id = e.id AND cs.edition_data = e.data
+        JOIN Corso c ON e.id = c.id
+        LEFT JOIN Insegnanti i ON e.insegnante = i.id
+        LEFT JOIN Utente u ON i.id = u.id
+        WHERE cs.student_id = %s AND cs.stato = 'completato'
+    """
+    results = db_handler.run_query(query, params=(user_id,), fetch=True)
+    return [
+        CourseResponse(
+            id=row[0],
+            nome=row[1],
+            cfu=row[2],
+            docente=row[3],
+            edition_id=row[4],
+            edition_data=row[5],
+            stato=row[6],
+            voto=row[7]
+        )
+        for row in results
+    ]
+
+
+# --- Endpoint: per completare un corso ---
+@router.put("/profile/courses/{edition_id}/complete")
+def complete_course(
+    edition_id: str,
+    data: CompleteCourseRequest,
+    current_user=Depends(get_current_user)
+):
+    user_id = current_user["user_id"]
+    query = """
+        UPDATE Corsi_seguiti
+        SET stato = 'completato', voto = %s
+        WHERE student_id = %s AND edition_id = %s AND edition_data = %s
+    """
+    db_handler.run_query(query, params=(data.voto, user_id, edition_id, data.edition_data))
+    return {"detail": "Corso completato"}
+    
+    
+
+# --- Endpoint: per iscrivere uno studente ad una determinata EdizioneCorso ---
+@router.post("/courses/{corso_id}/editions/{edition_id}/enroll")
+def enroll_in_edition(
+    corso_id: str,
+    edition_id: str,
+    stato: str = "attivo",
+    current_user=Depends(get_current_user)
+):
+    user_id = current_user["user_id"]
+    # Recupera la data dell'edizione
+    data_query = "SELECT data FROM EdizioneCorso WHERE id = %s"
+    data_result = db_handler.run_query(data_query, params=(edition_id,), fetch=True)
+    if not data_result:
+        raise HTTPException(status_code=404, detail="Edizione non trovata")
+    edition_data = data_result[0][0]
+    # Iscrivi lo studente
+    query = """
+        INSERT INTO Corsi_seguiti (student_id, edition_id, edition_data, stato)
+        VALUES (%s, %s, %s, %s)
+    """
+    db_handler.run_query(query, params=(user_id, edition_id, edition_data, stato))
+    return {"detail": "Iscritto all'edizione"}
+
+
+
+# --- Endpoint: per trovare l'id Insegnanti a partire dal Nome e Cognome ---
+@router.get("/teachers/search")
+def search_teacher(nome: str, cognome: str):
+    query = """
+        SELECT i.id, u.nome, u.cognome
+        FROM Insegnanti i
+        JOIN Utente u ON i.id = u.id
+        WHERE LOWER(u.nome) = LOWER(%s) AND LOWER(u.cognome) = LOWER(%s)
+        LIMIT 1
+    """
+    result = db_handler.run_query(query, params=(nome, cognome), fetch=True)
+    if not result:
+        raise HTTPException(status_code=404, detail="Insegnante non trovato")
+    return {"id": result[0][0], "nome": result[0][1], "cognome": result[0][2]}
+
+
+
+
+# --- Endpoint: Aggiungi edizioneCorso e iscrivi studente a quell'EdizioneCorso ---
+@router.post("/courses/{corso_id}/editions/add")
+def add_edizione_and_enroll(
+    corso_id: str,
+    edizione: EdizioneCorsoCreate,
+    current_user=Depends(get_current_user)
+):
+    # 1. Crea la nuova EdizioneCorso
+    query = """
+        INSERT INTO EdizioneCorso (id, insegnante, data, orario, esonero, mod_Esame)
+        VALUES (%s, %s, %s, %s, %s, %s)
+    """
+    db_handler.run_query(query, params=(
+        corso_id,
+        edizione.insegnante,
+        edizione.data,
+        edizione.orario,
+        edizione.esonero,
+        edizione.mod_Esame
+    ))
+
+    # 2. Iscrivi lo studente a questa edizione con lo stato scelto
+    user_id = current_user["user_id"]
+    query2 = """
+        INSERT INTO Corsi_seguiti (student_id, edition_id, edition_data, stato)
+        VALUES (%s, %s, %s, %s)
+    """
+    db_handler.run_query(query2, params=(user_id, corso_id, edizione.data, edizione.stato))
+
+    return {"detail": "EdizioneCorso creata e studente iscritto"}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# --- Endpoint: Recensioni dello studente ---
+@router.get("/profile/reviews", response_model=list[ReviewResponse])
+def get_student_reviews(current_user=Depends(get_current_user)):
+    user_id = current_user["user_id"]
+    query = """
+        SELECT id, student_id, edition_id, edition_data, descrizione, voto
+        FROM Review
+        WHERE student_id = %s
+    """
+    results = db_handler.run_query(query, params=(user_id,), fetch=True)
+    return [
+        ReviewResponse(
+            id=row[0],
+            student_id=row[1],
+            edition_id=row[2],
+            edition_data=row[3],
+            descrizione=row[4],
+            voto=row[5]
+        )
+        for row in results
+    ]
+
+# --- Endpoint: Aggiungi recensione ---
+
+@router.post("/profile/reviews", response_model=ReviewResponse)
+def add_review(
+    data: ReviewCreate,
+    current_user=Depends(get_current_user)
+):
+    user_id = current_user["user_id"]
+    # Verifica se già esiste una recensione per questa edizione
+    query = """
+        SELECT id FROM Review
+        WHERE student_id = %s AND edition_id = %s AND edition_data = %s
+    """
+    exists = db_handler.run_query(query, params=(user_id, str(data.edition_id), data.edition_data), fetch=True)
+    if exists:
+        raise HTTPException(status_code=400, detail="Recensione già presente per questo corso")
+    # Inserisci la recensione
+    insert_query = """
+        INSERT INTO Review (student_id, edition_id, edition_data, descrizione, voto)
+        VALUES (%s, %s, %s, %s, %s)
+        RETURNING id
+    """
+    new_id = db_handler.run_query(
+        insert_query,
+        params=(user_id, str(data.edition_id), data.edition_data, data.descrizione, data.voto),
+        fetch=True
+    )[0][0]
+    return ReviewResponse(
+        id=new_id,
+        student_id=user_id,
+        edition_id=data.edition_id,
+        edition_data=data.edition_data,
+        descrizione=data.descrizione,
+        voto=data.voto
+    )
 
 # # --- Endpoint: Statistiche ---
 # @router.get("/profile/stats", response_model=StatsResponse)
