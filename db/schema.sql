@@ -22,12 +22,12 @@ CREATE TABLE Utente (
 -- è una tabella con record temporanei, appena un utente è registrato viene inserito un record in questa tabella
 -- e poi viene cancellato quando l'utente verifica la sua email
 CREATE TABLE EmailVerification (
-    user_id UUID REFERENCES Utente(id),
+    user_id UUID REFERENCES Utente(id) ON DELETE CASCADE,
     token TEXT PRIMARY KEY
 );
 
 CREATE TABLE Insegnanti (
-  id           UUID PRIMARY KEY REFERENCES Utente(id),
+  id           UUID PRIMARY KEY REFERENCES Utente(id) ON DELETE CASCADE,
   infoMail     TEXT,
   sitoWeb      TEXT,
   cv           TEXT,
@@ -69,7 +69,7 @@ CREATE TABLE Corso_di_Laurea (
 );
 
 CREATE TABLE Studenti (
-  id           UUID PRIMARY KEY REFERENCES Utente(id),
+  id           UUID PRIMARY KEY REFERENCES Utente(id) ON DELETE CASCADE,
   corso_laurea_id UUID NOT NULL REFERENCES Corso_di_Laurea(id),
   matricola    INT NOT NULL
 );
