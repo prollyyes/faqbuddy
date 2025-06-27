@@ -1,4 +1,4 @@
-import CorsiPage from "@/components/pages/Courses";
+import CorsiPage from "@/components/pages/courses/Courses";
 
 export default function Courses(){
   return (

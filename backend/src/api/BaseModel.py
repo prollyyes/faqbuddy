@@ -105,7 +105,8 @@ class CourseResponse(BaseModel):
     id: str
     nome: str
     cfu: int
-    docente: Optional[str]
+    docente_nome: Optional[str]
+    docente_cognome: Optional[str]
     edition_id: str
     edition_data: str
     stato: str

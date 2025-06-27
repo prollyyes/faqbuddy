@@ -119,7 +119,8 @@ def delete_file(file_id: str):
 
 
 
-# --- Endpoint: Corsi Disponibili ---
+
+# --- Endpoint: Corsi Disponibili per un determinato studente ---
 @router.get("/courses/available", response_model=List[CourseBase])
 def get_available_courses(current_user=Depends(get_current_user)):
     user_id = current_user["user_id"]
@@ -129,13 +130,24 @@ def get_available_courses(current_user=Depends(get_current_user)):
     if not result:
         raise HTTPException(status_code=404, detail="Studente non trovato")
     corso_laurea_id = result[0][0]
-    # Filtra i corsi per corso di laurea
-    query = "SELECT id, nome, cfu FROM Corso WHERE id_corso = %s"
-    results = db_handler.run_query(query, params=(corso_laurea_id,), fetch=True)
+    # Filtra i corsi per corso di laurea, escludendo quelli già seguiti o completati
+    query = """
+        SELECT id, nome, cfu
+        FROM Corso
+        WHERE id_corso = %s
+        AND id NOT IN (
+            SELECT c.id
+            FROM Corsi_seguiti cs
+            JOIN EdizioneCorso e ON cs.edition_id = e.id
+            JOIN Corso c ON e.id = c.id
+            WHERE cs.student_id = %s
+        )
+    """
+    results = db_handler.run_query(query, params=(corso_laurea_id, user_id), fetch=True)
     return [CourseBase(id=row[0], nome=row[1], cfu=row[2]) for row in results]
 
 
-# --- Endpoint: EdizioneCorsi Disponibili ---
+# --- Endpoint: EdizioneCorsi Disponibili per un determinato corso ---
 @router.get("/courses/{corso_id}/editions", response_model=List[CourseEditionResponse])
 def get_editions_for_course(corso_id: uuid.UUID):
     query = """
@@ -157,7 +169,7 @@ def get_editions_for_course(corso_id: uuid.UUID):
 def get_current_courses(current_user=Depends(get_current_user)):
     user_id = current_user["user_id"]
     query = """
-        SELECT c.id, c.nome, c.cfu, u.nome as docente, e.id as edition_id, e.data as edition_data, cs.stato
+        SELECT c.id, c.nome, c.cfu, u.nome as docente_nome, u.cognome as docente_cognome, e.id as edition_id, e.data as edition_data, cs.stato
         FROM Corsi_seguiti cs
         JOIN EdizioneCorso e ON cs.edition_id = e.id AND cs.edition_data = e.data
         JOIN Corso c ON e.id = c.id
@@ -166,27 +178,26 @@ def get_current_courses(current_user=Depends(get_current_user)):
         WHERE cs.student_id = %s
     """
     results = db_handler.run_query(query, params=(user_id,), fetch=True)
-    print("Current courses query results:", results)  # Debugging line
     return [
         CourseResponse(
             id=row[0],
             nome=row[1],
             cfu=row[2],
-            docente=row[3],
-            edition_id=row[4],
-            edition_data=row[5],
-            stato=row[6],
+            docente_nome=row[3],
+            docente_cognome=row[4],
+            edition_id=row[5],
+            edition_data=row[6],
+            stato=row[7],
         )
         for row in results
     ]
-
 
 # --- Endpoint: Corsi completati dallo studente che è loggato---
 @router.get("/profile/courses/completed", response_model=list[CourseResponse])
 def get_completed_courses(current_user=Depends(get_current_user)):
     user_id = current_user["user_id"]
     query = """
-        SELECT c.id, c.nome, c.cfu, u.nome as docente, e.id as edition_id, e.data as edition_data, cs.stato, cs.voto
+        SELECT c.id, c.nome, c.cfu, u.nome as docente_nome, u.cognome as docente_cognome, e.id as edition_id, e.data as edition_data, cs.stato, cs.voto
         FROM Corsi_seguiti cs
         JOIN EdizioneCorso e ON cs.edition_id = e.id AND cs.edition_data = e.data
         JOIN Corso c ON e.id = c.id
@@ -200,17 +211,17 @@ def get_completed_courses(current_user=Depends(get_current_user)):
             id=row[0],
             nome=row[1],
             cfu=row[2],
-            docente=row[3],
-            edition_id=row[4],
-            edition_data=row[5],
-            stato=row[6],
-            voto=row[7]
+            docente_nome=row[3],
+            docente_cognome=row[4],
+            edition_id=row[5],
+            edition_data=row[6],
+            stato=row[7],
+            voto=row[8]
         )
         for row in results
     ]
 
-
-# --- Endpoint: per completare un corso ---
+# --- Endpoint: per completare un edizione del corso allo studente che è loggato ---
 @router.put("/profile/courses/{edition_id}/complete")
 def complete_course(
     edition_id: str,
@@ -254,20 +265,32 @@ def enroll_in_edition(
 
 
 # --- Endpoint: per trovare l'id Insegnanti a partire dal Nome e Cognome ---
-@router.get("/teachers/search")
-def search_teacher(nome: str, cognome: str):
+# Non serve più, la lascio qui magari in futuro può servire
+# @router.get("/teachers/search")
+# def search_teacher(nome: str, cognome: str):
+#     query = """
+#         SELECT i.id, u.nome, u.cognome
+#         FROM Insegnanti i
+#         JOIN Utente u ON i.id = u.id
+#         WHERE LOWER(u.nome) = LOWER(%s) AND LOWER(u.cognome) = LOWER(%s)
+#         LIMIT 1
+#     """
+#     result = db_handler.run_query(query, params=(nome, cognome), fetch=True)
+#     if not result:
+#         raise HTTPException(status_code=404, detail="Insegnante non trovato")
+#     return {"id": result[0][0], "nome": result[0][1], "cognome": result[0][2]}
+
+
+# --- Endpoint: per ottenere tutti gli insegnanti ---
+@router.get("/teachers")
+def get_teachers():
     query = """
         SELECT i.id, u.nome, u.cognome
         FROM Insegnanti i
         JOIN Utente u ON i.id = u.id
-        WHERE LOWER(u.nome) = LOWER(%s) AND LOWER(u.cognome) = LOWER(%s)
-        LIMIT 1
     """
-    result = db_handler.run_query(query, params=(nome, cognome), fetch=True)
-    if not result:
-        raise HTTPException(status_code=404, detail="Insegnante non trovato")
-    return {"id": result[0][0], "nome": result[0][1], "cognome": result[0][2]}
-
+    results = db_handler.run_query(query, fetch=True)
+    return [{"id": row[0], "nome": row[1], "cognome": row[2]} for row in results]
 
 
 
@@ -311,14 +334,6 @@ def add_edizione_and_enroll(
 
 
 
-
-
-
-
-
-
-
-
 # --- Endpoint: Recensioni dello studente ---
 @router.get("/profile/reviews", response_model=list[ReviewResponse])
 def get_student_reviews(current_user=Depends(get_current_user)):
@@ -342,7 +357,6 @@ def get_student_reviews(current_user=Depends(get_current_user)):
     ]
 
 # --- Endpoint: Aggiungi recensione ---
-
 @router.post("/profile/reviews", response_model=ReviewResponse)
 def add_review(
     data: ReviewCreate,
