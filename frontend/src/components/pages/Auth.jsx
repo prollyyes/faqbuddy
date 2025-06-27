@@ -7,6 +7,24 @@ import Button from '@/components/utils/Button';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 
+
+async function uploadCV(cvFile, nome, cognome) {
+  const formData = new FormData();
+  formData.append("file", cvFile);
+  formData.append("parent_folder", "FAQBuddy");
+  formData.append("child_folder", "CV");
+  formData.append("nome", nome);
+  formData.append("cognome", cognome);
+
+  const response = await axios.post(
+    "http://localhost:8000/files/upload",
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return response.data;
+}
+
+
 export default function Auth() {
   const router = useRouter();
   const [mode, setMode] = useState('login');
@@ -17,9 +35,13 @@ export default function Auth() {
     cognome: '',
     sesso: '',
     eta: '',
-    corsoDiLaurea: '',
-    annoDiImmatricolazione: '',
+    corso_laurea_id: '',
     numeroDiMatricola: '',
+    infoMail: '',
+    sitoWeb: '',
+    cv: '',
+    ricevimento: '',
+    ruolo: 'studente',
     email: '',
     password: '',
     confermaPassword: '',
@@ -35,9 +57,13 @@ export default function Auth() {
       cognome: '',
       sesso: '',
       eta: '',
-      corsoDiLaurea: '',
-      annoDiImmatricolazione: '',
+      corso_laurea_id: '',
       numeroDiMatricola: '',
+      infoMail: '',
+      sitoWeb: '',
+      cv: '',
+      ricevimento: '',
+      ruolo: 'studente',
       email: '',
       password: '',
       confermaPassword: '',
@@ -62,16 +88,29 @@ export default function Auth() {
         return;
       }
       try {
+        // 1. Se insegnante, carica prima il CV
+        if (formData.ruolo === 'insegnante' && formData.cv) {
+          const uploadResult= await uploadCV(formData.cv, formData.nome, formData.cognome);
+          formData.cv = uploadResult.file_id;
+        }
+
+        // 2. Poi invia i dati di signup
         const signupData = {
           nome: formData.nome,
           cognome: formData.cognome,
-          sesso: formData.sesso,
-          eta: formData.eta,
-          corsoDiLaurea: formData.corsoDiLaurea,
-          annoDiImmatricolazione: formData.annoDiImmatricolazione,
-          numeroDiMatricola: formData.numeroDiMatricola,
+          ruolo: formData.ruolo,
           email: formData.email,
           password: formData.password,
+          ...(formData.ruolo === 'studente' && {
+            corsoDiLaurea: formData.corsoDiLaurea,
+            numeroDiMatricola: parseInt(formData.numeroDiMatricola, 10) || undefined,
+          }),
+          ...(formData.ruolo === 'insegnante' && {
+            infoMail: formData.infoMail,
+            sitoWeb: formData.sitoWeb,
+            ricevimento: formData.ricevimento,
+            cv: formData.cv,
+          }),
         };
         await axios.post('http://127.0.0.1:8000/signup', signupData);
         setSuccess('Registrazione avvenuta con successo! Effettua il login.');
@@ -85,6 +124,7 @@ export default function Auth() {
           corsoDiLaurea: '',
           annoDiImmatricolazione: '',
           numeroDiMatricola: '',
+          ruolo: 'studente',
           email: '',
           password: '',
           confermaPassword: '',
@@ -173,6 +213,26 @@ export default function Auth() {
                 )}
                 {mode === 'signup' && signupStep === 1 && (
                   <>
+                    <div className="flex items-center justify-center mb-4">
+                      <span className={`mr-2 font-semibold ${formData.ruolo !== 'insegnante' ? 'text-[#822433]' : 'text-gray-400'}`}>Studente</span>
+                      <button
+                        type="button"
+                        className={`w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out ${formData.ruolo === 'insegnante' ? 'bg-[#822433]' : 'bg-gray-300'}`}
+                        onClick={() =>
+                          setFormData(prev => ({
+                            ...prev,
+                            ruolo: prev.ruolo === 'insegnante' ? 'studente' : 'insegnante'
+                          }))
+                        }
+                      >
+                        <div
+                          className={`bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out ${formData.ruolo === 'insegnante' ? 'translate-x-7' : ''}`}
+                        />
+                      </button>
+                      <span className={`ml-2 font-semibold ${formData.ruolo === 'insegnante' ? 'text-[#822433]' : 'text-gray-400'}`}>Insegnante</span>
+                    </div>
+                
+                    {/* Campi comuni */}
                     <input
                       type="text"
                       name="nome"
@@ -191,46 +251,70 @@ export default function Auth() {
                       onChange={handleChange}
                       className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#822433]"
                     />
-                    <input
-                      type="text"
-                      name="sesso"
-                      placeholder="Sesso"
-                      value={formData.sesso}
-                      onChange={handleChange}
-                      className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#822433]"
-                    />
-                    <input
-                      type="number"
-                      name="eta"
-                      placeholder="Età"
-                      value={formData.eta}
-                      onChange={handleChange}
-                      className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#822433]"
-                    />
-                    <input
-                      type="text"
-                      name="corsoDiLaurea"
-                      placeholder="Corso di laurea"
-                      value={formData.corsoDiLaurea}
-                      onChange={handleChange}
-                      className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#822433]"
-                    />
-                    <input
-                      type="text"
-                      name="annoDiImmatricolazione"
-                      placeholder="Anno di immatricolazione"
-                      value={formData.annoDiImmatricolazione}
-                      onChange={handleChange}
-                      className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#822433]"
-                    />
-                    <input
-                      type="text"
-                      name="numeroDiMatricola"
-                      placeholder="Numero di matricola"
-                      value={formData.numeroDiMatricola}
-                      onChange={handleChange}
-                      className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#822433]"
-                    />
+                
+                    {/* Campi specifici Studente */}
+                    {formData.ruolo === 'studente' && (
+                      <>
+                        <input
+                          type="text"
+                          name="corsoDiLaurea"
+                          placeholder="Corso di Laurea"
+                          value={formData.corsoDiLaurea || ''}
+                          onChange={handleChange}
+                          className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#822433]"
+                        />
+                        <input
+                          type="text"
+                          name="numeroDiMatricola"
+                          placeholder="Numero di matricola"
+                          value={formData.numeroDiMatricola}
+                          onChange={handleChange}
+                          className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#822433]"
+                        />
+                      </>
+                    )}
+                
+                    {/* Campi specifici Insegnante */}
+                    {formData.ruolo === 'insegnante' && (
+                      <>
+                        <input
+                          type="text"
+                          name="infoMail"
+                          placeholder="infoMail"
+                          value={formData.infoMail || ''}
+                          onChange={handleChange}
+                          className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#822433]"
+                        />
+                        <input
+                          type="text"
+                          name="sitoWeb"
+                          placeholder="Sito Web"
+                          value={formData.sitoWeb}
+                          onChange={handleChange}
+                          className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#822433]"
+                        />
+                        {/* Upload file CV */}
+                        <input
+                          type="file"
+                          name="cv"
+                          accept=".pdf,.doc,.docx"
+                          onChange={e => setFormData(prev => ({
+                            ...prev,
+                            cv: e.target.files[0]
+                          }))}
+                          className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#822433]"
+                        />
+                        <input
+                          type="text"
+                          name="ricevimento"
+                          placeholder="Ricevimento"
+                          value={formData.ricevimento}
+                          onChange={handleChange}
+                          className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#822433]"
+                        />
+                      </>
+                    )}
+                
                     <Button type="button" onClick={() => setSignupStep(2)} className="w-full bg-[#822433] hover:bg-red-900 text-[#822433] rounded-xl py-3">Avanti</Button>
                   </>
                 )}
