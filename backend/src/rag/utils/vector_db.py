@@ -3,9 +3,11 @@ from src.rag.utils.embeddings import embed_texts
 from typing import List
 from dotenv import load_dotenv
 import os
+
 # Constants for Pinecone index
-INDEX_NAME = "exams-index"
-NAMESPACE = "v6"
+# Updated to use L12 index with 768 dimensions
+INDEX_NAME = "exams-index-mpnet"  # New index for all-MiniLM-L12-v2 embeddings
+NAMESPACE = "v7"
 
 load_dotenv()  # Load environment variables from .env file  
 
