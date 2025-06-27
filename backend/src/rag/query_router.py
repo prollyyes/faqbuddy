@@ -2,12 +2,12 @@ import os
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone
-from utils.pdf_chunker import chunk_pdf
-from hybrid_retrieval import (
+from src.rag.utils.pdf_chunker import chunk_pdf
+from src.rag.hybrid_retrieval import (
     load_all_chunks, bm25_search, pinecone_search, fuse_and_rerank, cross_encoder_rerank, ALPHA, TOP_K, EMBEDDING_MODEL, INDEX_NAME, DOCS_NAMESPACE, DB_NAMESPACE
 )
 # For structured queries, import your DB chunking logic
-from utils.generate_chunks import ChunkGenerator
+from src.rag.utils.generate_chunks import ChunkGenerator
 
 # Simple rule-based intent classifier
 def classify_intent(query):

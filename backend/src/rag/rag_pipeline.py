@@ -3,12 +3,12 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone
-from hybrid_retrieval import (
+from src.rag.hybrid_retrieval import (
     load_all_chunks, bm25_search, pinecone_search, fuse_and_rerank, cross_encoder_rerank, ALPHA, TOP_K, EMBEDDING_MODEL
 )
-from query_router import classify_intent, structured_retrieval, unstructured_retrieval, merge_results
-from build_prompt import build_prompt
-from local_llm import generate_answer
+from src.rag.query_router import classify_intent, structured_retrieval, unstructured_retrieval, merge_results
+from src.rag.build_prompt import build_prompt
+from src.local_llm import generate_answer
 from dotenv import load_dotenv
 
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data'))
