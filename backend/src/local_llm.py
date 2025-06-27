@@ -8,12 +8,14 @@ DetectorFactory.seed = 0
 
 mistral_model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'models', 'mistral-7b-instruct-v0.2.Q4_K_M.gguf'))
 gemma_model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'models', 'gemma-3-4b-it-Q4_1.gguf'))
+qwen_model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'models', 'Qwen2.5-7B-Instruct.Q4_K_M.gguf'))
 
 llm_mistral = Llama(
     model_path=mistral_model_path,
     n_ctx=2048,
     n_threads=6,
-    n_gpu_layers=-1,
+    n_gpu_layers=8,  # Use only 8 GPU layers to prevent kernel panic
+    n_batch=512,     # Reduce batch size to lower memory usage
     verbose=True
 )
 
@@ -21,10 +23,24 @@ llm_gemma = Llama(
     model_path=gemma_model_path,
     n_ctx=2048,
     n_threads=6,
-    n_gpu_layers=-1,
+    n_gpu_layers=8,  # Use only 8 GPU layers to prevent kernel panic
+    n_batch=512,     # Reduce batch size to lower memory usage
     verbose=True
 )
 
+'''
+llm_qwen = Llama(
+    model_path=qwen_model_path,
+    n_ctx=1024,
+    n_threads=6,
+    n_gpu_layers=-0,
+    verbose=True
+)
+'''
+
+# Set the model to use for answer generation (RAG and T2SQL)
+# Options: llm_mistral, llm_qwen
+llm_answer = llm_mistral  # <--- Now using Mistral for answer generation
 
 def classify_question(question: str) -> str:
     prompt = (
@@ -41,34 +57,36 @@ def classify_question(question: str) -> str:
 
 
 def get_language_instruction(question: str) -> str:
-    """Detects the language of the question and returns an instruction for the LLM."""
+    """Detects the language of the question and returns a strong instruction for the LLM."""
     try:
         lang = detect(question)
         if lang == 'it':
-            return "Answer in Italian."
-        # Add other languages as needed
-        # elif lang == 'es':
-        #     return "Answer in Spanish."
+            return "IMPORTANTE: Rispondi SEMPRE in italiano. Non usare mai l'inglese. Mantieni la conversazione in italiano."
+        elif lang == 'en':
+            return "IMPORTANT: Always answer in English. Never use Italian. Keep the conversation in English."
         else:
-            return "Answer in English."
+            # Default to Italian for FAQBuddy since it's an Italian university system
+            return "IMPORTANTE: Rispondi SEMPRE in italiano. Non usare mai l'inglese. Mantieni la conversazione in italiano."
     except LangDetectException:
-        # Default to English if detection fails
-        return "Answer in English."
+        # Default to Italian for FAQBuddy
+        return "IMPORTANTE: Rispondi SEMPRE in italiano. Non usare mai l'inglese. Mantieni la conversazione in italiano."
 
 
 def generate_answer(context: str, question: str) -> str:
     language_instruction = get_language_instruction(question)
-    prompt = f"[INST] You are FAQBuddy, a helpful assistant for a university portal that answers questions about the university, their courses, professors, materials and any problem a student can have. Teachers are also using the platform, so keep a professional but friendly tone. Refrain from answering general questions. {language_instruction} Context:\n{context}\n\nQuestion:\n{question} [/INST]"
-    output = llm_mistral(prompt, max_tokens=512, stop=["</s>"])
+    prompt = (
+        f"[INST] Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. Anche i professori usano la piattaforma, quindi mantieni un tono professionale ma amichevole. Non rispondere a domande generali non legate all'università. {language_instruction} Contesto:\n{context}\n\nDomanda:\n{question} [/INST]"
+    )
+    output = llm_answer(prompt, max_tokens=512, stop=["</s>"])
     return output["choices"][0]["text"].strip()
 
 def generate_answer_streaming(context: str, question: str) -> list:
     """Generate an answer token by token."""
     language_instruction = get_language_instruction(question)
-    prompt = f"[INST] You are FAQBuddy, a helpful assistant for a university portal that answers questions about the university, their courses, professors, materials and any problem a student can have. Teachers are also using the platform, so keep a professional but friendly tone. Refrain from answering general questions. {language_instruction} Context:\n{context}\n\nQuestion:\n{question} [/INST]"
+    prompt = f"[INST] Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. Anche i professori usano la piattaforma, quindi mantieni un tono professionale ma amichevole. Non rispondere a domande generali non legate all'università. {language_instruction} Contesto:\n{context}\n\nDomanda:\n{question} [/INST]"
     
     # Use the streaming API
-    stream = llm_mistral(prompt, max_tokens=512, stop=["</s>"], stream=True)
+    stream = llm_answer(prompt, max_tokens=512, stop=["</s>"], stream=True)
     
     tokens = []
     for chunk in stream:

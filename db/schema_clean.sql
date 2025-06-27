@@ -1,4 +1,29 @@
 ------------------------------------------------
+-- CLEAN SCHEMA WITH DROP STATEMENTS
+------------------------------------------------
+
+-- Drop tables in reverse dependency order
+DROP TABLE IF EXISTS Tesi CASCADE;
+DROP TABLE IF EXISTS Review CASCADE;
+DROP TABLE IF EXISTS Valutazione CASCADE;
+DROP TABLE IF EXISTS Materiale_Didattico CASCADE;
+DROP TABLE IF EXISTS Corsi_seguiti CASCADE;
+DROP TABLE IF EXISTS EdizioneCorso CASCADE;
+DROP TABLE IF EXISTS Piattaforme CASCADE;
+DROP TABLE IF EXISTS Corso CASCADE;
+DROP TABLE IF EXISTS Studenti CASCADE;
+DROP TABLE IF EXISTS Corso_di_Laurea CASCADE;
+DROP TABLE IF EXISTS Facolta CASCADE;
+DROP TABLE IF EXISTS Dipartimento CASCADE;
+DROP TABLE IF EXISTS Insegnanti CASCADE;
+DROP TABLE IF EXISTS Utente CASCADE;
+
+-- Drop types and domains
+DROP TYPE IF EXISTS attend_status CASCADE;
+DROP TYPE IF EXISTS tipoCorso CASCADE;
+DROP DOMAIN IF EXISTS semestre CASCADE;
+
+------------------------------------------------
 -- CREAZIONE TIPI
 ------------------------------------------------
 
@@ -138,4 +163,4 @@ CREATE TABLE Tesi (
     corso_laurea_id UUID NOT NULL REFERENCES Corso_di_Laurea(id),
     titolo     TEXT NOT NULL,
     file       TEXT NOT NULL
-);
+); 

@@ -1,0 +1,63 @@
+
+{"timestamp": "2025-06-27T18:41:31.219862", "step": "main", "message": "Starting Pinecone Database Update"}
+{"timestamp": "2025-06-27T18:41:31.220543", "step": "check_environment", "message": "Checking environment variables..."}
+{"timestamp": "2025-06-27T18:41:31.220608", "step": "check_environment", "message": "Environment variables loaded successfully."}
+{"timestamp": "2025-06-27T18:41:31.220651", "step": "main", "message": "Environment checked."}
+{"timestamp": "2025-06-27T18:41:31.220696", "step": "initialize_pinecone", "message": "Initializing Pinecone..."}
+{"timestamp": "2025-06-27T18:41:31.221030", "step": "initialize_pinecone", "message": "Pinecone client created."}
+{"timestamp": "2025-06-27T18:41:31.550782", "step": "initialize_pinecone", "message": "Index exams-index-enhanced already exists."}
+{"timestamp": "2025-06-27T18:41:31.551390", "step": "initialize_pinecone", "message": "Returning Pinecone index object."}
+{"timestamp": "2025-06-27T18:41:31.943759", "step": "main", "message": "Pinecone initialized."}
+{"timestamp": "2025-06-27T18:41:31.944439", "step": "clear_db_namespace", "message": "Clearing namespace 'db'..."}
+{"timestamp": "2025-06-27T18:41:32.470918", "step": "clear_db_namespace", "message": "Could not clear namespace: (404)\nReason: Not Found\nHTTP response headers: HTTPHeaderDict({'Date': 'Fri, 27 Jun 2025 16:41:32 GMT', 'Content-Type': 'application/json', 'Content-Length': '55', 'Connection': 'keep-alive', 'x-pinecone-request-latency-ms': '20', 'x-pinecone-request-id': '4817193381086383743', 'x-envoy-upstream-service-time': '20', 'server': 'envoy'})\nHTTP response body: {\"code\":5,\"message\":\"Namespace not found\",\"details\":[]}\n"}
+{"timestamp": "2025-06-27T18:41:32.471538", "step": "main", "message": "Namespace cleared."}
+{"timestamp": "2025-06-27T18:41:32.471710", "step": "generate_db_chunks", "message": "Generating database chunks..."}
+{"timestamp": "2025-06-27T18:41:32.507142", "step": "generate_db_chunks", "message": "ChunkGenerator instantiated."}
+{"timestamp": "2025-06-27T18:41:32.522660", "step": "generate_db_chunks", "message": "Generated 28 database chunks.", "data": {"num_chunks": 28}}
+{"timestamp": "2025-06-27T18:41:32.522817", "step": "main", "message": "Generated 28 chunks."}
+{"timestamp": "2025-06-27T18:41:32.522871", "step": "main", "message": "Loading embedding model: all-mpnet-base-v2"}
+{"timestamp": "2025-06-27T18:41:35.759815", "step": "main", "message": "Embedding model loaded."}
+{"timestamp": "2025-06-27T18:41:35.760302", "step": "create_embeddings", "message": "Creating embeddings for 28 chunks..."}
+{"timestamp": "2025-06-27T18:41:35.760486", "step": "create_embeddings", "message": "Encoding texts with model."}
+{"timestamp": "2025-06-27T18:41:37.082234", "step": "create_embeddings", "message": "Embeddings created."}
+{"timestamp": "2025-06-27T18:41:37.083106", "step": "create_embeddings", "message": "Prepared 28 vectors for Pinecone upload."}
+{"timestamp": "2025-06-27T18:41:37.083199", "step": "main", "message": "Created 28 vectors."}
+{"timestamp": "2025-06-27T18:41:37.083248", "step": "upload_to_pinecone", "message": "Uploading 28 vectors to namespace 'db'..."}
+{"timestamp": "2025-06-27T18:41:37.083295", "step": "upload_to_pinecone", "message": "Uploading batch 1/1 (28 vectors)..."}
+{"timestamp": "2025-06-27T18:41:37.763357", "step": "upload_to_pinecone", "message": "Error uploading batch 1: (400)\nReason: Bad Request\nHTTP response headers: HTTPHeaderDict({'Date': 'Fri, 27 Jun 2025 16:41:37 GMT', 'Content-Type': 'application/json', 'Content-Length': '102', 'Connection': 'keep-alive', 'x-pinecone-request-latency-ms': '543', 'x-pinecone-request-id': '930012891580924254', 'x-envoy-upstream-service-time': '11', 'server': 'envoy'})\nHTTP response body: {\"code\":3,\"message\":\"Vector dimension 768 does not match the dimension of the index 384\",\"details\":[]}\n"}
+{"timestamp": "2025-06-27T18:43:38.868839", "step": "main", "message": "Starting Pinecone Database Update"}
+{"timestamp": "2025-06-27T18:43:38.869239", "step": "check_environment", "message": "Checking environment variables..."}
+{"timestamp": "2025-06-27T18:43:38.869332", "step": "check_environment", "message": "Environment variables loaded successfully."}
+{"timestamp": "2025-06-27T18:43:38.869387", "step": "main", "message": "Environment checked."}
+{"timestamp": "2025-06-27T18:43:38.869434", "step": "initialize_pinecone", "message": "Initializing Pinecone..."}
+{"timestamp": "2025-06-27T18:43:38.870107", "step": "initialize_pinecone", "message": "Pinecone client created."}
+{"timestamp": "2025-06-27T18:43:39.250209", "step": "initialize_pinecone", "message": "Index exams-index-enhanced already exists."}
+{"timestamp": "2025-06-27T18:43:40.215879", "step": "initialize_pinecone", "message": "Existing index dimension: 384"}
+{"timestamp": "2025-06-27T18:43:40.217073", "step": "initialize_pinecone", "message": "Dimension mismatch: index has 384, need 768. Deleting and recreating index."}
+{"timestamp": "2025-06-27T18:43:57.715871", "step": "initialize_pinecone", "message": "New index created with correct dimension."}
+{"timestamp": "2025-06-27T18:44:07.722379", "step": "initialize_pinecone", "message": "Returning Pinecone index object."}
+{"timestamp": "2025-06-27T18:44:07.729535", "step": "main", "message": "Pinecone initialized."}
+{"timestamp": "2025-06-27T18:44:07.729915", "step": "clear_db_namespace", "message": "Clearing namespace 'db'..."}
+{"timestamp": "2025-06-27T18:44:08.227748", "step": "clear_db_namespace", "message": "Could not clear namespace: (404)\nReason: Not Found\nHTTP response headers: HTTPHeaderDict({'Date': 'Fri, 27 Jun 2025 16:44:08 GMT', 'Content-Type': 'application/json', 'Content-Length': '55', 'Connection': 'keep-alive', 'x-pinecone-request-latency-ms': '29', 'x-pinecone-request-id': '5140091443361712337', 'x-envoy-upstream-service-time': '29', 'server': 'envoy'})\nHTTP response body: {\"code\":5,\"message\":\"Namespace not found\",\"details\":[]}\n"}
+{"timestamp": "2025-06-27T18:44:08.228718", "step": "main", "message": "Namespace cleared."}
+{"timestamp": "2025-06-27T18:44:08.229077", "step": "generate_db_chunks", "message": "Generating database chunks..."}
+{"timestamp": "2025-06-27T18:44:08.280068", "step": "generate_db_chunks", "message": "ChunkGenerator instantiated."}
+{"timestamp": "2025-06-27T18:44:08.299468", "step": "generate_db_chunks", "message": "Generated 28 database chunks.", "data": {"num_chunks": 28}}
+{"timestamp": "2025-06-27T18:44:08.299606", "step": "main", "message": "Generated 28 chunks."}
+{"timestamp": "2025-06-27T18:44:08.299676", "step": "main", "message": "Loading embedding model: all-mpnet-base-v2"}
+{"timestamp": "2025-06-27T18:44:10.943764", "step": "main", "message": "Embedding model loaded."}
+{"timestamp": "2025-06-27T18:44:10.944446", "step": "create_embeddings", "message": "Creating embeddings for 28 chunks..."}
+{"timestamp": "2025-06-27T18:44:10.944639", "step": "create_embeddings", "message": "Encoding texts with model."}
+{"timestamp": "2025-06-27T18:44:12.300181", "step": "create_embeddings", "message": "Embeddings created."}
+{"timestamp": "2025-06-27T18:44:12.300701", "step": "create_embeddings", "message": "Prepared 28 vectors for Pinecone upload."}
+{"timestamp": "2025-06-27T18:44:12.300783", "step": "main", "message": "Created 28 vectors."}
+{"timestamp": "2025-06-27T18:44:12.300829", "step": "upload_to_pinecone", "message": "Uploading 28 vectors to namespace 'db'..."}
+{"timestamp": "2025-06-27T18:44:12.300874", "step": "upload_to_pinecone", "message": "Uploading batch 1/1 (28 vectors)..."}
+{"timestamp": "2025-06-27T18:44:13.332577", "step": "upload_to_pinecone", "message": "Batch 1 uploaded successfully."}
+{"timestamp": "2025-06-27T18:44:13.333951", "step": "upload_to_pinecone", "message": "Successfully uploaded 28 vectors to namespace 'db'"}
+{"timestamp": "2025-06-27T18:44:13.334346", "step": "main", "message": "Vectors uploaded to Pinecone."}
+{"timestamp": "2025-06-27T18:44:13.334614", "step": "verify_upload", "message": "Verifying upload..."}
+{"timestamp": "2025-06-27T18:44:13.495930", "step": "verify_upload", "message": "Index stats: {'dimension': 768,\n 'index_fullness': 0.0,\n 'metric': 'cosine',\n 'namespaces': {},\n 'total_vector_count': 0,\n 'vector_type': 'dense'}"}
+{"timestamp": "2025-06-27T18:44:13.497187", "step": "verify_upload", "message": "Namespace 'db' not found in index stats."}
+{"timestamp": "2025-06-27T18:44:13.497616", "step": "main", "message": "Upload verified."}
+{"timestamp": "2025-06-27T18:44:13.497817", "step": "main", "message": "Pinecone database update completed successfully!"}
