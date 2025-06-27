@@ -1,6 +1,6 @@
 ## Setup rapido
-*Nota*: per un setup veloce, `./setup.sh` contiene tutti i passi necessari preparare l'avvio dell'applicazione.
-Se ci sono problemi di permessi, basta garantire permessi di esecuzione al file: `chmod +x setup.sh`.
+~*Nota*: per un setup veloce, `./setup.sh` contiene tutti i passi necessari preparare l'avvio dell'applicazione.
+Se ci sono problemi di permessi, basta garantire permessi di esecuzione al file: `chmod +x setup.sh`.~
 
 
 ### 1. Crea e attiva l’ambiente virtuale
