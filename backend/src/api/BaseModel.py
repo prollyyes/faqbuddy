@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional
+import uuid
 
 class LoginRequest(BaseModel):
     email: EmailStr
@@ -72,3 +73,63 @@ class ExamInsertRequest(BaseModel):
     corso: str
     voto: int
     data: Optional[str]
+
+# --- Recensioni Corso ---
+class ReviewBase(BaseModel):
+    student_id: Optional[uuid.UUID]
+    edition_id: uuid.UUID
+    edition_data: str
+    descrizione: Optional[str]
+    voto: int
+
+class ReviewCreate(BaseModel):
+    edition_id: uuid.UUID
+    edition_data: str
+    descrizione: Optional[str]
+    voto: int
+
+class ReviewResponse(ReviewBase):
+    id: uuid.UUID
+    class Config:
+        orm_mode = True
+
+class CourseBase(BaseModel):
+    id: uuid.UUID
+    nome: str
+    cfu: int
+    docente: Optional[str] = None
+    edition_id: Optional[uuid.UUID] = None
+    edition_data: Optional[str] = None
+
+class CourseResponse(BaseModel):
+    id: str
+    nome: str
+    cfu: int
+    docente: Optional[str]
+    edition_id: str
+    edition_data: str
+    stato: str
+    voto: Optional[int] = None
+
+# --- Edizione Corso (per visualizzare le edizioni disponibili di un corso) ---
+class CourseEditionResponse(BaseModel):
+    id: uuid.UUID
+    data: str
+    docente: Optional[str]
+
+# --- Richiesta per aggiungere un corso/edizione ai corsi seguiti ---
+class AddCourseRequest(BaseModel):
+    edition_id: uuid.UUID
+    edition_data: str
+
+class EdizioneCorsoCreate(BaseModel):
+    insegnante: str  # UUID
+    data: str        # semestre, es: 'S1/2024'
+    orario: Optional[str] = None
+    esonero: bool
+    mod_Esame: str
+    stato: str = 'Attivo' # "attivo" o "completato"
+    
+class CompleteCourseRequest(BaseModel):
+    edition_data: str
+    voto: int
