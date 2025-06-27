@@ -29,6 +29,7 @@ ram_log.txt
 mistral_sql_lora_schema
 finetune_pesante.py
 finetune.py
+finetunelollo.py
 ram_usage.py
 sql_dataset_dedup.jsonl
 sql_dataset_with_schema.jsonl
