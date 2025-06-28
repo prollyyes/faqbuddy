@@ -143,7 +143,8 @@ CREATE TABLE Review (
     edition_id UUID NOT NULL,
     edition_data semestre NOT NULL,
     descrizione TEXT,
-    voto       INT NOT NULL CHECK (voto BETWEEN 1 AND 5)
+    voto       INT NOT NULL CHECK (voto BETWEEN 1 AND 5),
+    FOREIGN KEY (edition_id, edition_data) REFERENCES EdizioneCorso(id, data)
 );
 
 

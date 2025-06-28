@@ -1,9 +1,10 @@
 from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from src.text_2_SQL.converter import TextToSQLConverter
 from src.switcher.MLmodel import MLModel
-from src.utils.db_utils import get_connection.
+from src.utils.db_utils import get_connection
 from src.utils.db_handler import DBHandler
 from src.rag.rag_adapter import RAGSystem
 import os
@@ -45,6 +46,7 @@ def t2sql_endpoint(req: T2SQLRequest):
     threshold = 0.7
     fallback = False
     if proba < threshold:
+        final_pred = "complex"
         final_pred = "complex"
         fallback = True
     

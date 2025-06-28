@@ -5,6 +5,8 @@ Se ci sono problemi di permessi, basta garantire permessi di esecuzione al file:
 
 **Per un setup piu' rapido possibile, esegui ./setup.sh dalla root**
 
+**Per un setup piu' rapido possibile, esegui ./setup.sh dalla root**
+
 ### 1. Crea e attiva l’ambiente virtuale
 
 ```sh

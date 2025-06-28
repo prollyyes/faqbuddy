@@ -4,6 +4,7 @@ from typing import List
 from dotenv import load_dotenv
 import os
 
+
 # Constants for Pinecone index
 # Updated to use L12 index with 768 dimensions
 INDEX_NAME = "exams-index-mpnet"  # New index for all-MiniLM-L12-v2 embeddings
