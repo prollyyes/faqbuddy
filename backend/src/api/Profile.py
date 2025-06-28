@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Body
 from src.api.BaseModel import *
 from typing import List
 from src.utils.db_utils import get_connection, MODE
@@ -324,6 +324,71 @@ def add_edizione_and_enroll(
     db_handler.run_query(query2, params=(user_id, corso_id, edizione.data, edizione.stato))
 
     return {"detail": "EdizioneCorso creata e studente iscritto"}
+
+
+# --- Endpoint: Corsi e tutte le edizionoi di quel corso dell'insegnante che è loggato ---
+@router.get("/teacher/courses/full")
+def get_teacher_courses_full(current_user=Depends(get_current_user)):
+    user_id = current_user["user_id"]
+    query = """
+        SELECT c.id, c.nome, c.cfu, 
+               e.id as edition_id, e.data as edition_data, e.mod_Esame, e.orario, e.esonero, e.stato
+        FROM EdizioneCorso e
+        JOIN Corso c ON e.id = c.id
+        WHERE e.insegnante = %s
+        ORDER BY c.nome, e.data DESC
+    """
+    results = db_handler.run_query(query, params=(user_id,), fetch=True, rollback=True)
+    corsi = {}
+    for row in results:
+        corso_id = row[0]
+        if corso_id not in corsi:
+            corsi[corso_id] = {
+                "id": row[0],
+                "nome": row[1],
+                "cfu": row[2],
+                "edizioni": []
+            }
+        corsi[corso_id]["edizioni"].append({
+            "edition_id": row[3],
+            "edition_data": row[4],
+            "mod_esame": row[5],
+            "orario": row[6],
+            "esonero": row[7],
+            "stato": row[8]
+        })
+    return list(corsi.values())
+
+
+# --- Endpoint: per aggiornare lo stato di un'edizione del corso dell'insegnante che è loggato ---
+@router.patch("/teacher/editions/{edition_id}")
+def update_edition(
+    edition_id: str,
+    payload: dict = Body(...),
+    current_user=Depends(get_current_user)
+):
+    user_id = current_user["user_id"]
+    query_check = "SELECT data FROM EdizioneCorso WHERE id = %s AND insegnante = %s"
+    old_data_result = db_handler.run_query(query_check, params=(edition_id, user_id), fetch=True, rollback=True)
+    if not old_data_result:
+        raise HTTPException(status_code=403, detail="Non autorizzato")
+    old_data = old_data_result[0][0]
+
+    allowed_fields = ["data", "mod_Esame", "orario", "esonero", "stato"]
+    set_clauses = []
+    values = []
+    for field in allowed_fields:
+        if field in payload:
+            set_clauses.append(f"{field} = %s")
+            values.append(payload[field])
+    if not set_clauses:
+        raise HTTPException(status_code=400, detail="Nessun campo da aggiornare")
+
+    # Aggiorna direttamente EdizioneCorso, il CASCADE aggiorna Corsi_seguiti
+    query = f"UPDATE EdizioneCorso SET {', '.join(set_clauses)} WHERE id = %s AND data = %s"
+    values.extend([edition_id, old_data])
+    db_handler.run_query(query, params=tuple(values), rollback=True)
+    return {"detail": "Edizione aggiornata"}
 
 
 # --- Endpoint: Statistiche dello studente, voti conseguiti, media, cose del genere ---

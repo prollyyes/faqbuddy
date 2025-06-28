@@ -118,7 +118,7 @@ CREATE TABLE Corsi_seguiti (
     stato      attend_status NOT NULL,
     voto       INT CHECK (voto BETWEEN 18 AND 31),
     PRIMARY KEY (student_id, edition_id, edition_data),
-    FOREIGN KEY (edition_id, edition_data) REFERENCES EdizioneCorso(id, data)
+    FOREIGN KEY (edition_id, edition_data) REFERENCES EdizioneCorso(id, data) ON UPDATE CASCADE
 );
 
 ------------------------------------------------
@@ -128,7 +128,7 @@ CREATE TABLE Corsi_seguiti (
 CREATE TABLE Materiale_Didattico (
     id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     Utente_id    UUID NOT NULL REFERENCES Utente(id),
-    course_id  UUID NOT NULL REFERENCES Corso(id),    
+    course_id  UUID NOT NULL REFERENCES Corso(id), -- cambia in edizione_corso(id, data), quindi aggingi data nel Materiale_Didattico
     path_file  TEXT NOT NULL,
     tipo       TEXT,
     verificato BOOLEAN NOT NULL DEFAULT false,
