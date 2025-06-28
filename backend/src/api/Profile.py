@@ -451,9 +451,9 @@ def update_edition(
 @router.get("/profile/stats", response_model=StatsResponse)
 def get_stats(current_user=Depends(get_current_user)):
     user_id = current_user["user_id"]
-    # Prendi tutti i corsi completati
+    # Prendi tutti i corsi completati, aggiungi c.id
     query = """
-        SELECT c.nome, cs.voto, c.cfu
+        SELECT c.nome, cs.voto, c.cfu, c.id
         FROM Corsi_seguiti cs
         JOIN EdizioneCorso e ON cs.edition_id = e.id AND cs.edition_data = e.data
         JOIN Corso c ON e.id = c.id
@@ -463,6 +463,7 @@ def get_stats(current_user=Depends(get_current_user)):
     esami = [row[0] for row in results]
     voti = [row[1] for row in results]
     cfu = [row[2] for row in results]
+    esami_id = [row[3] for row in results]  # <--- aggiungi questa riga
     
     # Prendi i CFU totali del corso di laurea dello studente
     query_cfu_totali = """
@@ -480,13 +481,13 @@ def get_stats(current_user=Depends(get_current_user)):
     return StatsResponse(
         esami=esami,
         voti=voti,
+        cfu=cfu,
+        esami_id=esami_id,  # <--- aggiungi questo campo
         media_aritmetica=media_aritmetica,
         media_ponderata=media_ponderata,
         cfu_totali=cfu_totali,
         cfu_completati=cfu_completati
     )
-
-
 
 
 

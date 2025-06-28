@@ -63,6 +63,8 @@ class CourseInfo(BaseModel):
 class StatsResponse(BaseModel):
     esami: List[str]
     voti: List[int]
+    cfu: List[int]
+    esami_id: List[uuid.UUID]
     media_aritmetica: float
     media_ponderata: float
     cfu_totali: int
