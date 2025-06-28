@@ -88,22 +88,21 @@ class ChunkGenerator:
     def get_course_edition_chunks(self) -> List[Dict[str, Any]]:
         query = """
             SELECT ec.id, ec.data, ec.mod_esame, c.nome as course_name, 
-                   u.nome as prof_nome, u.cognome as prof_cognome, p.nome as piattaforma
+                   u.nome as prof_nome, u.cognome as prof_cognome
             FROM edizionecorso ec
             JOIN corso c ON ec.id = c.id
             JOIN insegnanti i ON ec.insegnante = i.id
             JOIN utente u ON i.id = u.id
-            JOIN piattaforme p ON p.nome = ec.piattaforma
         """
         rows = self._execute_query(query)
         return [
             {
                 "id": f"edizione_corso_{id}",
                 "text": f"Edizione del corso di {course_name} per il periodo '{data}'. "
-                        f"Docente: {prof_nome} {prof_cognome}. Modalità d'esame: {mod_esame}. Piattaforma: {piattaforma}.",
+                        f"Docente: {prof_nome} {prof_cognome}. Modalità d'esame: {mod_esame}.",
                 "metadata": {"table_name": "edizionecorso", "primary_key": id}
             }
-            for id, data, mod_esame, course_name, prof_nome, prof_cognome, piattaforma in rows
+            for id, data, mod_esame, course_name, prof_nome, prof_cognome in rows
         ]
 
     def get_material_chunks(self) -> List[Dict[str, Any]]:
@@ -129,7 +128,7 @@ class ChunkGenerator:
         query = """
             SELECT r.id, r.descrizione, r.voto, c.nome as course_name
             FROM review r
-            JOIN edizionecorso ec ON r.edition_id = ec.id
+            JOIN edizionecorso ec ON r.edition_id = ec.id AND r.edition_data = ec.data
             JOIN corso c ON ec.id = c.id
         """
         rows = self._execute_query(query)
@@ -165,15 +164,16 @@ class ChunkGenerator:
         ]
     def get_piattaforma_chunks(self) -> List[Dict[str, Any]]:
         query = """
-            SELECT p.nome, p.codice, ec.id as edizione_id
-            FROM piattaforme p JOIN edizionecorso ec ON p.nome = ec.piattaforma
+            SELECT p.nome, ecp.codice, ecp.edizione_id
+            FROM piattaforme p 
+            LEFT JOIN edizionecorso_piattaforme ecp ON p.nome = ecp.piattaforma_nome
         """
         rows = self._execute_query(query)
         return [
             {
                 "id": f"piattaforma_{nome}",
                 "text": f"Piattaforma: {nome}, con codice: {codice or 'Nessun codice disponibile'}. "
-                        f"Edizione: {edizione_id}.",
+                        f"Edizione: {edizione_id or 'Non associata'}.",
                 "metadata": {"table_name": "piattaforme", "primary_key": nome}
             }
             for nome, codice, edizione_id in rows
@@ -197,18 +197,18 @@ class ChunkGenerator:
     
     def get_thesis_chunks(self) -> List[Dict[str, Any]]:
         query = """
-            SELECT t.id, t.titolo, cdl.nome as corso_laurea_nome, s.matricola as studente_matricola, t.file
+            SELECT t.id, cdl.nome as corso_laurea_nome, s.matricola as studente_matricola, t.file
             FROM tesi t JOIN corso_di_laurea cdl ON t.corso_laurea_id = cdl.id JOIN studenti s ON t.student_id = s.id
         """
         rows = self._execute_query(query)
         return [
             {
                 "id": f"tesi_{id}",
-                "text": f"Tesi: {titolo}, dello studente {studente_matricola} del corso di laurea {corso_laurea_nome}."
+                "text": f"Tesi, dello studente {studente_matricola} del corso di laurea {corso_laurea_nome}."
                         f"Il file si trova in {file}.",
                 "metadata": {"table_name": "tesi", "primary_key": id}
             }
-            for id, titolo, corso_laurea_nome, studente_matricola, file in rows
+            for id, corso_laurea_nome, studente_matricola, file in rows
         ]
     
     def get_chunks(self) -> List[Dict[str, Any]]:

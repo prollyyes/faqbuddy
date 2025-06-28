@@ -49,18 +49,18 @@ def classify_question(question: str) -> str:
 def generate_answer(context: str, question: str) -> str:
     language_instruction = get_language_instruction(question)
     prompt = (
-        f"[INST] Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. Anche i professori usano la piattaforma, quindi mantieni un tono professionale ma amichevole. Non rispondere a domande generali non legate all'università. {language_instruction} Contesto:\n{context}\n\nDomanda:\n{question} [/INST]"
+        f"[INST] Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. Anche i professori usano la piattaforma, quindi mantieni un tono professionale ma amichevole. Non rispondere a domande generali non legate all'università. {language_instruction} IMPORTANTE: Rispondi sempre in formato Markdown per una migliore leggibilità. Usa titoli (# ##), elenchi puntati (-), grassetto (**testo**), corsivo (*testo*) e link quando appropriato. Contesto:\n{context}\n\nDomanda:\n{question} [/INST]"
     )
-    output = llm_gemma(prompt, max_tokens=512, stop=["</s>"])
+    output = llm_gemma(prompt, max_tokens=1024, stop=["</s>"])
     return output["choices"][0]["text"].strip()
 
 def generate_answer_streaming(context: str, question: str) -> list:
     """Generate an answer token by token."""
     language_instruction = get_language_instruction(question)
-    prompt = f"[INST] Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. Anche i professori usano la piattaforma, quindi mantieni un tono professionale ma amichevole. Non rispondere a domande generali non legate all'università. {language_instruction} Contesto:\n{context}\n\nDomanda:\n{question} [/INST]"
+    prompt = f"[INST] Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. Anche i professori usano la piattaforma, quindi mantieni un tono professionale ma amichevole. Non rispondere a domande generali non legate all'università. {language_instruction} IMPORTANTE: Rispondi sempre in formato Markdown per una migliore leggibilità. Usa titoli (# ##), elenchi puntati (-), grassetto (**testo**), corsivo (*testo*) e link quando appropriato. Contesto:\n{context}\n\nDomanda:\n{question} [/INST]"
     
     # Use the streaming API
-    stream = llm_gemma(prompt, max_tokens=512, stop=["</s>"], stream=True)
+    stream = llm_gemma(prompt, max_tokens=1024, stop=["</s>"], stream=True)
     
     tokens = []
     for chunk in stream:

@@ -7,6 +7,7 @@ from src.switcher.MLmodel import MLModel
 from src.utils.db_utils import get_connection
 from src.utils.db_handler import DBHandler
 from src.rag.rag_adapter import RAGSystem
+from src.api.AuthAPI import router as auth_router
 import os
 
 app = FastAPI()
@@ -17,6 +18,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include auth routes
+app.include_router(auth_router)
 
 class T2SQLRequest(BaseModel):
     question: str
