@@ -1,5 +1,7 @@
 frontend/.next
 frontend/node_modules
+backend/src/token.json
+backend/src/credentials.json
 
 backend/models
 
