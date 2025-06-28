@@ -5,7 +5,8 @@ import CourseBox from "./CourseBox";
 import AddCourseModal from "./AddCourseModal";
 import CompleteModal from "./CompleteModal";
 import ReviewModal from "./ReviewModal";
-
+import CourseDetailModal from "./CourseDetailModal";
+import AddActionModal from "./AddActionModal";
 
 
 export default function CorsiPage() {
@@ -32,13 +33,32 @@ export default function CorsiPage() {
     docenteCognome: ""
   });
 
+  // Modale dettaglio corso, quando clicchi su un corso
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [detailCourse, setDetailCourse] = useState(null);
+
+  const handleOpenDetailModal = async (corso) => {
+    const token = localStorage.getItem("token");
+    const res = await axios.get(
+      `http://localhost:8000/courses/editions/${corso.edition_id}/${encodeURIComponent(corso.edition_data)}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setDetailCourse(res.data);
+    setShowDetailModal(true);
+  };
+
+  // Modale AddActionModal 
+  const [showAddActionModal, setShowAddActionModal] = useState(false);
+  const [actionCourse, setActionCourse] = useState(null);
+
+
   // Fetch all teachers for the dropdown in the add course modal
   const [docenti, setDocenti] = useState([]);
   useEffect(() => {
-      fetch("http://localhost:8000/teachers")
-          .then(res => res.json())
-          .then(data => setDocenti(data))
-          .catch(() => setDocenti([]));
+    fetch("http://localhost:8000/teachers")
+      .then(res => res.json())
+      .then(data => setDocenti(data))
+      .catch(() => setDocenti([]));
   }, []);
 
   // Handle reviews
@@ -59,11 +79,11 @@ export default function CorsiPage() {
     axios.get("http://localhost:8000/profile/courses/current", {
       headers: { Authorization: `Bearer ${token}` }
     }).then(res => setCurrentCourses(res.data));
-  
+
     axios.get("http://localhost:8000/profile/courses/completed", {
       headers: { Authorization: `Bearer ${token}` }
     }).then(res => setCompletedCourses(res.data));
-  
+
     axios.get("http://localhost:8000/profile/reviews", {
       headers: { Authorization: `Bearer ${token}` }
     }).then(res => setStudentReviews(res.data));
@@ -198,6 +218,7 @@ export default function CorsiPage() {
     }
   };
 
+  // --- Aggiungi recensione ---
   const handleAddReview = async (corso, descrizione, voto) => {
     const token = localStorage.getItem("token");
     try {
@@ -223,6 +244,35 @@ export default function CorsiPage() {
     }
   };
 
+  // Funzione per ripristinare un corso tra quelli attivi
+  const handleRestoreCourse = async (corso) => {
+    const token = localStorage.getItem("token");
+    try {
+      await axios.put(
+        `http://localhost:8000/profile/courses/${corso.edition_id}/restore`,
+        { edition_data: corso.edition_data },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setSuccess("Corso riportato tra quelli attivi!");
+      // Aggiorna le liste
+      const resCurrent = await axios.get("http://localhost:8000/profile/courses/current", { headers: { Authorization: `Bearer ${token}` } });
+      setCurrentCourses(resCurrent.data);
+      const resCompleted = await axios.get("http://localhost:8000/profile/courses/completed", { headers: { Authorization: `Bearer ${token}` } });
+      setCompletedCourses(resCompleted.data);
+      // Aggiorna recensioni
+      const resReviews = await axios.get("http://localhost:8000/profile/reviews", { headers: { Authorization: `Bearer ${token}` } });
+      setStudentReviews(resReviews.data);
+    } catch (err) {
+      setError("Errore durante il ripristino del corso");
+    }
+  };
+
+  const handleOpenActionModal = (corso) => {
+    setActionCourse(corso);
+    setShowAddActionModal(true);
+    setError("");
+    setSuccess("");
+  };
 
   return (
     <div className="flex flex-col p-4 min-h-screen pb-24 pt-20">
@@ -245,6 +295,20 @@ export default function CorsiPage() {
         >
           + Aggiungi Corso
         </button>
+      {showAddActionModal && (
+        <AddActionModal
+          onClose={() => setShowAddActionModal(false)}
+          onReview={() => {
+            setShowAddActionModal(false);
+            handleOpenReviewModal(actionCourse);
+          }}
+          onMaterial={() => {
+            setShowAddActionModal(false);
+            // Qui puoi aprire la modale per l'upload dei materiali
+            alert("Funzionalità aggiungi materiale non ancora implementata!");
+          }}
+        />
+      )}
       </div>
 
       {showAddModal && (
@@ -282,12 +346,16 @@ export default function CorsiPage() {
         {currentCourses
           .filter(corso => (corso.stato || "").toLowerCase() === "attivo")
           .map((corso) => (
-            <CourseBox key={corso.edition_id} corso={corso}>
+            <CourseBox
+              key={corso.edition_id}
+              corso={corso}
+              onClick={() => handleOpenDetailModal(corso)}
+            >
               <div className="flex justify-end">
                 <button
                   className="w-8 h-8 flex items-center justify-center bg-[#991B1B] text-white rounded-full hover:bg-red-800 text-xl shadow"
                   style={{ marginTop: "-0.5rem", marginRight: "-0.5rem" }}
-                  onClick={() => handleOpenCompleteModal(corso)}
+                  onClick={e => { e.stopPropagation(); handleOpenCompleteModal(corso); }}
                   title="Completa corso"
                 >
                   ✓
@@ -304,14 +372,18 @@ export default function CorsiPage() {
             r => r.edition_id === corso.edition_id && r.edition_data === corso.edition_data
           );
           return (
-            <CourseBox key={corso.edition_id} corso={corso}>
-              <div className="flex justify-end">
+            <CourseBox
+              key={corso.edition_id}
+              corso={corso}
+              onClick={() => handleOpenDetailModal(corso)}
+            >
+              <div className="flex justify-end items-center gap-5">
                 {!alreadyReviewed && (
                   <button
                     className="w-8 h-8 flex items-center justify-center bg-[#991B1B] text-white rounded-full hover:bg-red-800 text-xl shadow"
                     style={{ marginTop: "-0.5rem", marginRight: "-0.5rem" }}
-                    onClick={() => handleOpenReviewModal(corso)}
-                    title="Aggiungi recensione"
+                    onClick={e => { e.stopPropagation(); handleOpenActionModal(corso); }}
+                    title="Aggiungi"
                   >
                     +
                   </button>
@@ -319,10 +391,25 @@ export default function CorsiPage() {
                 {alreadyReviewed && (
                   <span className="text-sm text-gray-500 mr-2">Recensione inviata</span>
                 )}
+                {/* Pulsante ripristina */}
+                <button
+                  className="w-8 h-8 flex items-center justify-center text-black rounded-ful text-xl shadow"
+                  style={{ marginTop: "-0.5rem", marginRight: "-0.5rem" }}
+                  onClick={e => { e.stopPropagation(); handleRestoreCourse(corso); }}
+                  title="Riporta tra i corsi attivi"
+                >
+                  <span role="img" aria-label="modifica">↩</span>
+                </button>
               </div>
             </CourseBox>
           );
         })}
+        {showDetailModal && (
+          <CourseDetailModal
+            corso={detailCourse}
+            onClose={() => setShowDetailModal(false)}
+          />
+        )}
       </div>
     </div>
   );

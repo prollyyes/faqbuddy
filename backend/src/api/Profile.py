@@ -163,6 +163,36 @@ def get_editions_for_course(corso_id: uuid.UUID):
         for row in results
     ]
 
+@router.get("/courses/editions/{edition_id}/{edition_data:path}")
+def get_edition_detail(edition_id: str, edition_data: str, current_user=Depends(get_current_user)):
+    user_id = current_user["user_id"]
+    query = """
+        SELECT e.id, e.data, e.orario, e.esonero, e.mod_Esame, e.stato, c.nome, c.cfu,
+               u.nome as docente_nome, u.cognome as docente_cognome, cs.voto
+        FROM EdizioneCorso e
+        JOIN Corso c ON e.id = c.id
+        LEFT JOIN Insegnanti i ON e.insegnante = i.id
+        LEFT JOIN Utente u ON i.id = u.id
+        LEFT JOIN Corsi_seguiti cs ON cs.edition_id = e.id AND cs.edition_data = e.data AND cs.student_id = %s
+        WHERE e.id = %s AND e.data = %s
+    """
+    result = db_handler.run_query(query, params=(user_id, edition_id, edition_data), fetch=True)
+    if not result:
+        raise HTTPException(status_code=404, detail="Edizione non trovata")
+    row = result[0]
+    return {
+        "edition_id": row[0],
+        "edition_data": row[1],
+        "orario": row[2],
+        "esonero": row[3],
+        "mod_Esame": row[4],
+        "stato": row[5],
+        "nome": row[6],
+        "cfu": row[7],
+        "docente_nome": row[8],
+        "docente_cognome": row[9],
+        "voto": row[10],  # può essere None se non ancora assegnato
+    }
 
 # --- Endpoint: Corsi frequentati dallo studente che è loggato---
 @router.get("/profile/courses/current", response_model=list[CourseResponse])
@@ -263,6 +293,32 @@ def enroll_in_edition(
     return {"detail": "Iscritto all'edizione"}
 
 
+# --- Endpoint: per spostare un corso da completato -> seguito ---
+@router.put("/profile/courses/{edition_id}/restore")
+def restore_course(
+    edition_id: str,
+    data: dict = Body(...),
+    current_user=Depends(get_current_user)
+):
+    user_id = current_user["user_id"]
+    edition_data = data["edition_data"]
+
+    # 1. Elimina la recensione associata (se esiste)
+    delete_review_query = """
+        DELETE FROM Review
+        WHERE student_id = %s AND edition_id = %s AND edition_data = %s
+    """
+    db_handler.run_query(delete_review_query, params=(user_id, edition_id, edition_data), fetch=False)
+
+    # 2. Aggiorna lo stato e azzera il voto in Corsi_seguiti
+    update_course_query = """
+        UPDATE Corsi_seguiti
+        SET stato = 'attivo', voto = NULL
+        WHERE student_id = %s AND edition_id = %s AND edition_data = %s
+    """
+    db_handler.run_query(update_course_query, params=(user_id, edition_id, edition_data), fetch=False)
+
+    return {"detail": "Corso ripristinato tra quelli attivi, recensione e voto eliminati"}
 
 # --- Endpoint: per trovare l'id Insegnanti a partire dal Nome e Cognome ---
 # Non serve più, la lascio qui magari in futuro può servire
@@ -429,10 +485,6 @@ def get_stats(current_user=Depends(get_current_user)):
         cfu_totali=cfu_totali,
         cfu_completati=cfu_completati
     )
-
-
-
-
 
 
 

@@ -1,19 +1,18 @@
 import React from "react";
 
-export default function CourseBox({ corso, children }) {
+export default function CourseBox({ corso, children, onClick }) {
   return (
-    <div className="border rounded-lg p-4 shadow-md bg-white w-full md:w-1/2 lg:w-1/3 flex flex-col gap-2">
-      <h3 className="text-lg font-bold mb-2 text-[#991B1B]">{corso.nome}</h3>
-      <p className="text-sm text-gray-600 font-bold">CFU: {corso.cfu}</p>
-      <p className="text-sm">
-        Docente: {(corso.docente_nome || corso.docente_cognome)
-          ? `${corso.docente_nome ?? ""} ${corso.docente_cognome ?? ""}`.trim()
-          : "N/A"}
-      </p>
-      {corso.edition_data && <p className="text-sm">Data Edizione: {corso.edition_data}</p>}
-      {corso.voto !== undefined && corso.voto !== null && (
-        <span className="block text-green-700 font-bold">Voto: {corso.voto}</span>
-      )}
+    <div
+      className="rounded-lg shadow-lg bg-white p-4 w-72 cursor-pointer hover:shadow-2xl transition"
+      onClick={onClick}
+      tabIndex={0}
+      role="button"
+      style={{ position: "relative" }}
+    >
+      <div className="font-bold text-lg mb-2 text-[#991B1B]">{corso.nome}</div>
+      <div className="mb-1">Edizione: <span className="font-semibold">{corso.edition_data}</span></div>
+      <div className="mb-1">CFU: <span className="font-semibold">{corso.cfu}</span></div>
+      <div className="mb-1">Stato: <span className="font-semibold">{corso.stato}</span></div>
       {children}
     </div>
   );
