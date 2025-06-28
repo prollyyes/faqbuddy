@@ -29,11 +29,44 @@ def signup(data: SignupRequest):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email già registrata"
         )
+
+    # --- CONTROLLI CAMPI OBBLIGATORI ---
+    if not data.nome or not data.cognome or not data.email or not data.password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Tutti i campi obbligatori devono essere compilati"
+        )
+    if hasattr(data, "ruolo") and data.ruolo == "insegnante":
+        if not getattr(data, "infoMail", None) or not getattr(data, "sitoWeb", None) or not getattr(data, "ricevimento", None):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Tutti i campi insegnante sono obbligatori"
+            )
+    else:
+        if not getattr(data, "corsoDiLaurea", None) or not getattr(data, "numeroDiMatricola", None):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Tutti i campi studente sono obbligatori"
+            )
+        # --- QUI: controllo corso di laurea PRIMA di creare l'utente ---
+        corso = db_handler.run_query(
+                "SELECT id FROM Corso_di_Laurea WHERE id = %s",
+                params=(data.corsoDiLaurea,),
+                fetch=True
+            )
+        if not corso:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Corso di laurea non trovato"
+            )
+        corso_laurea_id = corso[0][0]
+
+    # --- SOLO ORA crea l'utente ---
     user_id = str(uuid4())
     hashed_pwd = hash_password(data.password)
     db_handler.execute_sql_insertion(
         "INSERT INTO Utente (id, email, pwd_hash, nome, cognome, email_verificata) VALUES (%s, %s, %s, %s, %s, %s)",
-        (user_id, data.email, hashed_pwd, data.nome, data.cognome, True) # metto True solo per comodità, nella realtà è False
+        (user_id, data.email, hashed_pwd, data.nome, data.cognome, True)
     )
 
     if hasattr(data, "ruolo") and data.ruolo == "insegnante":
@@ -43,28 +76,11 @@ def signup(data: SignupRequest):
                 user_id,
                 getattr(data, "infoMail", None),
                 getattr(data, "sitoWeb", None),
-                getattr(data, "cv", None),  # qui puoi salvare l'id file drive o il nome file se vuoi
+                getattr(data, "cv", None),
                 getattr(data, "ricevimento", None)
             )
         )
     else:
-        # Conversione nome corso di laurea -> id
-        if not data.corsoDiLaurea or not data.numeroDiMatricola:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Dati studente mancanti"
-            )
-        corso = db_handler.run_query(
-            "SELECT id FROM Corso_di_Laurea WHERE nome = %s",
-            params=(data.corsoDiLaurea,),
-            fetch=True
-        )
-        if not corso:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Corso di laurea non trovato"
-            )
-        corso_laurea_id = corso[0][0]
         db_handler.execute_sql_insertion(
             "INSERT INTO Studenti (id, corso_laurea_id, matricola) VALUES (%s, %s, %s)",
             (

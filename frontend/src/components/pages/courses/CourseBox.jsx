@@ -13,6 +13,9 @@ export default function CourseBox({ corso, children, onClick }) {
       <div className="mb-1">Edizione: <span className="font-semibold">{corso.edition_data}</span></div>
       <div className="mb-1">CFU: <span className="font-semibold">{corso.cfu}</span></div>
       <div className="mb-1">Stato: <span className="font-semibold">{corso.stato}</span></div>
+      {corso.voto && (
+        <div className="mb-1">Voto: <span className="font-semibold text-green-600">{corso.voto}</span></div>
+      )}
       {children}
     </div>
   );

@@ -18,7 +18,9 @@ const Chart = ({ data }) => {
       {
         label: "Voto",
         data: data.map((item) => item.voto),
-        backgroundColor: "#822433",
+        backgroundColor: data.map((item) =>
+          item.simulato ? "#fde68a" : "#822433" // giallo chiaro per simulati, rosso per reali
+        ),
         barThickness: 15,
       },
     ],
@@ -45,15 +47,17 @@ const Chart = ({ data }) => {
           text: "Voto",
         },
       },
+      // x: {
+      //   ticks: {
+      //     font: {
+      //       weight: 'bold',
+      //     },
+      //     autoSkip: false,
+      //     maxRotation: 90,
+      //     minRotation: 90,
+      //   },
       x: {
-        ticks: {
-          font: {
-            weight: 'bold',
-          },
-          autoSkip: false,
-          maxRotation: 90,
-          minRotation: 90,
-        },
+        display: false, // Nasconde completamente l'asse X (etichette e ticks)
       },
     },
     plugins: {

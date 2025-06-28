@@ -136,6 +136,8 @@ export default function Auth() {
         const msg = err.response?.data?.detail;
         if (msg === 'Email già registrata') {
           setError('Questa email è già stata registrata');
+        } else if (msg) {
+          setError(msg);
         } else {
           setError('Errore durante la registrazione');
         }
