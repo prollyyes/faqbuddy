@@ -1,5 +1,5 @@
 # Embedding model for retrieval is set here. To change, set EMBEDDING_MODEL_NAME below or via environment variable.
-# Answer generation model is set in local_llm.py (llm_answer).
+# Answer generation model is set in llm_mistral.py (llm_mistral).
 
 import os
 from sentence_transformers import SentenceTransformer

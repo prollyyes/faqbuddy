@@ -8,7 +8,7 @@ from src.rag.hybrid_retrieval import (
 )
 from src.rag.query_router import classify_intent, structured_retrieval, unstructured_retrieval, merge_results
 from src.rag.build_prompt import build_prompt
-from src.local_llm import generate_answer
+from src.utils.llm_mistral import generate_answer
 from dotenv import load_dotenv
 
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data'))

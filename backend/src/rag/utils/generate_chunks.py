@@ -1,4 +1,4 @@
-from src.text_2_SQL.db_utils import get_db_connection
+from src.utils.db_utils import get_connection
 from dotenv import load_dotenv
 from typing import List, Dict, Any
 
@@ -6,7 +6,7 @@ load_dotenv()
 
 class ChunkGenerator:
     def __init__(self):
-        self.conn = get_db_connection()
+        self.conn = get_connection(mode="neon")
         self.cur = self.conn.cursor()
 
     def __del__(self):
