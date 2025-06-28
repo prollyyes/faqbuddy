@@ -87,6 +87,26 @@ def signup(data: SignupRequest):
         "user_id": user_id
     }
 
+# -- endpoint per ottenere tutti i corsi di laurea --
+@router.get("/corsi-di-laurea")
+def get_corsi_di_laurea():
+    """
+    Restituisce la lista dei corsi di laurea disponibili.
+    """
+    try:
+        result = db_handler.run_query(
+            "SELECT id, nome FROM Corso_di_Laurea",
+            fetch=True
+        )
+        if not result:
+            raise HTTPException(status_code=404, detail="Nessun corso di laurea trovato.")
+        return [
+            {"id": row[0], "nome": row[1]}
+            for row in result
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Endpoint riutilizzabile per caricare file su Google Drive
 @router.post("/files/upload")
 async def upload_file(
