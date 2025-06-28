@@ -1,11 +1,18 @@
+# next.js
 frontend/.next
 frontend/node_modules
 
+# llm && ML models
 backend/models
 
-**/.DS_Store
+# pytest
+**/.benchmarks
+**/.pytest_cache
 **/__pycache__
 
+#Token && Credentials google
+backend/src/token.json
+backend/src/credentials.json
 
 # or any name that you used for your virtual environment
 venv/
@@ -13,4 +20,17 @@ venv/
 
 # environment
 .env
-.env.local
+
+# macOS
+**/.DS_Store
+
+# Robe di Luca strane
+ram_log.txt
+mistral_sql_lora_schema
+finetune_pesante.py
+finetune.py
+ram_usage.py
+sql_dataset_dedup.jsonl
+sql_dataset_with_schema.jsonl
+test_finetune.py
+offload/

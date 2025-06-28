@@ -101,18 +101,27 @@ CREATE TABLE Corso (
 
 -- Piattaforme must be created before EdizioneCorso due to foreign key reference
 CREATE TABLE Piattaforme (
-    Nome    TEXT PRIMARY KEY,
-    Codice  TEXT
+    Nome    TEXT PRIMARY KEY
 );
 
 CREATE TABLE EdizioneCorso (
-    id         UUID PRIMARY KEY REFERENCES Corso(id),
+    id         UUID NOT NULL REFERENCES Corso(id),
     insegnante UUID NOT NULL REFERENCES Insegnanti(id),
-    piattaforma TEXT REFERENCES Piattaforme(Nome),
     data       semestre NOT NULL,
     orario     TEXT,
     esonero    BOOLEAN NOT NULL,
-    mod_Esame  TEXT NOT NULL
+    mod_Esame  TEXT NOT NULL,
+    PRIMARY KEY (id, data)
+);
+
+-- Collegamento tra EdizioneCorso e Piattaforme con il codice del corso su quella piattaforma
+CREATE TABLE EdizioneCorso_Piattaforme (
+    edizione_id UUID NOT NULL,
+    edizione_data semestre NOT NULL,
+    piattaforma_nome TEXT NOT NULL REFERENCES Piattaforme(Nome),
+    codice TEXT,
+    PRIMARY KEY (edizione_id, edizione_data, piattaforma_nome),
+    FOREIGN KEY (edizione_id, edizione_data) REFERENCES EdizioneCorso(id, data)
 );
 
 CREATE TABLE Corsi_seguiti (

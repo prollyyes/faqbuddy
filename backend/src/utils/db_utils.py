@@ -4,14 +4,33 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def get_db_connection():
-    return psycopg2.connect(
-        dbname=os.getenv("DB_NAME"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        host=os.getenv("DB_HOST"),
-        port=os.getenv("DB_PORT")
+def get_connection(mode="local"):
+    if mode == "local":
+        prefix = "DB_"
+        ssl = False
+    elif mode == "neon":
+        prefix = "DB_NEON_"
+        ssl = True
+    else:
+        raise ValueError("mode deve essere 'local' o 'neon'")
+
+    dbname = os.getenv(f"{prefix}NAME")
+    user = os.getenv(f"{prefix}USER")
+    password = os.getenv(f"{prefix}PASSWORD")
+    host = os.getenv(f"{prefix}HOST")
+    port = os.getenv(f"{prefix}PORT")
+
+    conn_args = dict(
+        dbname=dbname,
+        user=user,
+        password=password,
+        host=host,
+        port=port
     )
+    if ssl:
+        conn_args["sslmode"] = "require"
+
+    return psycopg2.connect(**conn_args)
 
 def get_database_schema(conn) -> str:
     # Ottieni lo schema delle tabelle e colonne
@@ -31,7 +50,3 @@ def get_database_schema(conn) -> str:
         schema_str += f"Table: {table}\n  " + ", ".join(cols) + "\n"
     cur.close()
     return schema_str
-
-def is_sql_safe(sql_query: str) -> bool:
-    sql = sql_query.strip().upper()
-    return sql.startswith("SELECT") or sql.startswith("WITH")

@@ -3,6 +3,8 @@
 Se ci sono problemi di permessi, basta garantire permessi di esecuzione al file: `chmod +x setup.sh`.~
 
 
+**Per un setup piu' rapido possibile, esegui ./setup.sh dalla root**
+
 ### 1. Crea e attiva l’ambiente virtuale
 
 ```sh
@@ -74,7 +76,7 @@ python rag/embed_and_index.py
 ```sh
 cd ..
 python tests/test_ml.py
-python tests/test_pipeline.py
+python -m pytest -s tests/test_pipeline.py
 python src/rag/test_rag.py
 ```
 
