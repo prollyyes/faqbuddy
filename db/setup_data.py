@@ -1,8 +1,8 @@
 from utils import get_connection
 from dotenv import load_dotenv
 from uuid import uuid4
-from datetime import date
 import bcrypt
+
 
 load_dotenv()
 
@@ -18,7 +18,6 @@ def insert_departments(cur):
         "Ingegneria chimica, materiali e ambiente",
         "Ingegneria meccanica e aerospaziale"
     ]
-    
     dept_ids = {}
     for dept in departments:
         dept_id = str(uuid4())
@@ -27,7 +26,6 @@ def insert_departments(cur):
             (dept_id, dept)
         )
         dept_ids[dept] = dept_id
-    
     print(f"✅ Inserted {len(departments)} departments")
     return dept_ids
 
@@ -39,10 +37,7 @@ def insert_faculties(cur, dept_ids):
             "presidente": "Prof. Marco Schaerf",
             "contatti": "presidenza-i3s@uniroma1.it"
         },
-        # for now, one entry only... To be expanded later.
-        
     ]
-    
     faculty_ids = {}
     for faculty in faculties:
         faculty_id = str(uuid4())
@@ -51,7 +46,6 @@ def insert_faculties(cur, dept_ids):
             (faculty_id, dept_ids[faculty["dipartimento"]], faculty["presidente"], faculty["nome"], faculty["contatti"])
         )
         faculty_ids[faculty["nome"]] = faculty_id
-    
     print(f"✅ Inserted {len(faculties)} faculties")
     return faculty_ids
 
@@ -66,9 +60,7 @@ def insert_degree_courses(cur, faculty_ids):
             "mail_segreteria": "segreteria-i3s@uniroma1.it",
             "test": True
         },
-        # Add more degree courses
     ]
-    
     course_ids = {}
     for course in courses:
         course_id = str(uuid4())
@@ -90,7 +82,6 @@ def insert_degree_courses(cur, faculty_ids):
             )
         )
         course_ids[course["nome"]] = course_id
-    
     print(f"✅ Inserted {len(courses)} degree courses")
     return course_ids
 
@@ -104,13 +95,10 @@ def insert_users_and_roles(cur, degree_course_ids):
             "sitoWeb": "http://www.dis.uniroma1.it/~baldoni/",
             "ricevimento": "Martedì 14:00-16:00"
         },
-        # Add more professors
     ]
-    
     professor_ids = {}
     for prof in professors:
         user_id = str(uuid4())
-        # Insert base user
         cur.execute(
             """
             INSERT INTO Utente (id, email, pwd_hash, nome, cognome)
@@ -118,8 +106,6 @@ def insert_users_and_roles(cur, degree_course_ids):
             """,
             (user_id, prof["email"], hash_password("temp123"), prof["nome"], prof["cognome"])
         )
-        
-        # Insert professor details
         cur.execute(
             """
             INSERT INTO Insegnanti (id, infoMail, sitoWeb, ricevimento)
@@ -127,12 +113,8 @@ def insert_users_and_roles(cur, degree_course_ids):
             """,
             (user_id, prof["infoMail"], prof["sitoWeb"], prof["ricevimento"])
         )
-        
         professor_ids[f"{prof['nome']} {prof['cognome']}"] = user_id
-    
     print(f"✅ Inserted {len(professors)} professors")
-    
-    # Insert some students
     students = [
         {
             "nome": "Mario",
@@ -141,13 +123,10 @@ def insert_users_and_roles(cur, degree_course_ids):
             "matricola": 1234567,
             "corso": "Ingegneria Informatica e Automatica"
         },
-        # Add more students
     ]
-    
     student_ids = {}
     for student in students:
         user_id = str(uuid4())
-        # Insert base user
         cur.execute(
             """
             INSERT INTO Utente (id, email, pwd_hash, nome, cognome)
@@ -155,8 +134,6 @@ def insert_users_and_roles(cur, degree_course_ids):
             """,
             (user_id, student["email"], hash_password("temp123"), student["nome"], student["cognome"])
         )
-        
-        # Insert student details
         cur.execute(
             """
             INSERT INTO Studenti (id, corso_laurea_id, matricola)
@@ -164,9 +141,7 @@ def insert_users_and_roles(cur, degree_course_ids):
             """,
             (user_id, degree_course_ids[student["corso"]], student["matricola"])
         )
-        
         student_ids[f"{student['nome']} {student['cognome']}"] = user_id
-    
     print(f"✅ Inserted {len(students)} students")
     return professor_ids, student_ids
 
@@ -180,9 +155,7 @@ def insert_courses(cur, degree_course_ids):
             "prerequisiti": "Nessuno",
             "frequenza_obbligatoria": "No"
         },
-        # Add more courses
     ]
-    
     course_ids = {}
     for course in courses:
         course_id = str(uuid4())
@@ -203,9 +176,16 @@ def insert_courses(cur, degree_course_ids):
             )
         )
         course_ids[course["nome"]] = course_id
-    
     print(f"✅ Inserted {len(courses)} courses")
     return course_ids
+
+def insert_platforms(cur, platforms):
+    for nome in platforms:
+        cur.execute(
+            "INSERT INTO Piattaforme (Nome) VALUES (%s) ON CONFLICT DO NOTHING",
+            (nome,)
+        )
+    print(f"✅ Inserted {len(platforms)} platforms")
 
 def insert_course_editions(cur, course_ids, professor_ids):
     editions = [
@@ -215,13 +195,25 @@ def insert_course_editions(cur, course_ids, professor_ids):
             "aa": "S1/2023",
             "orario": "Lunedì 14:00-16:00, Mercoledì 14:00-16:00",
             "esonero": True,
-            "mod_Esame": "Scritto + Orale"
+            "mod_Esame": "Scritto + Orale",
+            "piattaforme": [
+                {"nome": "Moodle", "codice": "FI23-MDL"},
+                {"nome": "Teams", "codice": "FI23-TMS"}
+            ]
         },
+        # aggiungi altre edizioni/casi qui se vuoi
     ]
-    
-    edition_ids = {}
+    # 1. Raccogli tutte le piattaforme usate
+    piattaforme_set = set()
     for edition in editions:
-        edition_id = course_ids[edition["corso"]]  # Using same ID as course
+        for p in edition["piattaforme"]:
+            piattaforme_set.add(p["nome"])
+    insert_platforms(cur, list(piattaforme_set))
+
+    edition_ids = {}
+    
+    for edition in editions:
+        edition_id = course_ids[edition["corso"]]
         cur.execute(
             """
             INSERT INTO EdizioneCorso
@@ -237,28 +229,35 @@ def insert_course_editions(cur, course_ids, professor_ids):
                 edition["mod_Esame"]
             )
         )
-        edition_ids[f"{edition['corso']}_{edition['aa']}"] = edition_id
-    
-    print(f"✅ Inserted {len(editions)} course editions")
+        edition_ids[f"{edition['corso']}_{edition['aa']}"] = (edition_id, edition["aa"])
+        # Inserisci nella tabella di relazione
+        for p in edition["piattaforme"]:
+            cur.execute(
+                """
+                INSERT INTO EdizioneCorso_Piattaforme
+                (edizione_id, edizione_data, piattaforma_nome, codice)
+                VALUES (%s, %s, %s, %s)
+                """,
+                (edition_id, edition["aa"], p["nome"], p["codice"])
+            )
+
+    print(f"✅ Inserted {len(editions)} course editions and platforms")
     return edition_ids
 
-def main():
-    conn = get_connection()
-    cur = conn.cursor()
+
+def main(env):
     
+    conn = get_connection(mode=env)
+    cur = conn.cursor()
     try:
-        # Insert data in the correct order to maintain referential integrity
         dept_ids = insert_departments(cur)
         faculty_ids = insert_faculties(cur, dept_ids)
         degree_course_ids = insert_degree_courses(cur, faculty_ids)
         professor_ids, student_ids = insert_users_and_roles(cur, degree_course_ids)
         course_ids = insert_courses(cur, degree_course_ids)
         edition_ids = insert_course_editions(cur, course_ids, professor_ids)
-        
-        # Commit all changes
         conn.commit()
         print("✅ All data inserted successfully!")
-        
     except Exception as e:
         conn.rollback()
         print(f"❌ Error: {str(e)}")
@@ -268,4 +267,9 @@ def main():
         conn.close()
 
 if __name__ == "__main__":
-    main() 
+    import sys
+    if len(sys.argv) < 2 or sys.argv[1] != "--env" or len(sys.argv) < 3:
+        print("❌ Devi specificare l'ambiente: python setup_data.py --env local  oppure  --env neon")
+        sys.exit(1)
+    env = sys.argv[2].lower()
+    main(env)

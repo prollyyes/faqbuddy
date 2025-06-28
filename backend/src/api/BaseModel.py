@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field
-from uuid import uuid4
+from enum import Enum
+from typing import Optional, Annotated
 
 class LoginRequest(BaseModel):
     email: EmailStr
@@ -22,10 +23,42 @@ class AddEdizioneCorso(BaseModel):
     nomeCorso : str
     nomeInsegnante : str
     cognomeInsegnante : str
-    data : Semestre
-    orario : str
+    semestre : Semestre
+    orario : Optional[str]
     esonero : bool
     mod_Esame : str
 
 class AddCorso(BaseModel):
     nomeCorsoLaurea : str
+    nomeCorso : str
+    cfu : int
+    idoneita : bool
+    prerequisiti : Optional[str]
+    fequenza_obbligatoria : Optional[str]
+
+class AttendStatus(str, Enum):
+    attivo = "attivo"
+    completato = "completato"
+    abbandonato = "abbandonato"
+
+class AddCorsoSeguito(BaseModel):
+    nomeCorso : str
+    semestre : Semestre
+    matricolaStudente : int
+    stato: AttendStatus
+    voto: Optional[Annotated[int, Field(ge=18, le=31)]] = None
+
+class AddPiattaforma(BaseModel):
+    nome : str
+
+class AddEdizioneCorsoPiattaforma(BaseModel):
+    nomeCorso : str
+    semestre : Semestre
+    nomePiattaforma : str
+    codice : Optional[str]
+
+class AddValutazione(BaseModel):
+    matricola : str
+    path_file : str
+    voto : int = Field(ge=1, le=5)
+    commento : Optional[str]
