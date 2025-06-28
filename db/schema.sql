@@ -66,6 +66,7 @@ CREATE TABLE Corso_di_Laurea (
     mail_segreteria TEXT,
     domanda_laurea TEXT,
     test    BOOLEAN NOT NULL DEFAULT false
+    cfu_totali INT NOT NULL DEFAULT 180
 );
 
 CREATE TABLE Studenti (

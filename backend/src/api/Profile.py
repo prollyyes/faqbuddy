@@ -326,6 +326,46 @@ def add_edizione_and_enroll(
     return {"detail": "EdizioneCorso creata e studente iscritto"}
 
 
+# --- Endpoint: Statistiche dello studente, voti conseguiti, media, cose del genere ---
+@router.get("/profile/stats", response_model=StatsResponse)
+def get_stats(current_user=Depends(get_current_user)):
+    user_id = current_user["user_id"]
+    # Prendi tutti i corsi completati
+    query = """
+        SELECT c.nome, cs.voto, c.cfu
+        FROM Corsi_seguiti cs
+        JOIN EdizioneCorso e ON cs.edition_id = e.id AND cs.edition_data = e.data
+        JOIN Corso c ON e.id = c.id
+        WHERE cs.student_id = %s AND cs.stato = 'completato' AND cs.voto >= 18
+    """
+    results = db_handler.run_query(query, params=(user_id,), fetch=True)
+    esami = [row[0] for row in results]
+    voti = [row[1] for row in results]
+    cfu = [row[2] for row in results]
+    
+    # Prendi i CFU totali del corso di laurea dello studente
+    query_cfu_totali = """
+        SELECT cfu_totali
+        from corso_di_laurea
+        JOIN studenti s ON corso_di_laurea.id = s.corso_laurea_id
+        WHERE s.id = %s
+    """
+    results_cfu_totali = db_handler.run_query(query_cfu_totali, params=(user_id,), fetch=True)
+    cfu_totali = results_cfu_totali[0][0] if results_cfu_totali else 0
+    
+    cfu_completati = sum(cfu)  # tutti quelli trovati sono completati
+    media_aritmetica = round(sum(voti) / len(voti), 2) if voti else 0
+    media_ponderata = round(sum(v * c for v, c in zip(voti, cfu)) / sum(cfu), 2) if cfu else 0
+    return StatsResponse(
+        esami=esami,
+        voti=voti,
+        media_aritmetica=media_aritmetica,
+        media_ponderata=media_ponderata,
+        cfu_totali=cfu_totali,
+        cfu_completati=cfu_completati
+    )
+
+
 
 
 

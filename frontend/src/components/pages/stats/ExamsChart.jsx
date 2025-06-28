@@ -71,8 +71,8 @@ const Chart = ({ data }) => {
   };
 
   return (
-    <div style={{ maxWidth: '100%' }} className="w-fit overflow-x-auto">
-      <div style={{ width: `${data.length * 30}px`, height: '300px' }}>
+    <div style={{ width: '100%', maxWidth: '100%' }}>
+      <div style={{ width: '100%', height: '260px' }}>
         <Bar data={chartData} options={options} />
       </div>
     </div>
