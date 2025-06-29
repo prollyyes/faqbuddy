@@ -117,13 +117,15 @@ CREATE TABLE Corsi_seguiti (
 CREATE TABLE Materiale_Didattico (
     id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     Utente_id    UUID NOT NULL REFERENCES Utente(id),
-    course_id  UUID NOT NULL REFERENCES Corso(id),    
+    course_id  UUID NOT NULL,  
+    data       semestre NOT NULL,  
     path_file  TEXT NOT NULL,
     tipo       TEXT,
     verificato BOOLEAN NOT NULL DEFAULT false,
     data_caricamento TEXT NOT NULL DEFAULT to_char(CURRENT_DATE, 'DD/MM/YYYY'),
     rating_medio FLOAT,
-    numero_voti INT
+    numero_voti INT,
+    FOREIGN KEY (course_id,data) REFERENCES EdizioneCorso(id,data)
 );
 
 CREATE TABLE Valutazione (

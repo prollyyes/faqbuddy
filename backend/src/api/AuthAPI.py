@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException, status
 from src.api.BaseModel import LoginRequest, SignupRequest
 
 
-conn = get_connection(mode="neon")
+conn = get_connection(mode="local")
 
 db_handler = DBHandler(conn)
 
