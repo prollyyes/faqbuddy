@@ -1,8 +1,7 @@
 'use client'
 
-import React, {useState} from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import BackButton from "../utils/BackButton";
 import Button from "../utils/Button";
 import axios from "axios";
 
@@ -48,8 +47,8 @@ export default function UploadMaterials() {
       setEditionOptions(
         response.data.edizioni.map((e) =>
           Array.isArray(e)
-            ? { id: e[2], date: e[1], label: `${e[0]} - ${e[1]}` }
-            : { id: e, date: '', label: e }
+            ? { id: e[2].toString(), date: e[1], label: `${e[0]} - ${e[1]}` }
+            : { id: e.toString(), date: '', label: e }
         )
       );
     } catch (error) {
@@ -126,7 +125,7 @@ export default function UploadMaterials() {
       responses.forEach((res) => {
         const isMaterialResponse = res.data?.materiale?.some?.(entry =>
           Array.isArray(entry)
-            ? entry.length === 4  // materiali: path_file, tipo, verificato, rating
+            ? entry.length === 4
             : 'path_file' in entry || 'tipo' in entry
         );
 
@@ -143,6 +142,13 @@ export default function UploadMaterials() {
       console.error('[POST getMaterials/getInfoCorso] error:', error);
     }
   };
+
+  // useEffect per eseguire la ricerca automaticamente se ho già cliccato "Cerca"
+  useEffect(() => {
+    if (hasSearched && selectedEdition) {
+      handleSearch();
+    }
+  }, [selectedCourse, selectedEdition, selectedEditionDate, includeMaterials, includeInfo]);
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-white px-6 text-[#822433] space-y-8 pt-10 pb-15">
@@ -196,19 +202,25 @@ export default function UploadMaterials() {
               <label className="block font-semibold">Edizione</label>
               <select
                 className="w-full border border-[#822433] rounded-md px-4 py-2 focus:outline-none text-black"
-                value={selectedEdition}
+                value={selectedEdition === "all" ? "all" : (selectedEdition && selectedEditionDate ? `${selectedEdition}|${selectedEditionDate}` : '')}
                 onChange={(e) => {
-                  const selId = e.target.value;
-                  setSelectedEdition(selId);
-                  const picked = editionOptions.find(o => o.id === selId);
-                  setSelectedEditionDate(picked ? picked.date : '');
+                  const selVal = e.target.value;
+                  console.log("Opzione selezionata:", selVal);
+                  if (selVal === "all") {
+                    setSelectedEdition("all");
+                    setSelectedEditionDate('');
+                  } else {
+                    const [id, date] = selVal.split('|');
+                    setSelectedEdition(id);
+                    setSelectedEditionDate(date);
+                  }
                 }}
                 disabled={!editionOptions.length}
               >
                 <option value="">Seleziona un'Edizione</option>
                 <option value="all">Tutte le edizioni</option>
                 {editionOptions.map((ed, idx) => (
-                  <option key={idx} value={ed.id}>{ed.label}</option>
+                  <option key={idx} value={`${ed.id}|${ed.date}`}>{ed.label}</option>
                 ))}
               </select>
             </div>
@@ -264,7 +276,7 @@ export default function UploadMaterials() {
                       <div><strong>File:</strong> {path}</div>
                       <div><strong>Tipo:</strong> {tipo}</div>
                       <div><strong>Rating:</strong> {rating}</div>
-                      <div><strong>Verificato:</strong> {verificato ? 'Sì' : 'No'}</div>
+                      <div><strong>Verificato:</strong> {verificato ? "✅" : "❌"}</div>
                     </div>
                   );
                 })}

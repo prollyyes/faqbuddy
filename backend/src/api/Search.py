@@ -1,9 +1,6 @@
-from uuid import uuid4
-import bcrypt
 from src.utils.db_utils import get_connection
 from src.utils.db_handler import DBHandler
-from fastapi import APIRouter, HTTPException, status
-from fastapi import Depends
+from fastapi import APIRouter, HTTPException
 from src.api.BaseModel import SearchCorsi, SearchEdizione, SearchMaterials
 
 
