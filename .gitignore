@@ -35,3 +35,7 @@ sql_dataset_dedup.jsonl
 sql_dataset_with_schema.jsonl
 test_finetune.py
 offload/
+
+# parser_csv
+db/parser_csv.py
+db/FAQBuddy.csv
