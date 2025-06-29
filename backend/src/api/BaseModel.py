@@ -136,3 +136,8 @@ class EdizioneCorsoCreate(BaseModel):
 class CompleteCourseRequest(BaseModel):
     edition_data: str
     voto: int
+    
+    
+# Chat.py
+class T2SQLRequest(BaseModel):
+    question: str

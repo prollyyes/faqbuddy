@@ -88,19 +88,18 @@ class ChunkGenerator:
     def get_course_edition_chunks(self) -> List[Dict[str, Any]]:
         query = """
             SELECT ec.id, ec.data, ec.mod_esame, c.nome as course_name, 
-                   u.nome as prof_nome, u.cognome as prof_cognome
+                   ia.nome as prof_nome, ia.cognome as prof_cognome
             FROM edizionecorso ec
             JOIN corso c ON ec.id = c.id
-            JOIN insegnanti i ON ec.insegnante = i.id
-            JOIN utente u ON i.id = u.id
+            JOIN insegnanti_anagrafici ia ON ec.insegnante_anagrafico = ia.id
         """
         rows = self._execute_query(query)
         return [
             {
-                "id": f"edizione_corso_{id}",
+                "id": f"edizione_corso_{id}_{data}",
                 "text": f"Edizione del corso di {course_name} per il periodo '{data}'. "
                         f"Docente: {prof_nome} {prof_cognome}. Modalità d'esame: {mod_esame}.",
-                "metadata": {"table_name": "edizionecorso", "primary_key": id}
+                "metadata": {"table_name": "edizionecorso", "primary_key": [id, data]}
             }
             for id, data, mod_esame, course_name, prof_nome, prof_cognome in rows
         ]
@@ -181,18 +180,22 @@ class ChunkGenerator:
     
     def get_insegnante_chunks(self) -> List[Dict[str, Any]]:
         query = """
-            SELECT i.id, i.infoMail as email, u.nome, u.cognome, i.sitoweb, i.cv, i.ricevimento
-            FROM insegnanti i JOIN utente u ON i.id = u.id
+            SELECT ia.id, ia.nome, ia.cognome, ia.email, ir.infoMail, ir.sitoWeb, ir.cv, ir.ricevimento
+            FROM insegnanti_anagrafici ia
+            LEFT JOIN insegnanti_registrati ir ON ia.id = ir.anagrafico_id
         """
         rows = self._execute_query(query)
         return [
             {
                 "id": f"insegnante_{id}",
-                "text": f"Insegnante: {nome} {cognome}, raggiungibile all'email: {email}"
-                        f"Ha il seguente CV: {cv} e ricevimento: {ricevimento}. Il sito web dell'insegnante è: {sitoweb}.",
-                "metadata": {"table_name": "insegnanti", "primary_key": id}
+                "text": f"Insegnante: {nome} {cognome}, email: {email or 'Non disponibile'}."
+                        f"{' InfoMail: ' + infoMail if infoMail else ''}"
+                        f"{' Sito web: ' + sitoWeb if sitoWeb else ''}"
+                        f"{' CV: ' + cv if cv else ''}"
+                        f"{' Ricevimento: ' + ricevimento if ricevimento else ''}",
+                "metadata": {"table_name": "insegnanti_anagrafici", "primary_key": id}
             }
-            for id, email, nome, cognome, sitoweb, cv, ricevimento in rows
+            for id, nome, cognome, email, infoMail, sitoWeb, cv, ricevimento in rows
         ]
     
     def get_thesis_chunks(self) -> List[Dict[str, Any]]:

@@ -39,3 +39,6 @@ offload/
 # parser_csv
 db/parser_csv.py
 db/FAQBuddy.csv
+
+# rag
+debugging_pinecone.json
