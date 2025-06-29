@@ -8,6 +8,8 @@ import ReviewModal from "./ReviewModal";
 import CourseDetailModal from "./CourseDetailModal";
 import AddActionModal from "./AddActionModal";
 
+const HOST = process.env.NEXT_PUBLIC_HOST;
+
 
 export default function CorsiPage() {
   const [currentCourses, setCurrentCourses] = useState([]);
@@ -27,7 +29,7 @@ export default function CorsiPage() {
   const [newEdition, setNewEdition] = useState({
     data: "",
     orario: "",
-    esonero: "",
+    esonero: false,
     mod_Esame: "",
     docenteNome: "",
     docenteCognome: ""
@@ -40,7 +42,7 @@ export default function CorsiPage() {
   const handleOpenDetailModal = async (corso) => {
     const token = localStorage.getItem("token");
     const res = await axios.get(
-      `http://localhost:8000/courses/editions/${corso.edition_id}/${encodeURIComponent(corso.edition_data)}`,
+      `${HOST}/courses/editions/${corso.edition_id}/${encodeURIComponent(corso.edition_data)}`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     setDetailCourse(res.data);
@@ -55,7 +57,7 @@ export default function CorsiPage() {
   // Fetch all teachers for the dropdown in the add course modal
   const [docenti, setDocenti] = useState([]);
   useEffect(() => {
-    fetch("http://localhost:8000/teachers")
+    fetch(`${HOST}/teachers`)
       .then(res => res.json())
       .then(data => setDocenti(data))
       .catch(() => setDocenti([]));
@@ -76,15 +78,15 @@ export default function CorsiPage() {
   // Fetch all courses && reviews on mount
   useEffect(() => {
     const token = localStorage.getItem("token");
-    axios.get("http://localhost:8000/profile/courses/current", {
+    axios.get(`${HOST}/profile/courses/current`, {
       headers: { Authorization: `Bearer ${token}` }
     }).then(res => setCurrentCourses(res.data));
 
-    axios.get("http://localhost:8000/profile/courses/completed", {
+    axios.get(`${HOST}/profile/courses/completed`, {
       headers: { Authorization: `Bearer ${token}` }
     }).then(res => setCompletedCourses(res.data));
 
-    axios.get("http://localhost:8000/profile/reviews", {
+    axios.get(`${HOST}/profile/reviews`, {
       headers: { Authorization: `Bearer ${token}` }
     }).then(res => setStudentReviews(res.data));
   }, []);
@@ -106,7 +108,7 @@ export default function CorsiPage() {
     }
     try {
       await axios.put(
-        `http://localhost:8000/profile/courses/${courseToComplete.edition_id}/complete`,
+        `${HOST}/profile/courses/${courseToComplete.edition_id}/complete`,
         {
           edition_data: courseToComplete.edition_data,
           voto: Number(completeVoto)
@@ -116,9 +118,9 @@ export default function CorsiPage() {
       setShowCompleteModal(false);
       setSuccess("Corso completato!");
       // Aggiorna le liste
-      const resCurrent = await axios.get("http://localhost:8000/profile/courses/current", { headers: { Authorization: `Bearer ${token}` } });
+      const resCurrent = await axios.get(`${HOST}/profile/courses/current`, { headers: { Authorization: `Bearer ${token}` } });
       setCurrentCourses(resCurrent.data);
-      const resCompleted = await axios.get("http://localhost:8000/profile/courses/completed", { headers: { Authorization: `Bearer ${token}` } });
+      const resCompleted = await axios.get(`${HOST}/profile/courses/completed`, { headers: { Authorization: `Bearer ${token}` } });
       setCompletedCourses(resCompleted.data);
     } catch (err) {
       setError("Errore durante il completamento del corso");
@@ -143,7 +145,7 @@ export default function CorsiPage() {
     });
     // Carica i corsi disponibili
     const token = localStorage.getItem("token");
-    const res = await axios.get("http://localhost:8000/courses/available", {
+    const res = await axios.get(`${HOST}/courses/available`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     setAvailableCourses(res.data);
@@ -162,7 +164,7 @@ export default function CorsiPage() {
       docenteCognome: ""
     });
     const token = localStorage.getItem("token");
-    const res = await axios.get(`http://localhost:8000/courses/${corsoId}/editions`, {
+    const res = await axios.get(`${HOST}/courses/${corsoId}/editions`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     setEditions(res.data);
@@ -173,15 +175,15 @@ export default function CorsiPage() {
     const token = localStorage.getItem("token");
     try {
       await axios.post(
-        `http://localhost:8000/courses/${corso_id}/editions/${edition_id}/enroll`,
+        `${HOST}/courses/${corso_id}/editions/${edition_id}/enroll`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setSuccess("Iscrizione avvenuta!");
       // Non chiudere la modale subito, lascia che l'utente decida
-      // setShowAddModal(false);
+      setShowAddModal(false);
       // Aggiorna corsi attivi
-      const resCurrent = await axios.get("http://localhost:8000/profile/courses/current", { headers: { Authorization: `Bearer ${token}` } });
+      const resCurrent = await axios.get(`${HOST}/profile/courses/current`, { headers: { Authorization: `Bearer ${token}` } });
       setCurrentCourses(resCurrent.data);
     } catch (err) {
       setError(err.response?.data?.detail || "Errore durante l'iscrizione");
@@ -194,9 +196,18 @@ export default function CorsiPage() {
     const token = localStorage.getItem("token");
     try {
       const insegnanteId = newEdition.docenteId;
+      // const payload = {
+      //   insegnante: insegnanteId,
+      //   data: newEdition.data,
+      //   orario: newEdition.orario,
+      //   esonero: newEdition.esonero,
+      //   mod_Esame: newEdition.mod_Esame,
+      //   stato: "attivo"
+      // };
+      // console.log("Payload inviato:", payload);
       // Crea nuova edizione e iscrivi lo studente
       await axios.post(
-        `http://localhost:8000/courses/${selectedCourseId}/editions/add`,
+        `${HOST}/courses/${selectedCourseId}/editions/add`,
         {
           insegnante: insegnanteId,
           data: newEdition.data,
@@ -209,9 +220,9 @@ export default function CorsiPage() {
       );
       setSuccess("Edizione aggiunta e iscritto!");
       // Non chiudere la modale subito, lascia che l'utente decida
-      // setShowAddModal(false);
+      setShowAddModal(false);
       // Aggiorna corsi attivi
-      const resCurrent = await axios.get("http://localhost:8000/profile/courses/current", { headers: { Authorization: `Bearer ${token}` } });
+      const resCurrent = await axios.get(`${HOST}/profile/courses/current`, { headers: { Authorization: `Bearer ${token}` } });
       setCurrentCourses(resCurrent.data);
     } catch (err) {
       setError(err.response?.data?.detail || "Errore durante l'aggiunta dell'edizione");
@@ -223,7 +234,7 @@ export default function CorsiPage() {
     const token = localStorage.getItem("token");
     try {
       await axios.post(
-        "http://localhost:8000/profile/reviews",
+        `${HOST}/profile/reviews`,
         {
           edition_id: corso.edition_id,
           edition_data: corso.edition_data,
@@ -234,7 +245,7 @@ export default function CorsiPage() {
       );
       setSuccess("Recensione aggiunta!");
       // Aggiorna le recensioni
-      const res = await axios.get("http://localhost:8000/profile/reviews", {
+      const res = await axios.get(`${HOST}/profile/reviews`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setStudentReviews(res.data);
@@ -249,18 +260,18 @@ export default function CorsiPage() {
     const token = localStorage.getItem("token");
     try {
       await axios.put(
-        `http://localhost:8000/profile/courses/${corso.edition_id}/restore`,
+        `${HOST}/profile/courses/${corso.edition_id}/restore`,
         { edition_data: corso.edition_data },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setSuccess("Corso riportato tra quelli attivi!");
       // Aggiorna le liste
-      const resCurrent = await axios.get("http://localhost:8000/profile/courses/current", { headers: { Authorization: `Bearer ${token}` } });
+      const resCurrent = await axios.get(`${HOST}/profile/courses/current`, { headers: { Authorization: `Bearer ${token}` } });
       setCurrentCourses(resCurrent.data);
-      const resCompleted = await axios.get("http://localhost:8000/profile/courses/completed", { headers: { Authorization: `Bearer ${token}` } });
+      const resCompleted = await axios.get(`${HOST}/profile/courses/completed`, { headers: { Authorization: `Bearer ${token}` } });
       setCompletedCourses(resCompleted.data);
       // Aggiorna recensioni
-      const resReviews = await axios.get("http://localhost:8000/profile/reviews", { headers: { Authorization: `Bearer ${token}` } });
+      const resReviews = await axios.get(`${HOST}/profile/reviews`, { headers: { Authorization: `Bearer ${token}` } });
       setStudentReviews(resReviews.data);
     } catch (err) {
       setError("Errore durante il ripristino del corso");
@@ -286,14 +297,15 @@ export default function CorsiPage() {
           handleCompleteCourse={handleCompleteCourse}
         />
       )}
-
-      {/* Pulsante centrato in alto */}
-      <div className="flex justify-center mb-6 mt-8">
+        {/* Pulsante piccolo in alto a destra */}
         <button
-          className="px-4 py-2 bg-[#991B1B] text-white rounded hover:bg-red-800"
+          className="w-10 h-10 bg-[#991B1B] text-white rounded-full shadow flex items-center justify-center text-2xl hover:bg-red-800 self-end mb-4"
           onClick={handleOpenAddModal}
+          title="Aggiungi Corso"
+          aria-label="Aggiungi Corso"
+          style={{ marginRight: "0.5rem" }}
         >
-          + Aggiungi Corso
+          +
         </button>
       {showAddActionModal && (
         <AddActionModal
@@ -309,7 +321,7 @@ export default function CorsiPage() {
           }}
         />
       )}
-      </div>
+      
 
       {showAddModal && (
         <AddCourseModal

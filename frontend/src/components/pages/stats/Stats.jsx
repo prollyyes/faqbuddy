@@ -1,6 +1,7 @@
 'use client'
 import React, { useEffect, useState } from "react";
 import Chart from "@/components/pages/stats/ExamsChart";
+const HOST = process.env.NEXT_PUBLIC_HOST;
 
 export default function EsamiPage() {
   const [stats, setStats] = useState(null);
@@ -10,7 +11,7 @@ export default function EsamiPage() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    fetch("http://localhost:8000/profile/stats", {
+    fetch(`${HOST}/profile/stats`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -29,6 +30,21 @@ export default function EsamiPage() {
     ...simulati.map(e => ({ ...e, simulato: true }))
   ];
 
+  const MIN_COLONNE = 6;
+  const allEsamiGrafico = allEsami.length < MIN_COLONNE
+  ? [
+      ...allEsami,
+      ...Array.from({ length: MIN_COLONNE - allEsami.length }, (_, i) => ({
+        nome: "",
+        voto: null,
+        cfu: null,
+        simulato: false,
+        placeholder: true,
+      }))
+    ]
+  : allEsami;
+
+
 
   // Ricalcola le medie con gli esami simulati
   const mediaAritmetica = allEsami.length
@@ -44,7 +60,12 @@ export default function EsamiPage() {
         <div className="bg-white rounded-lg p-4">
           <h2 className="text-lg font-semibold mb-2 text-center">Andamento Voti</h2>
           <div className="w-full">
-            <Chart data={allEsami.map(e => ({ corso: e.nome, voto: e.voto, simulato: e.simulato }))} />
+            <Chart data={allEsamiGrafico.map(e => ({
+              corso: e.nome,
+              voto: e.voto,
+              simulato: e.simulato,
+              placeholder: e.placeholder
+            }))} />
           </div>
         </div>
 

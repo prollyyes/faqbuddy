@@ -13,15 +13,17 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const Chart = ({ data }) => {
   const chartData = {
-    labels: data.map((item) => item.corso),
+    labels: data.map((item) => item.corso || ""), // etichetta vuota per placeholder
     datasets: [
       {
         label: "Voto",
-        data: data.map((item) => item.voto),
+        data: data.map((item) => item.placeholder ? null : item.voto),
         backgroundColor: data.map((item) =>
-          item.simulato ? "#fde68a" : "#822433" // giallo chiaro per simulati, rosso per reali
+          item.placeholder ? "rgba(0,0,0,0)" : (item.simulato ? "#fde68a" : "#822433")
         ),
-        barThickness: 15,
+        barThickness: 17,
+        categoryPercentage: 0.5,
+        barPercentage: 0.9,
       },
     ],
   };

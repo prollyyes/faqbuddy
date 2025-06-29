@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { EditionsModal } from "@/components/pages/courses/EditionsModal";
+import { EditionsModal } from "@/components/pages/courses/teacher/EditionsModal";
+import { AddEditionModal } from "@/components/pages/courses/teacher/AddEditionModal";
+
+const HOST = process.env.NEXT_PUBLIC_HOST;
 
 export default function TeacherCourses() {
   const [courses, setCourses] = useState([]);
@@ -9,10 +12,14 @@ export default function TeacherCourses() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [refresh, setRefresh] = useState(false);
 
+  // Stato per la modale
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [allCourses, setAllCourses] = useState([]);
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     axios
-      .get("http://localhost:8000/teacher/courses/full", {
+      .get(`${HOST}/teacher/courses/full`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       .then(res => {
@@ -24,6 +31,20 @@ export default function TeacherCourses() {
         setLoading(false);
       });
   }, [refresh]);
+
+  // Carica tutti i corsi insegnati per la select della modale
+  const openAddModal = async () => {
+    setShowAddModal(true);
+    const token = localStorage.getItem("token");
+    try {
+      const res = await axios.get(`${HOST}/courses/all`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setAllCourses(res.data);
+    } catch {
+      setAllCourses([]);
+    }
+  };
 
   if (loading) return <div className="p-8 text-center">Caricamento corsi...</div>;
   if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
@@ -54,6 +75,15 @@ export default function TeacherCourses() {
 
   return (
     <div className="flex flex-col p-4 min-h-screen pb-24 pt-20">
+      <div className="flex justify-end mb-4">
+        <button
+          className="bg-[#991B1B] text-white rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow hover:bg-red-800 transition"
+          onClick={openAddModal}
+          title="Aggiungi nuova edizione"
+        >
+          +
+        </button>
+      </div>
       <h2 className="text-2xl font-bold text-[#991B1B] mb-6 text-center">Corsi che insegni</h2>
       <div className="flex flex-wrap gap-4 justify-center mb-10">
         {activeCourses.length === 0 && (
@@ -75,6 +105,12 @@ export default function TeacherCourses() {
           onUpdateStato={() => setRefresh(r => !r)}
         />
       )}
+      <AddEditionModal
+        show={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        courses={allCourses}
+        onSuccess={() => setRefresh(r => !r)}
+      />
     </div>
   );
 }

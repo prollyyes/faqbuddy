@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 
+const HOST = process.env.NEXT_PUBLIC_HOST;
+
 export function EditionsModal({ corso, onClose, onUpdateStato }) {
     const [editStates, setEditStates] = useState({});
     const [editMode, setEditMode] = useState({});
@@ -54,7 +56,7 @@ export function EditionsModal({ corso, onClose, onUpdateStato }) {
             const token = localStorage.getItem("token");
             const payload = editStates[edition_id];
             await axios.patch(
-                `http://localhost:8000/teacher/editions/${edition_id}`,
+                `${HOST}/teacher/editions/${edition_id}`,
                 payload,
                 {
                     headers: {
@@ -74,8 +76,12 @@ export function EditionsModal({ corso, onClose, onUpdateStato }) {
                         : ed
                 )
             );
-            // Se vuoi aggiornare anche il corso padre, chiama onUpdateStato()
-            // onUpdateStato();
+
+            // AGGIUNGI QUESTO: aggiorna il corso padre (se la funzione esiste)
+            if (onUpdateStato) onUpdateStato();
+
+            onClose();
+
         } catch (e) {
             setError("Errore aggiornamento edizione");
         }

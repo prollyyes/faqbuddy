@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import InputField from '@/components/utils/InputField';
 
+const HOST = process.env.NEXT_PUBLIC_HOST;
+
 export function SignupStudente({ formData, handleChange }) {
   const [corsi, setCorsi] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:8000/corsi-di-laurea')
+    fetch(`${HOST}/corsi-di-laurea`)
       .then(res => res.json())
       .then(data => setCorsi(data));
   }, []);

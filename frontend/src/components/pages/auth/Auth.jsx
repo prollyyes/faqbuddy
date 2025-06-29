@@ -9,6 +9,8 @@ import { SignupInsegnante } from './SignupInsegnante';
 import { SignupStudente } from './SignupStudente';
 import InputField from '@/components/utils/InputField';
 
+const HOST = process.env.NEXT_PUBLIC_HOST;
+
 async function uploadCV(cvFile, nome, cognome) {
   const formData = new FormData();
   formData.append("file", cvFile);
@@ -18,7 +20,7 @@ async function uploadCV(cvFile, nome, cognome) {
   formData.append("cognome", cognome);
 
   const response = await axios.post(
-    "http://localhost:8000/files/upload",
+    `${HOST}/files/upload`,
     formData,
     { headers: { "Content-Type": "multipart/form-data" } }
   );

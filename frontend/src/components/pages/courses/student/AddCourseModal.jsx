@@ -63,13 +63,14 @@ export default function AddCourseModal({
                             <div className="grid grid-cols-1 gap-2">
                                 {editions.map(edition => (
                                     <div
-                                        key={edition.id}
+                                        key={edition.id + "_" + edition.data}
                                         className="border rounded-lg p-3 flex items-center justify-between hover:bg-gray-100 cursor-pointer transition"
                                     >
                                         <span>
-                                            {edition.data} - Docente: {edition.docente_nome && edition.docente_cognome
-                                                ? `${edition.docente_nome} ${edition.docente_cognome}`
-                                                : "N/A"}
+                                            <div>{edition.data}</div>
+                                            <div className="text-sm text-gray-700">
+                                                Docente: {edition.docente ? edition.docente : "N/A"}
+                                            </div>
                                         </span>
                                         <button
                                             className="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-800"
@@ -113,7 +114,6 @@ export default function AddCourseModal({
                                 </select>
                                 <input
                                     type="text"
-                                    required
                                     placeholder="Orario"
                                     className="border rounded p-2 w-full"
                                     value={newEdition.orario}
@@ -179,13 +179,15 @@ export default function AddCourseModal({
                     </>
                 )}
                 {error && (
-                    <div className="text-red-600 mt-2">
-                        {typeof error === "string"
-                            ? error
-                            : Array.isArray(error)
-                                ? error.map((e, i) => <div key={i}>{e.msg || JSON.stringify(e)}</div>)
-                                : JSON.stringify(error)}
-                    </div>
+                  <div className="text-red-600 mt-2">
+                    {typeof error === "string"
+                      ? error
+                      : Array.isArray(error)
+                        ? error.map((e, i) => <div key={i}>{e.msg || JSON.stringify(e)}</div>)
+                        : error.detail && Array.isArray(error.detail)
+                          ? error.detail.map((e, i) => <div key={i}>{e.msg || JSON.stringify(e)}</div>)
+                          : JSON.stringify(error)}
+                  </div>
                 )}
                 {success && <div className="text-green-600 mt-2">{success}</div>}
             </div>

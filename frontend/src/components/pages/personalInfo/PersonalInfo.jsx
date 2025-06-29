@@ -7,6 +7,8 @@ import axios from 'axios';
 import { InfoProfiloStudente } from './PeronalInfo_studente';
 import { InfoProfiloInsegnante } from './PersonalInfo_insegnante';
 
+const HOST = process.env.NEXT_PUBLIC_HOST;
+
 const PersonalInfo = () => {
   const [showInfo, setShowInfo] = useState(false);
   const [dimBackground, setDimBackground] = useState(false);
@@ -19,7 +21,7 @@ const PersonalInfo = () => {
     const token = localStorage.getItem('token');
     if (!token) return;
 
-    fetch('http://localhost:8000/profile/me', {
+    fetch(`${HOST}/profile/me`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -54,7 +56,7 @@ const PersonalInfo = () => {
       if (pendingCV) {
         if (profile.cv) {
           try {
-            await axios.delete(`http://localhost:8000/files/delete/${profile.cv}`, {
+            await axios.delete(`${HOST}/files/delete/${profile.cv}`, {
               headers: { Authorization: `Bearer ${token}` }
             });
           } catch {
@@ -69,7 +71,7 @@ const PersonalInfo = () => {
         formData.append("cognome", editData.cognome);
         try {
           const res = await axios.post(
-            "http://localhost:8000/files/upload",
+            `${HOST}/files/upload`,
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
@@ -79,7 +81,7 @@ const PersonalInfo = () => {
         }
       }
 
-      await axios.put('http://localhost:8000/profile/me', { ...editData, cv: newCVId }, {
+      await axios.put(`${HOST}/profile/me`, { ...editData, cv: newCVId }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProfile({ ...editData, cv: newCVId });
