@@ -3,9 +3,10 @@
 ------------------------------------------------
 
 CREATE TYPE attend_status AS ENUM ('attivo','completato','abbandonato');
-CREATE TYPE tipoCorso AS ENUM ('triennale','magistrale','ciclo unico');
+CREATE TYPE tipoCorso AS ENUM ('Triennale','Magistrale','Ciclo unico');
 CREATE DOMAIN semestre AS TEXT 
   CHECK (VALUE ~ '^(S[12])/[0-9]{4}$');
+CREATE TYPE statoEdizioneCorso AS ENUM ('attivo', 'archiviato', 'annullato');
 
 ------------------------------------------------
 -- 1. Utente (studenti/insegnanti)
@@ -26,13 +27,27 @@ CREATE TABLE EmailVerification (
     token TEXT PRIMARY KEY
 );
 
-CREATE TABLE Insegnanti (
-  id           UUID PRIMARY KEY REFERENCES Utente(id) ON DELETE CASCADE,
-  infoMail     TEXT,
-  sitoWeb      TEXT,
-  cv           TEXT,
-  ricevimento  TEXT
+-- ho la necessità di avere sia una tabella per gli insegnanti registrati che una per gli insegnanti anagrafici,
+-- perché alcuni insegnanti potrebbero non essere registrati al sito, ma avere comunque un'anagrafica.
+-- e quindi voglio poter assegnare un corso anche a insegnanti non registrati.
+CREATE TABLE Insegnanti_Anagrafici (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    nome TEXT NOT NULL,
+    cognome TEXT NOT NULL,
+    email TEXT,
+    utente_id UUID REFERENCES Utente(id) -- NULL se non registrato
 );
+
+
+CREATE TABLE Insegnanti_Registrati (
+    id UUID PRIMARY KEY REFERENCES Utente(id) ON DELETE CASCADE,
+    anagrafico_id UUID REFERENCES Insegnanti_Anagrafici(id),
+    infoMail TEXT,
+    sitoWeb TEXT,
+    cv TEXT,
+    ricevimento TEXT
+);
+
 
 
 
@@ -61,11 +76,11 @@ CREATE TABLE Corso_di_Laurea (
     id_facolta UUID NOT NULL REFERENCES Facolta(id),
     nome    TEXT NOT NULL,
     descrizione TEXT,
-    classe  TEXT NOT NULL,
+    classe  TEXT,
     tipologia tipoCorso NOT NULL,
     mail_segreteria TEXT,
     domanda_laurea TEXT,
-    test    BOOLEAN NOT NULL DEFAULT false
+    test    BOOLEAN NOT NULL DEFAULT false,
     cfu_totali INT NOT NULL DEFAULT 180
 );
 
@@ -93,11 +108,12 @@ CREATE TABLE Piattaforme (
 
 CREATE TABLE EdizioneCorso (
     id         UUID NOT NULL REFERENCES Corso(id),
-    insegnante UUID NOT NULL REFERENCES Insegnanti(id),
+    insegnante_anagrafico UUID NOT NULL REFERENCES Insegnanti_Anagrafici(id),
     data       semestre NOT NULL,
     orario     TEXT,
     esonero    BOOLEAN NOT NULL,
     mod_Esame  TEXT NOT NULL,
+    stato      statoEdizioneCorso NOT NULL DEFAULT 'attivo',
     PRIMARY KEY (id, data)
 );
 
@@ -207,3 +223,33 @@ CREATE TRIGGER trigger_aggiorna_stato_corso
 BEFORE INSERT OR UPDATE ON Corsi_seguiti
 FOR EACH ROW
 EXECUTE FUNCTION aggiorna_stato_corso();
+
+
+CREATE OR REPLACE FUNCTION set_email_verificata_true()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE Utente SET email_verificata = TRUE WHERE id = OLD.user_id;
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_set_email_verificata_true
+AFTER DELETE ON EmailVerification
+FOR EACH ROW
+EXECUTE FUNCTION set_email_verificata_true();
+
+CREATE OR REPLACE FUNCTION normalize_text_fields()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.nome := INITCAP(LOWER(NEW.nome));
+    IF NEW.cognome IS NOT NULL THEN
+        NEW.cognome := INITCAP(LOWER(NEW.cognome));
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_normalize_insegnanti
+BEFORE INSERT OR UPDATE ON Insegnanti_Anagrafici
+FOR EACH ROW
+EXECUTE FUNCTION normalize_text_fields();
