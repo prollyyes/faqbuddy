@@ -1,12 +1,14 @@
 from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from src.text_2_SQL.converter import TextToSQLConverter
-from src.utils.db_utils import get_connection, MODE
-
-from src.rag.rag_core import RAGSystem
-from src.utils.db_handler import DBHandler
 from src.switcher.MLmodel import MLModel
+from src.utils.db_utils import get_connection, MODE
+from src.utils.db_handler import DBHandler
+from src.rag.rag_adapter import RAGSystem
+from src.api.AuthAPI import router as auth_router
+import os
 
 app = FastAPI()
 app.add_middleware(
@@ -16,6 +18,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include auth routes
+app.include_router(auth_router)
 
 class T2SQLRequest(BaseModel):
     question: str
@@ -46,11 +51,9 @@ def t2sql_endpoint(req: T2SQLRequest):
     fallback = False
     if proba < threshold:
         final_pred = "complex"
+        final_pred = "complex"
         fallback = True
-        # dato che l'llm è torppo lento faccio direttamente il fallback a "complex" per passare al rag
-        # from src.utils.llm_gemma import classify_question
-        # llm_pred = classify_question(question)
-        # final_pred = llm_pred.strip().lower()
+    
     else:
         final_pred = ml_pred.strip().lower()
 

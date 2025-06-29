@@ -158,7 +158,7 @@ CREATE TABLE Valutazione (
     id_materiale UUID REFERENCES Materiale_Didattico(id),
     voto       INT NOT NULL CHECK (voto BETWEEN 1 AND 5),
     commento   TEXT,
-    data       TEXT NOT NULL DEFAULT to_char(CURRENT_DATE, 'DD/MM/YYYY'),      
+    data  TEXT NOT NULL DEFAULT to_char(CURRENT_DATE, 'DD/MM/YYYY'),      
 
     PRIMARY KEY (student_id, id_materiale)
 );
@@ -178,6 +178,7 @@ CREATE TABLE Tesi (
     id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     student_id UUID NOT NULL REFERENCES Studenti(id),
     corso_laurea_id UUID NOT NULL REFERENCES Corso_di_Laurea(id),
+    titolo     TEXT NOT NULL,
     file       TEXT NOT NULL
 );
 
