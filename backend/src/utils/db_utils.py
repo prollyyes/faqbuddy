@@ -4,9 +4,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-MODE="local" # cosi usiamo solo MODE per le connessioni, ed è più facile da cambiare
+MODE="neon" # cosi usiamo solo MODE per le connessioni, ed è più facile da cambiare
 
-def get_connection(mode="local"):
+def get_connection(mode=MODE):
     if mode == "local":
         prefix = "DB_"
         ssl = False
