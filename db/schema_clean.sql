@@ -1,4 +1,29 @@
 ------------------------------------------------
+-- CLEAN SCHEMA WITH DROP STATEMENTS
+------------------------------------------------
+
+-- Drop tables in reverse dependency order
+DROP TABLE IF EXISTS Tesi CASCADE;
+DROP TABLE IF EXISTS Review CASCADE;
+DROP TABLE IF EXISTS Valutazione CASCADE;
+DROP TABLE IF EXISTS Materiale_Didattico CASCADE;
+DROP TABLE IF EXISTS Corsi_seguiti CASCADE;
+DROP TABLE IF EXISTS EdizioneCorso CASCADE;
+DROP TABLE IF EXISTS Piattaforme CASCADE;
+DROP TABLE IF EXISTS Corso CASCADE;
+DROP TABLE IF EXISTS Studenti CASCADE;
+DROP TABLE IF EXISTS Corso_di_Laurea CASCADE;
+DROP TABLE IF EXISTS Facolta CASCADE;
+DROP TABLE IF EXISTS Dipartimento CASCADE;
+DROP TABLE IF EXISTS Insegnanti CASCADE;
+DROP TABLE IF EXISTS Utente CASCADE;
+
+-- Drop types and domains
+DROP TYPE IF EXISTS attend_status CASCADE;
+DROP TYPE IF EXISTS tipoCorso CASCADE;
+DROP DOMAIN IF EXISTS semestre CASCADE;
+
+------------------------------------------------
 -- CREAZIONE TIPI
 ------------------------------------------------
 
@@ -74,8 +99,7 @@ CREATE TABLE Corso (
     frequenza_obbligatoria TEXT
 );
 
--- Creo prima Piattaforme altrimenti EdizioneCorso non può fare riferimento
-
+-- Piattaforme must be created before EdizioneCorso due to foreign key reference
 CREATE TABLE Piattaforme (
     Nome    TEXT PRIMARY KEY
 );
@@ -83,7 +107,6 @@ CREATE TABLE Piattaforme (
 CREATE TABLE EdizioneCorso (
     id         UUID NOT NULL REFERENCES Corso(id),
     insegnante UUID NOT NULL REFERENCES Insegnanti(id),
-    piattaforma TEXT REFERENCES Piattaforme(Nome),
     data       semestre NOT NULL,
     orario     TEXT,
     esonero    BOOLEAN NOT NULL,
@@ -103,12 +126,10 @@ CREATE TABLE EdizioneCorso_Piattaforme (
 
 CREATE TABLE Corsi_seguiti (
     student_id UUID NOT NULL REFERENCES Studenti(id),
-    edition_id UUID NOT NULL,
-    edition_data semestre NOT NULL,
+    edition_id UUID NOT NULL REFERENCES EdizioneCorso(id),
     stato      attend_status NOT NULL,
     voto       INT CHECK (voto BETWEEN 18 AND 31),
-    PRIMARY KEY (student_id, edition_id, edition_data),
-    FOREIGN KEY (edition_id, edition_data) REFERENCES EdizioneCorso(id, data)
+    PRIMARY KEY (student_id,edition_id)
 );
 
 ------------------------------------------------
@@ -140,13 +161,10 @@ CREATE TABLE Valutazione (
 CREATE TABLE Review (
     id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     student_id UUID NOT NULL REFERENCES Studenti(id),
-    edition_id UUID NOT NULL,
-    edition_data semestre NOT NULL,
+    edition_id UUID NOT NULL REFERENCES EdizioneCorso(id),
     descrizione TEXT,
-    voto       INT NOT NULL CHECK (voto BETWEEN 1 AND 5),
-    FOREIGN KEY (edition_id, edition_data) REFERENCES EdizioneCorso(id, data)
+    voto       INT NOT NULL CHECK (voto BETWEEN 1 AND 5)
 );
-
 
 CREATE TABLE Tesi (
     id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -154,47 +172,4 @@ CREATE TABLE Tesi (
     corso_laurea_id UUID NOT NULL REFERENCES Corso_di_Laurea(id),
     titolo     TEXT NOT NULL,
     file       TEXT NOT NULL
-);
-
-------------------------------------------------
--- Definizione Trigger
-------------------------------------------------
-
--- Aggiorna rating_medio e numero_voti dopo INSERT o UPDATE su Valutazione
-CREATE OR REPLACE FUNCTION aggiorna_rating_materiale()
-RETURNS TRIGGER AS $$
-BEGIN
-    UPDATE Materiale_Didattico
-    SET 
-        rating_medio = (
-            SELECT AVG(voto)::FLOAT FROM Valutazione WHERE id_materiale = NEW.id_materiale
-        ),
-        numero_voti = (
-            SELECT COUNT(*) FROM Valutazione WHERE id_materiale = NEW.id_materiale
-        )
-    WHERE id = NEW.id_materiale;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-
--- Trigger per aggiornare lo stato del corso a completato se il voto è >= 18
-CREATE TRIGGER trigger_aggiorna_rating_materiale
-AFTER INSERT OR UPDATE OR DELETE ON Valutazione
-FOR EACH ROW
-EXECUTE FUNCTION aggiorna_rating_materiale();
-
-CREATE OR REPLACE FUNCTION aggiorna_stato_corso()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF NEW.voto IS NOT NULL AND NEW.voto >= 18 THEN
-        NEW.stato := 'completato';
-    END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trigger_aggiorna_stato_corso
-BEFORE INSERT OR UPDATE ON Corsi_seguiti
-FOR EACH ROW
-EXECUTE FUNCTION aggiorna_stato_corso();
+); 
