@@ -36,12 +36,15 @@ def signup(data: SignupRequest):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Tutti i campi obbligatori devono essere compilati"
         )
+    # if hasattr(data, "ruolo") and data.ruolo == "insegnante":
+    #     if not getattr(data, "infoMail", None) or not getattr(data, "sitoWeb", None) or not getattr(data, "ricevimento", None):
+    #         raise HTTPException(
+    #             status_code=status.HTTP_400_BAD_REQUEST,
+    #             detail="Tutti i campi insegnante sono obbligatori"
+    #         )
     if hasattr(data, "ruolo") and data.ruolo == "insegnante":
-        if not getattr(data, "infoMail", None) or not getattr(data, "sitoWeb", None) or not getattr(data, "ricevimento", None):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Tutti i campi insegnante sono obbligatori"
-            )
+        # non è obbligatorio avere infoMail, sitoWeb, cv, ricevimento
+        pass
     else:
         if not getattr(data, "corsoDiLaurea", None) or not getattr(data, "numeroDiMatricola", None):
             raise HTTPException(
@@ -70,9 +73,29 @@ def signup(data: SignupRequest):
     )
 
     if hasattr(data, "ruolo") and data.ruolo == "insegnante":
+        # Inserisci o aggiorna in Insegnanti_Anagrafici
         db_handler.execute_sql_insertion(
-            "INSERT INTO Insegnanti (id, infoMail, sitoWeb, cv, ricevimento) VALUES (%s, %s, %s, %s, %s)",
+            """
+            INSERT INTO Insegnanti_Anagrafici (id, nome, cognome, email, utente_id)
+            VALUES (%s, %s, %s, %s, %s)
+            ON CONFLICT (id) DO UPDATE SET
+                nome = EXCLUDED.nome,
+                cognome = EXCLUDED.cognome,
+                email = EXCLUDED.email,
+                utente_id = EXCLUDED.utente_id
+            """,
             (
+                user_id,
+                data.nome,
+                data.cognome,
+                data.email,
+                user_id
+            )
+        )
+        db_handler.execute_sql_insertion(
+            "INSERT INTO Insegnanti_Registrati (id, anagrafico_id, infoMail, sitoWeb, cv, ricevimento) VALUES (%s, %s, %s, %s, %s, %s)",
+            (
+                user_id,
                 user_id,
                 getattr(data, "infoMail", None),
                 getattr(data, "sitoWeb", None),
