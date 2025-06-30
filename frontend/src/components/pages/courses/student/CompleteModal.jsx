@@ -25,19 +25,19 @@ export default function CompleteModal({
                 <h3 className="text-lg font-bold mb-2 text-[#991B1B]">
                     Completa il corso: {courseToComplete?.nome}
                 </h3>
-                <p className="mb-2 text-sm">
+                <p className="mb-2 text-sm text-black">
                     Docente: {(courseToComplete?.docente_nome || courseToComplete?.docente_cognome)
                         ? `${courseToComplete?.docente_nome ?? ""} ${courseToComplete?.docente_cognome ?? ""}`.trim()
                         : "N/A"}
                 </p>
-                <label className="block mb-2">Voto:</label>
+                <label className="block mb-2 text-black">Voto:</label>
                 <input
                     type="number"
                     min={18}
                     max={31}
                     value={completeVoto}
                     onChange={e => setCompleteVoto(e.target.value)}
-                    className="border rounded p-2 w-full mb-4"
+                    className="border text-black rounded p-2 w-full mb-4"
                 />
                 {(localError || error) && <div className="text-red-600 mb-2">{localError || error}</div>}
                 <div className="flex flex-row justify-center gap-6 mt-4">

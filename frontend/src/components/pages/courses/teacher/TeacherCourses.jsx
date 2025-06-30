@@ -60,15 +60,20 @@ export default function TeacherCourses() {
   const renderCourseBox = corso => (
     <div
       key={corso.id}
-      className="bg-white border border-[#991B1B] rounded-lg shadow p-4 min-w-[220px] max-w-xs flex flex-col items-center cursor-pointer hover:bg-gray-100 transition"
+      className="bg-white border border-[#991B1B] rounded-lg shadow p-4 min-w-[220px] max-w-xs w-64 h-32 flex flex-col justify-between cursor-pointer hover:bg-gray-100 transition"
       onClick={() => setSelectedCourse(corso)}
+      style={{ aspectRatio: "4/3" }}
     >
-      <h3 className="text-lg font-semibold text-[#991B1B] mb-2">{corso.nome}</h3>
-      <div className="text-sm text-gray-700 mb-1">
-        CFU: <span className="font-bold">{corso.cfu}</span>
+      <div className="flex items-start">
+        <h3 className="text-lg font-semibold text-[#991B1B]">{corso.nome}</h3>
       </div>
-      <div className="text-sm text-gray-700 mb-1">
-        Edizioni: <span className="font-bold">{corso.edizioni.length}</span>
+      <div className="flex justify-end items-end gap-4 mt-auto">
+        <div className="text-xs text-gray-700">
+          CFU: <span className="font-bold">{corso.cfu}</span>
+        </div>
+        <div className="text-xs text-gray-700">
+          Edizioni: <span className="font-bold">{corso.edizioni.length}</span>
+        </div>
       </div>
     </div>
   );

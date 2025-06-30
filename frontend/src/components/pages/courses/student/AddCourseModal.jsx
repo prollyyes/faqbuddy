@@ -41,13 +41,13 @@ export default function AddCourseModal({
                 <h3 className="text-lg font-bold mb-4 text-[#991B1B]">Aggiungi Corso</h3>
                 {!selectedCourseId ? (
                     <>
-                        <div className="mb-4">
-                            <h4 className="font-semibold mb-2">Corsi disponibili:</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="mb-4 ">
+                            <h4 className="font-semibold mb-2 text-black">Corsi disponibili:</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                 {availableCourses.map(corso => (
                                     <div
                                         key={corso.id}
-                                        className="border rounded-lg p-4 shadow hover:bg-gray-100 cursor-pointer transition"
+                                        className="border border-gray-400 rounded-lg p-4 shadow hover:bg-gray-100 cursor-pointer transition"
                                         onClick={() => handleSelectCourse(corso.id)}
                                     >
                                         <div className="font-bold text-[#991B1B]">{corso.nome}</div>
@@ -64,10 +64,10 @@ export default function AddCourseModal({
                                 {editions.map(edition => (
                                     <div
                                         key={edition.id + "_" + edition.data}
-                                        className="border rounded-lg p-3 flex items-center justify-between hover:bg-gray-100 cursor-pointer transition"
+                                        className="border border-gray-400 rounded-lg p-3 flex items-center justify-between hover:bg-gray-100 cursor-pointer transition"
                                     >
                                         <span>
-                                            <div>{edition.data}</div>
+                                            <div className='text-black'>{edition.data}</div>
                                             <div className="text-sm text-gray-700">
                                                 Docente: {edition.docente ? edition.docente : "N/A"}
                                             </div>
@@ -99,11 +99,11 @@ export default function AddCourseModal({
                             </div>
                         ) : (
                             <form onSubmit={handleAddEdition} className="space-y-2 mt-4">
-                                <h4 className="font-semibold mb-2">Aggiungi nuova edizione</h4>
-                                <label className="block font-semibold">Data:</label>
+                                <h4 className="font-semibold mb-2 text-black">Aggiungi nuova edizione</h4>
+                                <label className="block font-semibold text-black">Data:</label>
                                 <select
                                     required
-                                    className="border rounded p-2 w-full"
+                                    className="border rounded p-2 w-full text-black"
                                     value={newEdition.data}
                                     onChange={e => setNewEdition({ ...newEdition, data: e.target.value })}
                                 >
@@ -115,7 +115,7 @@ export default function AddCourseModal({
                                 <input
                                     type="text"
                                     placeholder="Orario"
-                                    className="border rounded p-2 w-full"
+                                    className="border rounded p-2 w-full text-black"
                                     value={newEdition.orario}
                                     onChange={e => setNewEdition({ ...newEdition, orario: e.target.value })}
                                 />
@@ -124,15 +124,15 @@ export default function AddCourseModal({
                                     type="text"
                                     required
                                     placeholder="Modalità Esame"
-                                    className="border rounded p-2 w-full"
+                                    className="border rounded p-2 w-full text-black"
                                     value={newEdition.mod_Esame}
                                     onChange={e => setNewEdition({ ...newEdition, mod_Esame: e.target.value })}
                                 />
 
-                                <label className="block font-semibold">Docente:</label>
+                                <label className="block font-semibold text-black">Docente:</label>
                                 <select
                                   required
-                                  className="border rounded p-2 w-full"
+                                  className="border rounded p-2 w-full text-black"
                                   value={newEdition.docenteId}
                                   onChange={e => setNewEdition({ ...newEdition, docenteId: e.target.value })}
                                 >
@@ -145,7 +145,7 @@ export default function AddCourseModal({
                                 </select>
 
                                 <div className="flex items-center gap-2">
-                                    <span className="font-semibold">Esonero:</span>
+                                    <span className="font-semibold text-black">Esonero:</span>
                                     <button
                                         type="button"
                                         className={`px-4 py-1 rounded-full transition font-semibold text-sm

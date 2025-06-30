@@ -99,17 +99,17 @@ export function EditionsModal({ corso, onClose, onUpdateStato }) {
                 </button>
                 <h3 className="text-lg font-bold mb-4 text-[#991B1B]">{corso.nome}</h3>
                 <div className="mb-2 text-gray-700">CFU: <span className="font-bold">{corso.cfu}</span></div>
-                <h4 className="font-semibold mb-2">Edizioni:</h4>
+                <h4 className="font-semibold mb-2 text-black">Edizioni:</h4>
                 <div className="space-y-2">
                     {edizioni.length === 0 && (
                         <div className="text-gray-500">Nessuna edizione trovata.</div>
                     )}
                     {edizioni.map((ed) => (
-                        <div key={ed.edition_id} className="border rounded-lg p-3">
+                        <div key={ed.edition_id} className="border border-black rounded-lg p-3">
                             <div className="font-semibold text-[#991B1B]">{ed.data || ed.edition_data}</div>
                             {editMode[ed.edition_id] ? (
                                 <>
-                                    <div className="text-sm mb-1">
+                                    <div className="text-sm mb-1 text-black">
                                         Modalità esame:{" "}
                                         <input
                                             className="border rounded p-1 w-full"
@@ -118,7 +118,7 @@ export function EditionsModal({ corso, onClose, onUpdateStato }) {
                                             disabled={loadingId === ed.edition_id}
                                         />
                                     </div>
-                                    <div className="text-sm mb-1">
+                                    <div className="text-sm mb-1 text-black">
                                         Orario:{" "}
                                         <input
                                             className="border rounded p-1 w-full"
@@ -127,7 +127,7 @@ export function EditionsModal({ corso, onClose, onUpdateStato }) {
                                             disabled={loadingId === ed.edition_id}
                                         />
                                     </div>
-                                    <div className="text-sm mb-1 flex items-center gap-2">
+                                    <div className="text-sm mb-1 flex items-center gap-2 text-black">
                                         Esonero:{" "}
                                         <button
                                             type="button"
@@ -138,7 +138,7 @@ export function EditionsModal({ corso, onClose, onUpdateStato }) {
                                             {editStates[ed.edition_id]?.esonero ? "Sì" : "No"}
                                         </button>
                                     </div>
-                                    <div className="text-sm mb-1">
+                                    <div className="text-sm mb-1 text-black">
                                         <label className="block font-semibold">Data:</label>
                                         <select
                                             required
@@ -153,7 +153,7 @@ export function EditionsModal({ corso, onClose, onUpdateStato }) {
                                             ))}
                                         </select>
                                     </div>
-                                    <div className="text-sm mb-2">
+                                    <div className="text-sm mb-2 text-black">
                                         Stato:{" "}
                                         <select
                                             className="border rounded p-1"
@@ -183,11 +183,11 @@ export function EditionsModal({ corso, onClose, onUpdateStato }) {
                                 </>
                             ) : (
                                 <>
-                                    <div className="text-sm">Modalità esame: <span className="font-bold">{ed.mod_Esame || ed.mod_esame || "N/A"}</span></div>
-                                    <div className="text-sm">Orario: <span className="font-bold">{ed.orario || "N/A"}</span></div>
-                                    <div className="text-sm">Esonero: <span className="font-bold">{ed.esonero ? "Sì" : "No"}</span></div>
-                                    <div className="text-sm">Data: <span className="font-bold">{ed.data || ed.edition_data}</span></div>
-                                    <div className="text-sm mb-2">Stato: <span className="font-bold">{ed.stato}</span></div>
+                                    <div className="text-sm text-black">Modalità esame: <span className="font-bold">{ed.mod_Esame || ed.mod_esame || "N/A"}</span></div>
+                                    <div className="text-sm text-black">Orario: <span className="font-bold">{ed.orario || "N/A"}</span></div>
+                                    <div className="text-sm text-black">Esonero: <span className="font-bold">{ed.esonero ? "Sì" : "No"}</span></div>
+                                    <div className="text-sm text-black">Data: <span className="font-bold">{ed.data || ed.edition_data}</span></div>
+                                    <div className="text-sm mb-2 text-black">Stato: <span className="font-bold">{ed.stato}</span></div>
                                     <button
                                         className="px-2 py-1 rounded text-[#991B1B] border border-[#991B1B] hover:bg-[#991B1B] hover:text-white text-sm transition"
                                         onClick={() => startEdit(ed)}

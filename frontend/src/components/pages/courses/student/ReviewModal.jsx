@@ -22,9 +22,9 @@ export default function ReviewModal({ corso, onClose, onSubmit, error }) {
         <h3 className="text-lg font-bold mb-4 text-[#991B1B]">Aggiungi Recensione</h3>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="block font-semibold mb-1">Descrizione:</label>
+            <label className="block font-semibold mb-1 text-black">Descrizione:</label>
             <textarea
-              className="border rounded p-2 w-full"
+              className="border rounded p-2 w-full text-black"
               value={descrizione}
               onChange={e => setDescrizione(e.target.value)}
               rows={3}
@@ -32,12 +32,12 @@ export default function ReviewModal({ corso, onClose, onSubmit, error }) {
             />
           </div>
           <div>
-            <label className="block font-semibold mb-1">Voto (1-5):</label>
+            <label className="block font-semibold mb-1 text-black">Voto (1-5):</label>
             <input
               type="number"
               min={1}
               max={5}
-              className="border rounded p-2 w-full"
+              className="border rounded p-2 w-full text-black"
               value={voto}
               onChange={e => setVoto(e.target.value)}
               required
