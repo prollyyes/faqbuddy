@@ -29,50 +29,55 @@ class Colors:
     BUTTON_HOVER = "#0056CC" # Darker Apple Blue for hover
 
 class ModernButton(tk.Button):
-    """Apple-style rounded button."""
+    """Modern button with improved styling."""
+    
     def __init__(self, parent, **kwargs):
         super().__init__(parent, **kwargs)
         self.configure(
             relief="flat",
             borderwidth=0,
-            font=("SF Pro Display", 10, "bold"),
             cursor="hand2",
+            font=("SF Pro Display", 10, "bold"),
             padx=20,
             pady=8
         )
         
     def configure_primary(self):
+        """Configure as primary button."""
         self.configure(
             bg=Colors.PRIMARY,
             fg="white",
             activebackground=Colors.BUTTON_HOVER,
             activeforeground="white"
         )
-        # Add rounded corners effect
         self.bind("<Enter>", self._on_enter)
         self.bind("<Leave>", self._on_leave)
         
     def configure_secondary(self):
+        """Configure as secondary button."""
         self.configure(
             bg=Colors.SECONDARY,
             fg="white",
             activebackground="#6D6D70",
             activeforeground="white"
         )
-        # Add rounded corners effect
         self.bind("<Enter>", self._on_enter_secondary)
         self.bind("<Leave>", self._on_leave_secondary)
         
     def _on_enter(self, event):
+        """Handle mouse enter for primary button."""
         self.configure(bg=Colors.BUTTON_HOVER)
         
     def _on_leave(self, event):
+        """Handle mouse leave for primary button."""
         self.configure(bg=Colors.PRIMARY)
         
     def _on_enter_secondary(self, event):
+        """Handle mouse enter for secondary button."""
         self.configure(bg="#6D6D70")
         
     def _on_leave_secondary(self, event):
+        """Handle mouse leave for secondary button."""
         self.configure(bg=Colors.SECONDARY)
 
 class ModernEntry(tk.Entry):
@@ -1401,7 +1406,7 @@ class SetupWizard:
         """Show a modal for role selection and handle admin authentication."""
         self.role_window = tk.Toplevel(self.root)
         self.role_window.title("Select Role")
-        self.role_window.geometry("400x250")
+        self.role_window.geometry("500x350")
         self.role_window.configure(bg=Colors.BACKGROUND)
         self.role_window.grab_set()
         self.role_window.resizable(False, False)
@@ -1416,66 +1421,230 @@ class SetupWizard:
         y = (self.role_window.winfo_screenheight() // 2) - (height // 2)
         self.role_window.geometry(f"{width}x{height}+{x}+{y}")
 
+        # Main container
+        main_frame = tk.Frame(self.role_window, bg=Colors.BACKGROUND)
+        main_frame.pack(fill="both", expand=True, padx=40, pady=40)
+
+        # Icon
+        icon_label = tk.Label(
+            main_frame, 
+            text="🚀", 
+            font=("Segoe UI", 48), 
+            bg=Colors.BACKGROUND
+        )
+        icon_label.pack(pady=(0, 20))
+
         # Title
-        title = tk.Label(self.role_window, text="Welcome to FAQBuddy Setup", font=("Segoe UI", 16, "bold"), fg=Colors.PRIMARY, bg=Colors.BACKGROUND)
-        title.pack(pady=(30, 10))
+        title = tk.Label(
+            main_frame, 
+            text="Welcome to FAQBuddy Setup", 
+            font=("Segoe UI", 20, "bold"), 
+            fg=Colors.PRIMARY, 
+            bg=Colors.BACKGROUND
+        )
+        title.pack(pady=(0, 10))
 
-        subtitle = tk.Label(self.role_window, text="Please select your role:", font=("Segoe UI", 11), fg=Colors.TEXT, bg=Colors.BACKGROUND)
-        subtitle.pack(pady=(0, 20))
+        subtitle = tk.Label(
+            main_frame, 
+            text="Please select your role to continue:", 
+            font=("Segoe UI", 12), 
+            fg=Colors.SECONDARY, 
+            bg=Colors.BACKGROUND
+        )
+        subtitle.pack(pady=(0, 30))
 
-        # Buttons
-        btn_frame = tk.Frame(self.role_window, bg=Colors.BACKGROUND)
-        btn_frame.pack(pady=10)
+        # Buttons container
+        btn_frame = tk.Frame(main_frame, bg=Colors.BACKGROUND)
+        btn_frame.pack(fill="x", pady=20)
 
+        # Admin button with modern styling
         admin_btn = tk.Button(
-            btn_frame, text="Admin", width=15, height=2, bg=Colors.PRIMARY, fg="white", font=("SF Pro Display", 11, "bold"),
-            activebackground=Colors.BUTTON_HOVER, activeforeground="white", relief="flat", cursor="hand2",
-            command=self.admin_login_modal, padx=20, pady=8
+            btn_frame, 
+            text="👨‍💼 Admin", 
+            width=20, 
+            height=3, 
+            bg=Colors.PRIMARY, 
+            fg="white", 
+            font=("SF Pro Display", 12, "bold"),
+            activebackground=Colors.BUTTON_HOVER, 
+            activeforeground="white", 
+            relief="flat", 
+            cursor="hand2",
+            command=self.admin_login_modal, 
+            padx=30, 
+            pady=12,
+            borderwidth=0
         )
-        admin_btn.grid(row=0, column=0, padx=20)
+        admin_btn.pack(pady=(0, 15), fill="x")
 
+        # User button with modern styling
         user_btn = tk.Button(
-            btn_frame, text="User", width=15, height=2, bg=Colors.SECONDARY, fg="white", font=("SF Pro Display", 11, "bold"),
-            activebackground="#6D6D70", activeforeground="white", relief="flat", cursor="hand2",
-            command=self.user_select, padx=20, pady=8
+            btn_frame, 
+            text="👤 User", 
+            width=20, 
+            height=3, 
+            bg=Colors.SECONDARY, 
+            fg="white", 
+            font=("SF Pro Display", 12, "bold"),
+            activebackground="#6D6D70", 
+            activeforeground="white", 
+            relief="flat", 
+            cursor="hand2",
+            command=self.user_select, 
+            padx=30, 
+            pady=12,
+            borderwidth=0
         )
-        user_btn.grid(row=0, column=1, padx=20)
+        user_btn.pack(fill="x")
+
+        # Add hover effects
+        def on_admin_enter(e):
+            admin_btn.configure(bg=Colors.BUTTON_HOVER)
+        
+        def on_admin_leave(e):
+            admin_btn.configure(bg=Colors.PRIMARY)
+            
+        def on_user_enter(e):
+            user_btn.configure(bg="#6D6D70")
+            
+        def on_user_leave(e):
+            user_btn.configure(bg=Colors.SECONDARY)
+            
+        admin_btn.bind("<Enter>", on_admin_enter)
+        admin_btn.bind("<Leave>", on_admin_leave)
+        user_btn.bind("<Enter>", on_user_enter)
+        user_btn.bind("<Leave>", on_user_leave)
 
     def admin_login_modal(self):
         """Prompt for admin password."""
         for widget in self.role_window.winfo_children():
             widget.destroy()
         
-        title = tk.Label(self.role_window, text="Admin Login", font=("Segoe UI", 16, "bold"), fg=Colors.PRIMARY, bg=Colors.BACKGROUND)
-        title.pack(pady=(30, 10))
+        # Main container
+        main_frame = tk.Frame(self.role_window, bg=Colors.BACKGROUND)
+        main_frame.pack(fill="both", expand=True, padx=40, pady=40)
         
-        subtitle = tk.Label(self.role_window, text="Enter admin password:", font=("Segoe UI", 11), fg=Colors.TEXT, bg=Colors.BACKGROUND)
-        subtitle.pack(pady=(0, 10))
+        # Icon
+        icon_label = tk.Label(
+            main_frame, 
+            text="🔐", 
+            font=("Segoe UI", 48), 
+            bg=Colors.BACKGROUND
+        )
+        icon_label.pack(pady=(0, 20))
+        
+        title = tk.Label(
+            main_frame, 
+            text="Admin Login", 
+            font=("Segoe UI", 20, "bold"), 
+            fg=Colors.PRIMARY, 
+            bg=Colors.BACKGROUND
+        )
+        title.pack(pady=(0, 10))
+        
+        subtitle = tk.Label(
+            main_frame, 
+            text="Enter admin password to continue:", 
+            font=("Segoe UI", 12), 
+            fg=Colors.SECONDARY, 
+            bg=Colors.BACKGROUND
+        )
+        subtitle.pack(pady=(0, 30))
+        
+        # Password entry frame
+        entry_frame = tk.Frame(main_frame, bg=Colors.BACKGROUND)
+        entry_frame.pack(fill="x", pady=(0, 20))
         
         self.admin_pw_var = tk.StringVar()
-        pw_entry = tk.Entry(self.role_window, textvariable=self.admin_pw_var, show="*", font=("Segoe UI", 12), width=25, relief="flat", bd=2)
+        pw_entry = tk.Entry(
+            entry_frame, 
+            textvariable=self.admin_pw_var, 
+            show="*", 
+            font=("Segoe UI", 14), 
+            width=25, 
+            relief="flat", 
+            bd=2,
+            bg=Colors.CARD_BG,
+            fg=Colors.TEXT,
+            insertbackground=Colors.PRIMARY
+        )
         pw_entry.pack(pady=(0, 10))
         pw_entry.focus_set()
         
-        self.admin_pw_error = tk.Label(self.role_window, text="", font=("Segoe UI", 10), fg=Colors.ERROR, bg=Colors.BACKGROUND)
-        self.admin_pw_error.pack()
+        # Error label
+        self.admin_pw_error = tk.Label(
+            main_frame, 
+            text="", 
+            font=("Segoe UI", 10), 
+            fg=Colors.ERROR, 
+            bg=Colors.BACKGROUND
+        )
+        self.admin_pw_error.pack(pady=(0, 30))
         
-        btn_frame = tk.Frame(self.role_window, bg=Colors.BACKGROUND)
-        btn_frame.pack(pady=10)
+        # Buttons frame
+        btn_frame = tk.Frame(main_frame, bg=Colors.BACKGROUND)
+        btn_frame.pack(fill="x", pady=20)
         
+        # Submit button
         submit_btn = tk.Button(
-            btn_frame, text="Login", width=12, height=2, bg=Colors.PRIMARY, fg="white", font=("SF Pro Display", 11, "bold"),
-            activebackground=Colors.BUTTON_HOVER, activeforeground="white", relief="flat", cursor="hand2",
-            command=self.check_admin_password, padx=15, pady=6
+            btn_frame, 
+            text="🔓 Login", 
+            width=15, 
+            height=2, 
+            bg=Colors.PRIMARY, 
+            fg="white", 
+            font=("SF Pro Display", 12, "bold"),
+            activebackground=Colors.BUTTON_HOVER, 
+            activeforeground="white", 
+            relief="flat", 
+            cursor="hand2",
+            command=self.check_admin_password, 
+            padx=20, 
+            pady=8,
+            borderwidth=0
         )
-        submit_btn.grid(row=0, column=0, padx=10)
+        submit_btn.pack(side="left", padx=(0, 10), fill="x", expand=True)
         
+        # Back button
         back_btn = tk.Button(
-            btn_frame, text="Back", width=12, height=2, bg=Colors.SECONDARY, fg="white", font=("SF Pro Display", 11, "bold"),
-            activebackground="#6D6D70", activeforeground="white", relief="flat", cursor="hand2",
-            command=self.reset_role_modal, padx=15, pady=6
+            btn_frame, 
+            text="← Back", 
+            width=15, 
+            height=2, 
+            bg=Colors.SECONDARY, 
+            fg="white", 
+            font=("SF Pro Display", 12, "bold"),
+            activebackground="#6D6D70", 
+            activeforeground="white", 
+            relief="flat", 
+            cursor="hand2",
+            command=self.reset_role_modal, 
+            padx=20, 
+            pady=8,
+            borderwidth=0
         )
-        back_btn.grid(row=0, column=1, padx=10)
+        back_btn.pack(side="right", fill="x", expand=True)
+        
+        # Add hover effects
+        def on_submit_enter(e):
+            submit_btn.configure(bg=Colors.BUTTON_HOVER)
+        
+        def on_submit_leave(e):
+            submit_btn.configure(bg=Colors.PRIMARY)
+            
+        def on_back_enter(e):
+            back_btn.configure(bg="#6D6D70")
+            
+        def on_back_leave(e):
+            back_btn.configure(bg=Colors.SECONDARY)
+            
+        submit_btn.bind("<Enter>", on_submit_enter)
+        submit_btn.bind("<Leave>", on_submit_leave)
+        back_btn.bind("<Enter>", on_back_enter)
+        back_btn.bind("<Leave>", on_back_leave)
+        
+        # Bind Enter key to submit
+        pw_entry.bind("<Return>", lambda e: self.check_admin_password())
 
     def check_admin_password(self):
         pw = self.admin_pw_var.get()
