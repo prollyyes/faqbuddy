@@ -117,7 +117,7 @@ class SetupWizard:
         
         # Initialize variables
         self.current_step = -1  # Start with login step
-        self.total_steps = 6
+        self.total_steps = 7  # Changed from 6 to 7 to include completion step
         self.is_admin = False
         self.env_vars = {}
         self.env_entries = {}
@@ -238,7 +238,7 @@ class SetupWizard:
         # Progress label
         self.progress_label = tk.Label(
             progress_frame,
-            text="Step 1 of 6: Checking Python Version",
+            text="Step 1 of 7: Checking Python Version",
             font=("Segoe UI", 10, "bold"),
             fg=Colors.TEXT,
             bg=Colors.BACKGROUND
@@ -395,7 +395,7 @@ class SetupWizard:
             self.progress_label.config(text=f"Step {step} of {self.total_steps}")
         else:
             # For users, skip admin-only steps
-            user_steps = [1, 2, 3, 4, 5, 6]  # Python check, env setup, model download, vector db, deps, completion
+            user_steps = [1, 2, 3, 4, 5, 6, 7]  # Python check, env setup, model download, vector db, deps, completion
             if step in user_steps:
                 user_step_index = user_steps.index(step)
                 progress = ((user_step_index + 1) / len(user_steps)) * 100
@@ -701,7 +701,7 @@ class SetupWizard:
         
     def show_python_check(self):
         """Show Python version check step."""
-        self.progress_label.config(text="Step 1 of 6: Checking Python Version")
+        self.progress_label.config(text="Step 1 of 7: Checking Python Version")
         
         # Create card
         card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
@@ -773,7 +773,7 @@ class SetupWizard:
         
     def show_env_setup(self):
         """Show environment setup step."""
-        self.progress_label.config(text="Step 2 of 6: Environment Configuration")
+        self.progress_label.config(text="Step 2 of 7: Environment Configuration")
         
         # Create card
         card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
@@ -1021,7 +1021,7 @@ class SetupWizard:
             
     def show_db_test(self):
         """Show database test step."""
-        self.progress_label.config(text="Step 3 of 6: Testing Database Connection")
+        self.progress_label.config(text="Step 3 of 7: Testing Database Connection")
         
         # Create card
         card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
@@ -1081,7 +1081,7 @@ class SetupWizard:
         
     def show_model_download(self):
         """Show model download step."""
-        self.progress_label.config(text="Step 4 of 6: Downloading AI Models")
+        self.progress_label.config(text="Step 4 of 7: Downloading AI Models")
         
         # Create card
         card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
@@ -1194,7 +1194,7 @@ class SetupWizard:
         
     def show_vector_db_setup(self):
         """Show vector database setup step."""
-        self.progress_label.config(text="Step 5 of 6: Setting up Vector Database")
+        self.progress_label.config(text="Step 5 of 7: Setting up Vector Database")
         
         # Create card
         card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
@@ -1298,7 +1298,7 @@ class SetupWizard:
         
     def show_dependency_install(self):
         """Show dependency installation step."""
-        self.progress_label.config(text="Step 6 of 6: Installing Dependencies")
+        self.progress_label.config(text="Step 6 of 7: Installing Dependencies")
         
         # Create card
         card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
@@ -1872,7 +1872,7 @@ class SetupWizard:
                 
                 # Install Python dependencies
                 result = subprocess.run([
-                    sys.executable, "-m", "pip", "install", "-r", "backend/src/requirements.txt"
+                    sys.executable, "-m", "pip", "install", "-r", "requirements.txt"
                 ], capture_output=True, text=True)
                 
                 if result.returncode != 0:

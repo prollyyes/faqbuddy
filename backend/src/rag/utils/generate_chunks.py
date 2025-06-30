@@ -1,4 +1,4 @@
-from src.utils.db_utils import get_connection, MODE
+from src.text_2_SQL.db_utils import get_db_connection
 from dotenv import load_dotenv
 from typing import List, Dict, Any
 
@@ -6,7 +6,7 @@ load_dotenv()
 
 class ChunkGenerator:
     def __init__(self):
-        self.conn = get_connection(mode=MODE)
+        self.conn = get_db_connection()
         self.cur = self.conn.cursor()
 
     def __del__(self):
@@ -88,20 +88,22 @@ class ChunkGenerator:
     def get_course_edition_chunks(self) -> List[Dict[str, Any]]:
         query = """
             SELECT ec.id, ec.data, ec.mod_esame, c.nome as course_name, 
-                   ia.nome as prof_nome, ia.cognome as prof_cognome
+                   u.nome as prof_nome, u.cognome as prof_cognome, p.nome as piattaforma
             FROM edizionecorso ec
             JOIN corso c ON ec.id = c.id
-            JOIN insegnanti_anagrafici ia ON ec.insegnante_anagrafico = ia.id
+            JOIN insegnanti i ON ec.insegnante = i.id
+            JOIN utente u ON i.id = u.id
+            JOIN piattaforme p ON p.nome = ec.piattaforma
         """
         rows = self._execute_query(query)
         return [
             {
-                "id": f"edizione_corso_{id}_{data}",
+                "id": f"edizione_corso_{id}",
                 "text": f"Edizione del corso di {course_name} per il periodo '{data}'. "
-                        f"Docente: {prof_nome} {prof_cognome}. Modalità d'esame: {mod_esame}.",
-                "metadata": {"table_name": "edizionecorso", "primary_key": [id, data]}
+                        f"Docente: {prof_nome} {prof_cognome}. Modalità d'esame: {mod_esame}. Piattaforma: {piattaforma}.",
+                "metadata": {"table_name": "edizionecorso", "primary_key": id}
             }
-            for id, data, mod_esame, course_name, prof_nome, prof_cognome in rows
+            for id, data, mod_esame, course_name, prof_nome, prof_cognome, piattaforma in rows
         ]
 
     def get_material_chunks(self) -> List[Dict[str, Any]]:
@@ -127,7 +129,7 @@ class ChunkGenerator:
         query = """
             SELECT r.id, r.descrizione, r.voto, c.nome as course_name
             FROM review r
-            JOIN edizionecorso ec ON r.edition_id = ec.id AND r.edition_data = ec.data
+            JOIN edizionecorso ec ON r.edition_id = ec.id
             JOIN corso c ON ec.id = c.id
         """
         rows = self._execute_query(query)
@@ -163,16 +165,15 @@ class ChunkGenerator:
         ]
     def get_piattaforma_chunks(self) -> List[Dict[str, Any]]:
         query = """
-            SELECT p.nome, ecp.codice, ecp.edizione_id
-            FROM piattaforme p 
-            LEFT JOIN edizionecorso_piattaforme ecp ON p.nome = ecp.piattaforma_nome
+            SELECT p.nome, p.codice, ec.id as edizione_id
+            FROM piattaforme p JOIN edizionecorso ec ON p.nome = ec.piattaforma
         """
         rows = self._execute_query(query)
         return [
             {
                 "id": f"piattaforma_{nome}",
                 "text": f"Piattaforma: {nome}, con codice: {codice or 'Nessun codice disponibile'}. "
-                        f"Edizione: {edizione_id or 'Non associata'}.",
+                        f"Edizione: {edizione_id}.",
                 "metadata": {"table_name": "piattaforme", "primary_key": nome}
             }
             for nome, codice, edizione_id in rows
@@ -180,38 +181,34 @@ class ChunkGenerator:
     
     def get_insegnante_chunks(self) -> List[Dict[str, Any]]:
         query = """
-            SELECT ia.id, ia.nome, ia.cognome, ia.email, ir.infoMail, ir.sitoWeb, ir.cv, ir.ricevimento
-            FROM insegnanti_anagrafici ia
-            LEFT JOIN insegnanti_registrati ir ON ia.id = ir.anagrafico_id
+            SELECT i.id, i.infoMail as email, u.nome, u.cognome, i.sitoweb, i.cv, i.ricevimento
+            FROM insegnanti i JOIN utente u ON i.id = u.id
         """
         rows = self._execute_query(query)
         return [
             {
                 "id": f"insegnante_{id}",
-                "text": f"Insegnante: {nome} {cognome}, email: {email or 'Non disponibile'}."
-                        f"{' InfoMail: ' + infoMail if infoMail else ''}"
-                        f"{' Sito web: ' + sitoWeb if sitoWeb else ''}"
-                        f"{' CV: ' + cv if cv else ''}"
-                        f"{' Ricevimento: ' + ricevimento if ricevimento else ''}",
-                "metadata": {"table_name": "insegnanti_anagrafici", "primary_key": id}
+                "text": f"Insegnante: {nome} {cognome}, raggiungibile all'email: {email}"
+                        f"Ha il seguente CV: {cv} e ricevimento: {ricevimento}. Il sito web dell'insegnante è: {sitoweb}.",
+                "metadata": {"table_name": "insegnanti", "primary_key": id}
             }
-            for id, nome, cognome, email, infoMail, sitoWeb, cv, ricevimento in rows
+            for id, email, nome, cognome, sitoweb, cv, ricevimento in rows
         ]
     
     def get_thesis_chunks(self) -> List[Dict[str, Any]]:
         query = """
-            SELECT t.id, cdl.nome as corso_laurea_nome, s.matricola as studente_matricola, t.file
+            SELECT t.id, t.titolo, cdl.nome as corso_laurea_nome, s.matricola as studente_matricola, t.file
             FROM tesi t JOIN corso_di_laurea cdl ON t.corso_laurea_id = cdl.id JOIN studenti s ON t.student_id = s.id
         """
         rows = self._execute_query(query)
         return [
             {
                 "id": f"tesi_{id}",
-                "text": f"Tesi, dello studente {studente_matricola} del corso di laurea {corso_laurea_nome}."
+                "text": f"Tesi: {titolo}, dello studente {studente_matricola} del corso di laurea {corso_laurea_nome}."
                         f"Il file si trova in {file}.",
                 "metadata": {"table_name": "tesi", "primary_key": id}
             }
-            for id, corso_laurea_nome, studente_matricola, file in rows
+            for id, titolo, corso_laurea_nome, studente_matricola, file in rows
         ]
     
     def get_chunks(self) -> List[Dict[str, Any]]:
