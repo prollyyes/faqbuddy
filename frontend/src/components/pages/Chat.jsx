@@ -97,8 +97,8 @@ const Chat = () => {
                     )}
 
                     {chatExpanded && (
-                        <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[calc(100vh-200px)]">
-                            <div className="flex justify-between items-center mb-4">
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[calc(100vh-200px)] pt-10">
+                            {/* <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-lg font-semibold text-[#822433]">FAQBuddy Chat</h2>
                                 <button
                                     onClick={() => setChatExpanded(false)}
@@ -106,7 +106,7 @@ const Chat = () => {
                                 >
                                     ✕
                                 </button>
-                            </div>
+                            </div> */}
                             {messages.map((msg, index) => (
                                 <motion.div
                                     key={index}
