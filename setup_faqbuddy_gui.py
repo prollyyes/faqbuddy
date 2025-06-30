@@ -381,6 +381,9 @@ class SetupWizard:
             
         self.current_step = step
         
+        # Initialize progress variable
+        progress = 0
+        
         # Update progress based on role
         if step == 0:
             # Login screen - no progress bar
