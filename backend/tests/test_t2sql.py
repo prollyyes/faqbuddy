@@ -1,7 +1,7 @@
 import pytest
 from src.text_2_SQL import TextToSQLConverter
 from src.utils.db_handler import DBHandler
-from src.utils.db_utils import get_connection
+from src.utils.db_utils import get_connection, MODE
 import time
 
 @pytest.fixture(scope="module")
@@ -10,7 +10,7 @@ def t2sql():
 
 @pytest.fixture(scope="module")
 def db():
-    conn = get_connection(mode="neon")
+    conn = get_connection(mode=MODE)
     dbh = DBHandler(conn)
     yield dbh
     dbh.close_connection()

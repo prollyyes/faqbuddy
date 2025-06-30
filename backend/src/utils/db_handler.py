@@ -15,38 +15,44 @@ class DBHandler():
         self.conn = connection
 
 
-    def run_query(self, query: str, params: Optional[tuple] = None, many: bool = False, fetch: bool = False, columns: bool = False) -> list[tuple]:
+    def run_query(self, query: str, params: Optional[tuple] = None, many: bool = False, fetch: bool = False, columns: bool = False, rollback: bool = False) -> list[tuple]:
         """
         Executes SQL queries, handling parameters, multiple executions and data retrieval.
-
+    
         Args:
             query (str): SQL query.
             params (tuple): Parameters with values for placeholders.
             many (bool): Default false, set true to execute batch of queries.
             fetch (bool): Default false, set true to retrieve query's results.
             columns (bool): Default false, set true to retrieve query's results and columns' names.
+            rollback (bool): If True, rollback the transaction on exception.
         
         Returns:
             list: If fetch is set true returns a list of tuples with query's result.
             If columns is set true returns a list of tuples with query's result and a list of columns' names.
             None: If fetch is false.
         """
-        with self.conn.cursor() as cursor:
-            if many:
-                cursor.executemany(query, params)
-            elif params:
-                cursor.execute(query, params)
-            else:
-                cursor.execute(query)
-
-            self.conn.commit()
-
-            if fetch:
-                result = cursor.fetchall()
-                if columns:
-                    columns_names = [desc[0] for desc in cursor.description]
-                    return result, columns_names
-                return result
+        try:
+            with self.conn.cursor() as cursor:
+                if many:
+                    cursor.executemany(query, params)
+                elif params:
+                    cursor.execute(query, params)
+                else:
+                    cursor.execute(query)
+    
+                self.conn.commit()
+    
+                if fetch:
+                    result = cursor.fetchall()
+                    if columns:
+                        columns_names = [desc[0] for desc in cursor.description]
+                        return result, columns_names
+                    return result
+        except Exception as e:
+            if rollback:
+                self.conn.rollback()
+            raise e
 
     def execute_sql_insertion(self, query: str, params: tuple) -> None:
         """

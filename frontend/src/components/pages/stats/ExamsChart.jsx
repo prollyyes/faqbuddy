@@ -13,13 +13,17 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const Chart = ({ data }) => {
   const chartData = {
-    labels: data.map((item) => item.corso),
+    labels: data.map((item) => item.corso || ""), // etichetta vuota per placeholder
     datasets: [
       {
         label: "Voto",
-        data: data.map((item) => item.voto),
-        backgroundColor: "#822433",
-        barThickness: 15,
+        data: data.map((item) => item.placeholder ? null : item.voto),
+        backgroundColor: data.map((item) =>
+          item.placeholder ? "rgba(0,0,0,0)" : (item.simulato ? "#fde68a" : "#822433")
+        ),
+        barThickness: 17,
+        categoryPercentage: 0.5,
+        barPercentage: 0.9,
       },
     ],
   };
@@ -45,15 +49,17 @@ const Chart = ({ data }) => {
           text: "Voto",
         },
       },
+      // x: {
+      //   ticks: {
+      //     font: {
+      //       weight: 'bold',
+      //     },
+      //     autoSkip: false,
+      //     maxRotation: 90,
+      //     minRotation: 90,
+      //   },
       x: {
-        ticks: {
-          font: {
-            weight: 'bold',
-          },
-          autoSkip: false,
-          maxRotation: 90,
-          minRotation: 90,
-        },
+        display: false, // Nasconde completamente l'asse X (etichette e ticks)
       },
     },
     plugins: {
@@ -71,8 +77,8 @@ const Chart = ({ data }) => {
   };
 
   return (
-    <div style={{ maxWidth: '100%' }} className="w-fit overflow-x-auto">
-      <div style={{ width: `${data.length * 30}px`, height: '300px' }}>
+    <div style={{ width: '100%', maxWidth: '100%' }}>
+      <div style={{ width: '100%', height: '260px' }}>
         <Bar data={chartData} options={options} />
       </div>
     </div>

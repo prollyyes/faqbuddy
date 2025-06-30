@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Ramaraja&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
 :root {
   --background: #ffffff;
@@ -23,4 +24,10 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.ramaraja-regular {
+  font-family: "Ramaraja", serif;
+  font-weight: 700;
+  font-style: normal;
 }
