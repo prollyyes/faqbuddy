@@ -18,10 +18,19 @@ class RAGPipeline:
         load_dotenv()
         self.data_dir = data_dir
         self.top_k = top_k
-        self.model = SentenceTransformer(EMBEDDING_MODEL, device='mps')
+        self._model = None  # Lazy load SentenceTransformer
         self.pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
         self.all_chunks = load_all_chunks(self.data_dir)
-        print("[RAGPipeline] Initialized with Mistral for generation. Only Mistral is loaded.")
+        print("[RAGPipeline] Initialized. Models will be loaded on first use.")
+
+    @property
+    def model(self):
+        """Lazy load SentenceTransformer model."""
+        if self._model is None:
+            print("[RAGPipeline] Loading SentenceTransformer model...")
+            self._model = SentenceTransformer(EMBEDDING_MODEL, device='mps')
+            print("[RAGPipeline] SentenceTransformer model loaded successfully.")
+        return self._model
 
     def answer(self, question: str) -> str:
         print(f"\n🔍 Processing question: {question}")

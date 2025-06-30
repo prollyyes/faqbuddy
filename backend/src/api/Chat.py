@@ -8,35 +8,53 @@ from src.utils.db_utils import get_connection, MODE
 from fastapi import APIRouter
 
 
-# Inizializza modello ML
-ml_model = MLModel()
-
-# Inizializza converter Text-to-SQL
-converter = TextToSQLConverter()
-
-# Inizializza RAG
-rag = RAGSystem()
-
-# Inizializza router
+# Initialize router
 router = APIRouter()
+
+# Lazy loading variables
+_ml_model = None
+_converter = None
+_rag = None
+
+def get_ml_model():
+    """Lazy load ML model."""
+    global _ml_model
+    if _ml_model is None:
+        _ml_model = MLModel()
+    return _ml_model
+
+def get_converter():
+    """Lazy load Text-to-SQL converter."""
+    global _converter
+    if _converter is None:
+        _converter = TextToSQLConverter()
+    return _converter
+
+def get_rag():
+    """Lazy load RAG system."""
+    global _rag
+    if _rag is None:
+        _rag = RAGSystem()
+    return _rag
 
 
 @router.post("/t2sql")
 def t2sql_endpoint(req: T2SQLRequest):
     question = req.question
 
-    # Inizializza DBHandler
+    # Initialize DBHandler
     db = DBHandler(get_connection(mode=MODE))
     schema = db.get_schema()
 
     # 1. Switcher ML
+    ml_model = get_ml_model()
     ml_pred, proba = ml_model.inference(question)
 
     # 2. Fallback LLM se confidenza bassa
     threshold = 0.7
     fallback = False
     if proba < threshold:
-        # no Fallback LLM, but we consider the question complex
+        # no Fallback LLM, but we consider the question complex
         final_pred = "complex"
         fallback = True
     else:
@@ -47,6 +65,7 @@ def t2sql_endpoint(req: T2SQLRequest):
         # se entro 2 tentativi non riesco a generare una query SQL valida, faccio il fallback a RAG
         max_attempts = 2
         attempt = 0
+        converter = get_converter()
         while attempt < max_attempts:
             prompt = converter.create_prompt(question, schema)
             raw_response = converter.query_llm(prompt)
@@ -81,6 +100,7 @@ def t2sql_endpoint(req: T2SQLRequest):
 
         # Dopo 2 tentativi falliti, fallback RAG
         print("Fallback to RAG after 2 failed attempts.")
+        rag = get_rag()
         rag_result = rag.generate_response(question)
         db.close_connection()
         return {
@@ -97,6 +117,7 @@ def t2sql_endpoint(req: T2SQLRequest):
         }
     else:
         print("falling back to RAG for complex question prediction.")
+        rag = get_rag()
         rag_result = rag.generate_response(question)
         db.close_connection()
         return {

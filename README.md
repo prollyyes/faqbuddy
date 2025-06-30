@@ -416,6 +416,22 @@ npm run dev
 npm run build
 ```
 
+
+## Optional: Process Cleaner
+
+If you ever notice that some Python, Node.js, or Uvicorn processes remain running after closing FAQBuddy (especially after using Ctrl+C), you can use the provided process cleaner script:
+
+```bash
+python process_cleaner.py
+```
+
+This script will:
+- List any lingering FAQBuddy-related processes (python, node, uvicorn, next, etc.)
+- Prompt you to kill them if desired
+- Help keep your development environment clean
+
+You can safely run this script after closing the app or if you suspect some processes are still running in the background. 
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
