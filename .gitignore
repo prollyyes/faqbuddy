@@ -1,9 +1,10 @@
-# next.js
+# next.js
 frontend/.next
 frontend/node_modules
 
-# llm && ML models
+# llm && ML models
 backend/models
+!backend/models/*.joblib
 
 # pytest
 **/.benchmarks
@@ -14,11 +15,11 @@ backend/models
 backend/src/token.json
 backend/src/credentials.json
 
-# or any name that you used for your virtual environment
+
 venv/
 .env/
 
-# environment
+# environment
 .env
 
 # macOS
@@ -40,5 +41,5 @@ offload/
 db/parser_csv.py
 db/FAQBuddy.csv
 
-# rag
+# rag
 debugging_pinecone.json
