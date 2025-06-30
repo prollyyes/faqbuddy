@@ -1,13 +1,117 @@
 ## Setup rapido
-~*Nota*: per un setup veloce, `./setup.sh` contiene tutti i passi necessari preparare l'avvio dell'applicazione.
-Se ci sono problemi di permessi, basta garantire permessi di esecuzione al file: `chmod +x setup.sh`.~
+~Nota: per un setup veloce, `./setup.sh` contiene tutti i passi necessari preparare l'avvio dell'applicazione.
+Se ci sono problemi di permessi, basta garantire permessi di esecuzione al file: `chmod +x setup.sh`~
 
 
-**Per un setup piu' rapido possibile, esegui ./setup.sh dalla root**
+## Quick Launch (Recommended)
 
-**Per un setup piu' rapido possibile, esegui ./setup.sh dalla root**
+For the fastest setup, use the unified launch script:
 
-### 1. Crea e attiva l’ambiente virtuale
+```bash
+python launch_faqbuddy.py
+```
+
+This script will:
+- Detect your database configuration (Neon or Docker)
+- Set up the database if needed
+- Start both backend and frontend servers
+- Provide a unified interface
+
+## Database Setup Options
+
+### Option 1: Neon Database (Cloud - Recommended)
+```bash
+python setup_neon_database.py
+```
+
+**Required environment variables:**
+```env
+DB_NEON_NAME=your_neon_database_name
+DB_NEON_USER=your_neon_username
+DB_NEON_PASSWORD=your_neon_password
+DB_NEON_HOST=your_neon_host
+DB_NEON_PORT=5432
+PINECONE_API_KEY=your_pinecone_api_key
+```
+
+**Note:** This script connects to an existing Neon database that is already functional and populated. It only configures your local environment to connect to it.
+
+**Optional:** To update the Pinecone vector database with fresh data:
+```bash
+python setup_neon_database.py --update-vec-db
+```
+
+### Option 2: Docker Database (Local)
+```bash
+python setup_docker_database.py
+```
+
+**Required environment variables:**
+```env
+PINECONE_API_KEY=your_pinecone_api_key
+```
+
+**Note:** The setup script will ask if you want to update Pinecone. It's recommended to skip this unless you've made significant database changes.
+
+## Updating Pinecone Vector Database
+
+When you update your Neon database with new data, you'll want to refresh the Pinecone vector database to ensure your RAG system has the latest information.
+
+### Quick Update (Recommended)
+```bash
+python update_pinecone_db.py
+```
+
+This script will:
+- Connect to your Neon database
+- Generate fresh chunks from all tables
+- Clear the existing 'db' namespace in Pinecone
+- Upload the new vectors with embeddings
+- Verify the upload
+
+### Test Chunk Generation First
+Before running the full update, you can test that chunk generation works correctly:
+
+```bash
+python test_chunk_generation.py
+```
+
+This will show you:
+- How many chunks are generated from each table
+- Sample chunks to verify the content
+- Any connection or query errors
+
+### Manual Update (Advanced)
+If you need more control, you can run the update script directly:
+
+```bash
+cd backend/src/rag
+python update_pinecone_from_neon.py
+```
+
+### What Gets Updated
+The update process includes chunks from all major tables:
+- **Academic Structure**: Departments, Faculties, Degree Courses, Courses
+- **Teaching**: Course Editions, Teachers (both registered and unregistered)
+- **Students**: Student records, Course enrollments
+- **Materials**: Educational materials, Reviews, Ratings
+- **Platforms**: Course platforms and codes
+- **Theses**: Thesis information
+
+### Environment Variables Required
+Make sure your `.env` file contains:
+```env
+PINECONE_API_KEY=your_pinecone_api_key
+DB_NAME=your_neon_db_name
+DB_USER=your_neon_username
+DB_PASSWORD=your_neon_password
+DB_HOST=your_neon_host
+DB_PORT=5432
+```
+
+## Manual Setup (Legacy)
+
+### 1. Crea e attiva l'ambiente virtuale
 
 ```sh
 python3.9 -m venv venv
@@ -33,7 +137,7 @@ Scarica e inserisci i file `.gguf` nella cartella `models`:
 
 ---
 
-### 3. Configura le variabili d’ambiente
+### 3. Configura le variabili d'ambiente
 
 Crea un file `.env` nella root del progetto con questo contenuto:
 
@@ -98,6 +202,16 @@ cd frontend
 npm install
 npm run dev
 ```
+
+## 🎯 Launch Options Summary
+
+| Method | Command | Description |
+|--------|---------|-------------|
+| **Unified Launch** | `python launch_faqbuddy.py` | Automatic setup and launch |
+| **Neon Setup** | `python setup_neon_database.py` | Cloud database setup |
+| **Docker Setup** | `python setup_docker_database.py` | Local database setup |
+| **Manual Launch** | `uvicorn src.main:app --reload` | Manual backend launch |
+
 ### Dev test sul RAG
 
 Per testare solo le funzionalita' del RAG, potete eseguire il file `interactive_test.py`, trovato in `/backend/src/rag/`.
@@ -114,7 +228,7 @@ Queste domande richiedono ragionamento, spiegazioni o informazioni non struttura
 - **Cosa succede se non supero un esame obbligatorio entro la scadenza prevista dal regolamento?**
 - **Quali sono i vantaggi e le opportunità offerte da un curriculum internazionale?**
 - **Come posso conciliare efficacemente lavoro e studio durante il mio percorso universitario?**
-- **Quali sono le procedure dettagliate per ottenere il riconoscimento di esami sostenuti all’estero?**
+- **Quali sono le procedure dettagliate per ottenere il riconoscimento di esami sostenuti all'estero?**
 - **Quali passi devo seguire se desidero cambiare corso di laurea?**
 - **Come posso evitare sovrapposizioni tra esami obbligatori nel mio piano di studi?**
 - **Quali documenti sono necessari per presentare la domanda di laurea e dove posso reperirli?**
