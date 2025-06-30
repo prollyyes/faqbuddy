@@ -117,11 +117,16 @@ class SetupWizard:
         
         # Initialize variables
         self.current_step = -1  # Start with login step
-        self.total_steps = 7  # Changed from 6 to 7 to include completion step
+        self.total_steps = 8  # Changed from 7 to 8 to include environment setup step
         self.is_admin = False
         self.env_vars = {}
         self.env_entries = {}
         self.progress_queue = queue.Queue()
+        
+        # Environment detection variables
+        self.python_env = None
+        self.env_type = None  # 'venv', 'conda', or 'system'
+        self.env_path = None
         
         # Load existing environment variables
         self.load_existing_env()
@@ -143,6 +148,51 @@ class SetupWizard:
         x = (self.root.winfo_screenwidth() // 2) - (width // 2)
         y = (self.root.winfo_screenheight() // 2) - (height // 2)
         self.root.geometry(f"{width}x{height}+{x}+{y}")
+        
+    def detect_python_environment(self):
+        """Detect the current Python environment."""
+        try:
+            # Check if we're in a virtual environment
+            if hasattr(sys, 'real_prefix') or (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix):
+                # We're in a virtual environment
+                if hasattr(sys, 'real_prefix'):
+                    # This is a virtualenv
+                    self.env_type = 'venv'
+                    self.env_path = sys.prefix
+                else:
+                    # This is a venv (Python 3.3+)
+                    self.env_type = 'venv'
+                    self.env_path = sys.prefix
+                return True
+            elif 'CONDA_DEFAULT_ENV' in os.environ:
+                # We're in a conda environment
+                self.env_type = 'conda'
+                self.env_path = os.environ.get('CONDA_PREFIX', sys.prefix)
+                return True
+            else:
+                # We're in the system Python
+                self.env_type = 'system'
+                self.env_path = sys.prefix
+                return False
+        except Exception as e:
+            print(f"Error detecting Python environment: {e}")
+            self.env_type = 'system'
+            self.env_path = sys.prefix
+            return False
+    
+    def get_python_executable(self):
+        """Get the Python executable to use for installations."""
+        if self.python_env:
+            if self.env_type == 'venv':
+                # For virtual environments, use the python executable in the env
+                if os.name == 'nt':  # Windows
+                    return os.path.join(self.env_path, 'Scripts', 'python.exe')
+                else:  # Unix/Linux/macOS
+                    return os.path.join(self.env_path, 'bin', 'python')
+            elif self.env_type == 'conda':
+                # For conda environments, use the conda python
+                return os.path.join(self.env_path, 'bin', 'python')
+        return sys.executable
         
     def load_existing_env(self):
         """Load existing environment variables from .env file."""
@@ -199,10 +249,10 @@ class SetupWizard:
         # Content area with scrollbar
         self.create_scrollable_content()
         
-        # Fixed bottom navigation (created separately)
+        # Navigation
         self.create_navigation()
         
-        # Status bar (created separately)
+        # Status bar
         self.create_status_bar()
         
     def create_header(self):
@@ -238,7 +288,7 @@ class SetupWizard:
         # Progress label
         self.progress_label = tk.Label(
             progress_frame,
-            text="Step 1 of 7: Checking Python Version",
+            text="Step 1 of 8: Checking Python Version",
             font=("Segoe UI", 10, "bold"),
             fg=Colors.TEXT,
             bg=Colors.BACKGROUND
@@ -395,7 +445,7 @@ class SetupWizard:
             self.progress_label.config(text=f"Step {step} of {self.total_steps}")
         else:
             # For users, skip admin-only steps
-            user_steps = [1, 2, 3, 4, 5, 6, 7]  # Python check, env setup, model download, vector db, deps, completion
+            user_steps = [1, 2, 3, 4, 5, 6, 7, 8]  # Python check, env setup, env detection, model download, vector db, deps, completion
             if step in user_steps:
                 user_step_index = user_steps.index(step)
                 progress = ((user_step_index + 1) / len(user_steps)) * 100
@@ -417,12 +467,14 @@ class SetupWizard:
             else:
                 self.show_step(4)  # Skip DB test for users
         elif step == 4:
-            self.show_model_download()
+            self.show_environment_setup()
         elif step == 5:
-            self.show_vector_db_setup()
+            self.show_model_download()
         elif step == 6:
-            self.show_dependency_install()
+            self.show_vector_db_setup()
         elif step == 7:
+            self.show_dependency_install()
+        elif step == 8:
             self.show_completion()
             
         # Update navigation
@@ -701,7 +753,7 @@ class SetupWizard:
         
     def show_python_check(self):
         """Show Python version check step."""
-        self.progress_label.config(text="Step 1 of 7: Checking Python Version")
+        self.progress_label.config(text="Step 1 of 8: Checking Python Version")
         
         # Create card
         card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
@@ -773,7 +825,7 @@ class SetupWizard:
         
     def show_env_setup(self):
         """Show environment setup step."""
-        self.progress_label.config(text="Step 2 of 7: Environment Configuration")
+        self.progress_label.config(text="Step 2 of 8: Environment Configuration")
         
         # Create card
         card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
@@ -1019,9 +1071,9 @@ class SetupWizard:
             )
             save_btn.pack(pady=(20, 0))
             
-    def show_db_test(self):
-        """Show database test step."""
-        self.progress_label.config(text="Step 3 of 7: Testing Database Connection")
+    def show_environment_setup(self):
+        """Show Python environment setup step."""
+        self.progress_label.config(text="Step 4 of 8: Python Environment Setup")
         
         # Create card
         card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
@@ -1034,7 +1086,7 @@ class SetupWizard:
         # Icon and title
         icon_label = tk.Label(
             content_frame,
-            text="🗄️",
+            text="🐍",
             font=("Segoe UI", 48),
             bg=Colors.CARD_BG
         )
@@ -1042,7 +1094,7 @@ class SetupWizard:
         
         title_label = tk.Label(
             content_frame,
-            text="Database Connection Test",
+            text="Python Environment Setup",
             font=("Segoe UI", 18, "bold"),
             fg=Colors.TEXT,
             bg=Colors.CARD_BG
@@ -1051,7 +1103,7 @@ class SetupWizard:
         
         desc_label = tk.Label(
             content_frame,
-            text="Testing connection to your Neon PostgreSQL database",
+            text="Detecting and setting up Python environment for FAQBuddy",
             font=("Segoe UI", 11),
             fg=Colors.SECONDARY,
             bg=Colors.CARD_BG,
@@ -1059,29 +1111,298 @@ class SetupWizard:
         )
         desc_label.pack(pady=(10, 30))
         
-        # Test button
-        test_btn = ModernButton(
-            content_frame,
-            text="Test Database Connection",
-            command=self.test_database_connection,
-            width=20
-        )
-        test_btn.configure_primary()
-        test_btn.pack()
+        # Environment detection frame
+        env_frame = tk.Frame(content_frame, bg=Colors.CARD_BG)
+        env_frame.pack(fill="x", pady=(0, 20))
         
-        # Result label
-        self.db_result_label = tk.Label(
-            content_frame,
-            text="",
-            font=("Segoe UI", 10),
-            bg=Colors.CARD_BG,
-            wraplength=500
+        # Detect current environment
+        has_env = self.detect_python_environment()
+        
+        # Environment status
+        status_frame = tk.Frame(env_frame, bg=Colors.CARD_BG)
+        status_frame.pack(fill="x", pady=(0, 20))
+        
+        if has_env:
+            status_icon = "✅"
+            status_text = f"Active {self.env_type.upper()} environment detected"
+            status_color = Colors.SUCCESS
+            self.python_env = True
+        else:
+            status_icon = "⚠️"
+            status_text = "No virtual environment detected - using system Python"
+            status_color = Colors.WARNING
+            self.python_env = False
+        
+        status_label = tk.Label(
+            status_frame,
+            text=f"{status_icon} {status_text}",
+            font=("Segoe UI", 12, "bold"),
+            fg=status_color,
+            bg=Colors.CARD_BG
         )
-        self.db_result_label.pack(pady=(20, 0))
+        status_label.pack(anchor="w")
+        
+        # Environment path
+        path_label = tk.Label(
+            status_frame,
+            text=f"Path: {self.env_path}",
+            font=("Segoe UI", 10),
+            fg=Colors.SECONDARY,
+            bg=Colors.CARD_BG,
+            anchor="w"
+        )
+        path_label.pack(anchor="w", pady=(5, 0))
+        
+        # Create environment section (only show if no environment detected)
+        if not has_env:
+            create_frame = tk.Frame(content_frame, bg=Colors.CARD_BG)
+            create_frame.pack(fill="x", pady=(20, 0))
+            
+            create_title = tk.Label(
+                create_frame,
+                text="🔧 Create Virtual Environment",
+                font=("Segoe UI", 14, "bold"),
+                fg=Colors.TEXT,
+                bg=Colors.CARD_BG,
+                anchor="w"
+            )
+            create_title.pack(anchor="w", pady=(0, 15))
+            
+            create_desc = tk.Label(
+                create_frame,
+                text="It's recommended to create a virtual environment to avoid conflicts with system packages.",
+                font=("Segoe UI", 10),
+                fg=Colors.SECONDARY,
+                bg=Colors.CARD_BG,
+                wraplength=500,
+                anchor="w"
+            )
+            create_desc.pack(anchor="w", pady=(0, 20))
+            
+            # Environment type selection
+            env_type_frame = tk.Frame(create_frame, bg=Colors.CARD_BG)
+            env_type_frame.pack(fill="x", pady=(0, 20))
+            
+            self.env_choice = tk.StringVar(value="venv")
+            
+            venv_radio = tk.Radiobutton(
+                env_type_frame,
+                text="Python venv (Recommended)",
+                variable=self.env_choice,
+                value="venv",
+                font=("Segoe UI", 10),
+                fg=Colors.TEXT,
+                bg=Colors.CARD_BG,
+                selectcolor=Colors.CARD_BG,
+                activebackground=Colors.CARD_BG,
+                activeforeground=Colors.TEXT
+            )
+            venv_radio.pack(anchor="w", pady=2)
+            
+            # Check if conda is available
+            conda_available = subprocess.run(["conda", "--version"], capture_output=True, text=True).returncode == 0
+            
+            if conda_available:
+                conda_radio = tk.Radiobutton(
+                    env_type_frame,
+                    text="Conda environment",
+                    variable=self.env_choice,
+                    value="conda",
+                    font=("Segoe UI", 10),
+                    fg=Colors.TEXT,
+                    bg=Colors.CARD_BG,
+                    selectcolor=Colors.CARD_BG,
+                    activebackground=Colors.CARD_BG,
+                    activeforeground=Colors.TEXT
+                )
+                conda_radio.pack(anchor="w", pady=2)
+            
+            # Environment name entry
+            name_frame = tk.Frame(create_frame, bg=Colors.CARD_BG)
+            name_frame.pack(fill="x", pady=(0, 20))
+            
+            name_label = tk.Label(
+                name_frame,
+                text="Environment Name:",
+                font=("Segoe UI", 10, "bold"),
+                fg=Colors.TEXT,
+                bg=Colors.CARD_BG,
+                anchor="w"
+            )
+            name_label.pack(anchor="w", pady=(0, 5))
+            
+            self.env_name_entry = ModernEntry(
+                name_frame,
+                width=30
+            )
+            self.env_name_entry.insert(0, "faqbuddy_env")
+            self.env_name_entry.pack(anchor="w")
+            
+            # Create environment button
+            create_btn = tk.Button(
+                create_frame,
+                text="🔧 Create Environment",
+                command=self.create_environment,
+                width=25,
+                height=2,
+                bg=Colors.PRIMARY,
+                fg="white",
+                font=("SF Pro Display", 12, "bold"),
+                relief="flat",
+                cursor="hand2",
+                activebackground=Colors.BUTTON_HOVER,
+                activeforeground="white",
+                padx=20,
+                pady=8
+            )
+            create_btn.pack(pady=(0, 20))
+            
+            # Progress frame
+            self.env_progress_frame = tk.Frame(create_frame, bg=Colors.CARD_BG)
+            self.env_progress_frame.pack(fill="x", pady=(20, 0))
+            
+            self.env_progress_bar = ttk.Progressbar(
+                self.env_progress_frame,
+                mode='indeterminate',
+                style='Modern.Horizontal.TProgressbar'
+            )
+            self.env_progress_bar.pack(fill="x")
+            
+            # Result label
+            self.env_result_label = tk.Label(
+                create_frame,
+                text="",
+                font=("Segoe UI", 10),
+                bg=Colors.CARD_BG,
+                wraplength=500
+            )
+            self.env_result_label.pack(pady=(20, 0))
+        
+        # Skip button (if environment exists or user wants to skip)
+        skip_btn = tk.Button(
+            content_frame,
+            text="⏭️ Continue with Current Environment",
+            command=self.next_step,
+            width=25,
+            height=2,
+            bg=Colors.SECONDARY,
+            fg="white",
+            font=("SF Pro Display", 12, "bold"),
+            relief="flat",
+            cursor="hand2",
+            activebackground="#6D6D70",
+            activeforeground="white",
+            padx=20,
+            pady=8
+        )
+        skip_btn.pack(pady=(20, 0))
+        
+    def create_environment(self):
+        """Create a new virtual environment."""
+        def create():
+            try:
+                self.env_progress_bar.start()
+                self.update_status("Creating virtual environment...")
+                
+                env_name = self.env_name_entry.get().strip()
+                if not env_name:
+                    self.env_result_label.config(
+                        text="❌ Please enter an environment name",
+                        fg=Colors.ERROR
+                    )
+                    self.env_progress_bar.stop()
+                    return
+                
+                env_choice = self.env_choice.get()
+                
+                if env_choice == "venv":
+                    # Create Python venv
+                    result = subprocess.run([
+                        sys.executable, "-m", "venv", env_name
+                    ], capture_output=True, text=True)
+                    
+                    if result.returncode == 0:
+                        self.env_type = 'venv'
+                        self.env_path = os.path.abspath(env_name)
+                        self.python_env = True
+                        
+                        self.env_result_label.config(
+                            text=f"✅ Virtual environment '{env_name}' created successfully!",
+                            fg=Colors.SUCCESS
+                        )
+                        self.update_status("Virtual environment created successfully")
+                        
+                        # Update the status display
+                        for widget in self.content_frame.winfo_children():
+                            if isinstance(widget, tk.Frame):
+                                for child in widget.winfo_children():
+                                    if isinstance(child, tk.Frame):
+                                        for grandchild in child.winfo_children():
+                                            if isinstance(grandchild, tk.Label) and "Active" in grandchild.cget("text"):
+                                                grandchild.config(
+                                                    text=f"✅ Active VENV environment created",
+                                                    fg=Colors.SUCCESS
+                                                )
+                                            elif isinstance(grandchild, tk.Label) and "Path:" in grandchild.cget("text"):
+                                                grandchild.config(text=f"Path: {self.env_path}")
+                        
+                    else:
+                        self.env_result_label.config(
+                            text=f"❌ Failed to create virtual environment: {result.stderr}",
+                            fg=Colors.ERROR
+                        )
+                        self.update_status("Virtual environment creation failed")
+                        
+                elif env_choice == "conda":
+                    # Check if conda is available
+                    conda_check = subprocess.run(["conda", "--version"], capture_output=True, text=True)
+                    if conda_check.returncode != 0:
+                        self.env_result_label.config(
+                            text="❌ Conda is not available. Please install conda or choose venv.",
+                            fg=Colors.ERROR
+                        )
+                        self.env_progress_bar.stop()
+                        self.update_status("Conda not available")
+                        return
+                    
+                    # Create conda environment
+                    result = subprocess.run([
+                        "conda", "create", "-n", env_name, "python=3.11", "-y"
+                    ], capture_output=True, text=True)
+                    
+                    if result.returncode == 0:
+                        self.env_type = 'conda'
+                        self.env_path = env_name  # Conda env name
+                        self.python_env = True
+                        
+                        self.env_result_label.config(
+                            text=f"✅ Conda environment '{env_name}' created successfully!",
+                            fg=Colors.SUCCESS
+                        )
+                        self.update_status("Conda environment created successfully")
+                        
+                    else:
+                        self.env_result_label.config(
+                            text=f"❌ Failed to create conda environment: {result.stderr}",
+                            fg=Colors.ERROR
+                        )
+                        self.update_status("Conda environment creation failed")
+                
+                self.env_progress_bar.stop()
+                
+            except Exception as e:
+                self.env_progress_bar.stop()
+                self.env_result_label.config(
+                    text=f"❌ Error creating environment: {e}",
+                    fg=Colors.ERROR
+                )
+                self.update_status("Environment creation failed")
+                
+        threading.Thread(target=create, daemon=True).start()
         
     def show_model_download(self):
         """Show model download step."""
-        self.progress_label.config(text="Step 4 of 7: Downloading AI Models")
+        self.progress_label.config(text="Step 5 of 8: Downloading AI Models")
         
         # Create card
         card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
@@ -1194,7 +1515,7 @@ class SetupWizard:
         
     def show_vector_db_setup(self):
         """Show vector database setup step."""
-        self.progress_label.config(text="Step 5 of 7: Setting up Vector Database")
+        self.progress_label.config(text="Step 6 of 8: Setting up Vector Database")
         
         # Create card
         card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
@@ -1298,7 +1619,7 @@ class SetupWizard:
         
     def show_dependency_install(self):
         """Show dependency installation step."""
-        self.progress_label.config(text="Step 6 of 7: Installing Dependencies")
+        self.progress_label.config(text="Step 7 of 8: Installing Dependencies")
         
         # Create card
         card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
@@ -1365,6 +1686,55 @@ class SetupWizard:
                 anchor="w"
             )
             dep_item.pack(anchor="w", pady=2)
+        
+        # Environment info
+        env_info_frame = tk.Frame(content_frame, bg=Colors.CARD_BG)
+        env_info_frame.pack(fill="x", pady=(20, 0))
+        
+        env_info_label = tk.Label(
+            env_info_frame,
+            text="🐍 Python Environment:",
+            font=("Segoe UI", 12, "bold"),
+            fg=Colors.TEXT,
+            bg=Colors.CARD_BG,
+            anchor="w"
+        )
+        env_info_label.pack(anchor="w", pady=(0, 10))
+        
+        if self.python_env:
+            if self.env_type == 'venv':
+                env_name = os.path.basename(self.env_path)
+                env_text = f"✅ Virtual Environment: {env_name}"
+                env_color = Colors.SUCCESS
+            elif self.env_type == 'conda':
+                env_text = f"✅ Conda Environment: {self.env_path}"
+                env_color = Colors.SUCCESS
+            else:
+                env_text = "⚠️ System Python (not recommended)"
+                env_color = Colors.WARNING
+        else:
+            env_text = "⚠️ System Python (not recommended)"
+            env_color = Colors.WARNING
+        
+        env_status_label = tk.Label(
+            env_info_frame,
+            text=env_text,
+            font=("Segoe UI", 10),
+            fg=env_color,
+            bg=Colors.CARD_BG,
+            anchor="w"
+        )
+        env_status_label.pack(anchor="w", pady=2)
+        
+        python_path_label = tk.Label(
+            env_info_frame,
+            text=f"Path: {self.get_python_executable()}",
+            font=("Segoe UI", 9),
+            fg=Colors.SECONDARY,
+            bg=Colors.CARD_BG,
+            anchor="w"
+        )
+        python_path_label.pack(anchor="w", pady=(5, 0))
         
         # Install button with improved styling
         install_btn = tk.Button(
@@ -1475,6 +1845,36 @@ class SetupWizard:
             "   • Frontend: cd frontend && npm run dev",
             "3. Access: http://localhost:3000"
         ]
+        
+        # Add environment-specific instructions
+        if self.python_env and self.env_type == 'venv':
+            env_name = os.path.basename(self.env_path)
+            instructions = [
+                f"1. Activate environment: source {env_name}/bin/activate (Linux/Mac) or {env_name}\\Scripts\\activate (Windows)",
+                "2. Run: python launch_servers.py",
+                "3. Or start servers separately:",
+                "   • Backend: cd backend && python -m uvicorn src.api.API:app --reload",
+                "   • Frontend: cd frontend && npm run dev",
+                "4. Access: http://localhost:3000"
+            ]
+        elif self.python_env and self.env_type == 'conda':
+            env_name = self.env_path
+            instructions = [
+                f"1. Activate environment: conda activate {env_name}",
+                "2. Run: python launch_servers.py",
+                "3. Or start servers separately:",
+                "   • Backend: cd backend && python -m uvicorn src.api.API:app --reload",
+                "   • Frontend: cd frontend && npm run dev",
+                "4. Access: http://localhost:3000"
+            ]
+        else:
+            instructions = [
+                "1. Run: python launch_servers.py",
+                "2. Or start servers separately:",
+                "   • Backend: cd backend && python -m uvicorn src.api.API:app --reload",
+                "   • Frontend: cd frontend && npm run dev",
+                "3. Access: http://localhost:3000"
+            ]
         
         for instruction in instructions:
             instruction_label = tk.Label(
@@ -1647,13 +2047,13 @@ class SetupWizard:
     def launch_faqbuddy(self):
         """Launch FAQBuddy."""
         try:
-            # Show confirmation dialog
-            result = messagebox.askyesno("Launch FAQBuddy", "Do you want to launch FAQBuddy now? This will start both the backend and frontend servers.")
-            if result:
-                subprocess.Popen([sys.executable, "launch_servers.py"])
-                self.root.destroy()
+            # Get the correct Python executable
+            python_executable = self.get_python_executable()
+            
+            subprocess.Popen([python_executable, "launch_servers.py"])
+            messagebox.showinfo("FAQBuddy", "FAQBuddy is starting up!\n\nBackend: http://localhost:8000\nFrontend: http://localhost:3000")
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to launch FAQBuddy: {e}")
+            messagebox.showerror("Launch Error", f"Failed to launch FAQBuddy: {e}")
             
     def update_status(self, message):
         """Update status bar message."""
@@ -1837,8 +2237,11 @@ class SetupWizard:
                 # Save env vars first
                 self.save_env_vars(show_message=False)
                 
+                # Get the correct Python executable
+                python_executable = self.get_python_executable()
+                
                 result = subprocess.run([
-                    sys.executable, "backend/src/rag/update_pinecone_from_neon.py"
+                    python_executable, "backend/src/rag/update_pinecone_from_neon.py"
                 ], capture_output=True, text=True)
                 
                 if result.returncode == 0:
@@ -1870,9 +2273,12 @@ class SetupWizard:
                 self.install_progress_bar.start()
                 self.update_status("Installing Python dependencies...")
                 
+                # Get the correct Python executable
+                python_executable = self.get_python_executable()
+                
                 # Install Python dependencies
                 result = subprocess.run([
-                    sys.executable, "-m", "pip", "install", "-r", "requirements.txt"
+                    python_executable, "-m", "pip", "install", "-r", "requirements.txt"
                 ], capture_output=True, text=True)
                 
                 if result.returncode != 0:
@@ -1944,6 +2350,66 @@ class SetupWizard:
         self.current_step = 0
         self.is_admin = False
         self.show_step(0)
+
+    def show_db_test(self):
+        """Show database test step."""
+        self.progress_label.config(text="Step 3 of 8: Testing Database Connection")
+        
+        # Create card
+        card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
+        card.pack(fill="both", expand=True, padx=20, pady=10)
+        
+        # Content
+        content_frame = tk.Frame(card, bg=Colors.CARD_BG)
+        content_frame.pack(fill="both", expand=True, padx=30, pady=30)
+        
+        # Icon and title
+        icon_label = tk.Label(
+            content_frame,
+            text="🗄️",
+            font=("Segoe UI", 48),
+            bg=Colors.CARD_BG
+        )
+        icon_label.pack(pady=(0, 20))
+        
+        title_label = tk.Label(
+            content_frame,
+            text="Database Connection Test",
+            font=("Segoe UI", 18, "bold"),
+            fg=Colors.TEXT,
+            bg=Colors.CARD_BG
+        )
+        title_label.pack()
+        
+        desc_label = tk.Label(
+            content_frame,
+            text="Testing connection to your Neon PostgreSQL database",
+            font=("Segoe UI", 11),
+            fg=Colors.SECONDARY,
+            bg=Colors.CARD_BG,
+            wraplength=500
+        )
+        desc_label.pack(pady=(10, 30))
+        
+        # Test button
+        test_btn = ModernButton(
+            content_frame,
+            text="Test Database Connection",
+            command=self.test_database_connection,
+            width=20
+        )
+        test_btn.configure_primary()
+        test_btn.pack()
+        
+        # Result label
+        self.db_result_label = tk.Label(
+            content_frame,
+            text="",
+            font=("Segoe UI", 10),
+            bg=Colors.CARD_BG,
+            wraplength=500
+        )
+        self.db_result_label.pack(pady=(20, 0))
 
 def main():
     """Main function."""
