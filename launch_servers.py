@@ -82,7 +82,7 @@ def start_backend_server():
         
         # Start uvicorn server
         process = subprocess.Popen([
-            sys.executable, "-m", "uvicorn", "src.main:app", 
+            sys.executable, "-m", "uvicorn", "src.api.API:app", 
             "--reload", "--host", "0.0.0.0", "--port", "8000"
         ], cwd=backend_dir)
         

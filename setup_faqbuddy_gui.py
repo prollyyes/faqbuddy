@@ -1181,7 +1181,7 @@ class SetupWizard:
         instructions = [
             "1. Run: python launch_servers.py",
             "2. Or start servers separately:",
-            "   • Backend: cd backend && python -m uvicorn src.main:app --reload",
+            "   • Backend: cd backend && python -m uvicorn src.api.API:app --reload",
             "   • Frontend: cd frontend && npm run dev",
             "3. Access: http://localhost:3000"
         ]

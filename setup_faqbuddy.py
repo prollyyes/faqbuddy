@@ -324,7 +324,7 @@ def show_launch_instructions():
     
     print(f"\n{Colors.BOLD}Backend Server:{Colors.ENDC}")
     print("   cd backend")
-    print("   python -m uvicorn src.main:app --reload --host 0.0.0.0 --port 8000")
+    print("   python -m uvicorn src.api.API:app --reload --host 0.0.0.0 --port 8000")
     print("   URL: http://localhost:8000")
     print("   API Docs: http://localhost:8000/docs")
     

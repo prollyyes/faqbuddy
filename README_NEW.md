@@ -55,7 +55,7 @@ Or start them separately:
 **Backend Server:**
 ```bash
 cd backend
-python -m uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+python -m uvicorn src.api.API:app --reload --host 0.0.0.0 --port 8000
 ```
 
 **Frontend Server:**
