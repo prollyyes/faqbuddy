@@ -147,21 +147,38 @@ class SetupWizard:
         if env_file.exists():
             load_dotenv()
             self.env_vars = {
-                "DB_NEON_NAME": os.getenv("DB_NEON_NAME", ""),
-                "DB_NEON_USER": os.getenv("DB_NEON_USER", ""),
-                "DB_NEON_PASSWORD": os.getenv("DB_NEON_PASSWORD", ""),
-                "DB_NEON_HOST": os.getenv("DB_NEON_HOST", ""),
+                "DB_NEON_NAME": os.getenv("DB_NEON_NAME", "neondb"),
+                "DB_NEON_USER": os.getenv("DB_NEON_USER", "neondb_owner"),
+                "DB_NEON_PASSWORD": os.getenv("DB_NEON_PASSWORD", "npg_81IXpKWZQxEa"),
+                "DB_NEON_HOST": os.getenv("DB_NEON_HOST", "ep-super-credit-a9zsuu7x-pooler.gwc.azure.neon.tech"),
                 "DB_NEON_PORT": os.getenv("DB_NEON_PORT", "5432"),
-                "PINECONE_API_KEY": os.getenv("PINECONE_API_KEY", "")
+                "PINECONE_API_KEY": os.getenv("PINECONE_API_KEY", "pcsk_6FLreq_PQ9dENviDRu7WwTHg5BF27PWBmFoVMPqJNzrJcNQSWywSns973idr5vqgTixqF2"),
+                "DB_USER": os.getenv("DB_USER", "db_user"),
+                "DB_PASSWORD": os.getenv("DB_PASSWORD", "pwd"),
+                "DB_NAME": os.getenv("DB_NAME", "faqbuddy_db"),
+                "DB_HOST": os.getenv("DB_HOST", "localhost"),
+                "DB_PORT": os.getenv("DB_PORT", "5433"),
+                "EMAIL_FROM": os.getenv("EMAIL_FROM", "tutordimatematica.ing@gmail.com"),
+                "EMAIL_PASS": os.getenv("EMAIL_PASS", "ohxrysinakqpryrb"),
+                "EMAIL_USER": os.getenv("EMAIL_USER", "tutordimatematica.ing@gmail.com")
             }
         else:
+            # Default values if no .env file exists
             self.env_vars = {
-                "DB_NEON_NAME": "",
-                "DB_NEON_USER": "",
-                "DB_NEON_PASSWORD": "",
-                "DB_NEON_HOST": "",
+                "DB_NEON_NAME": "neondb",
+                "DB_NEON_USER": "neondb_owner",
+                "DB_NEON_PASSWORD": "npg_81IXpKWZQxEa",
+                "DB_NEON_HOST": "ep-super-credit-a9zsuu7x-pooler.gwc.azure.neon.tech",
                 "DB_NEON_PORT": "5432",
-                "PINECONE_API_KEY": ""
+                "PINECONE_API_KEY": "pcsk_6FLreq_PQ9dENviDRu7WwTHg5BF27PWBmFoVMPqJNzrJcNQSWywSns973idr5vqgTixqF2",
+                "DB_USER": "db_user",
+                "DB_PASSWORD": "pwd",
+                "DB_NAME": "faqbuddy_db",
+                "DB_HOST": "localhost",
+                "DB_PORT": "5433",
+                "EMAIL_FROM": "tutordimatematica.ing@gmail.com",
+                "EMAIL_PASS": "ohxrysinakqpryrb",
+                "EMAIL_USER": "tutordimatematica.ing@gmail.com"
             }
             
     def create_widgets(self):
@@ -1267,12 +1284,20 @@ class SetupWizard:
                 if env_file.exists():
                     load_dotenv()
                     env_content = {
-                        "DB_NEON_NAME": os.getenv("DB_NEON_NAME", ""),
-                        "DB_NEON_USER": os.getenv("DB_NEON_USER", ""),
-                        "DB_NEON_PASSWORD": os.getenv("DB_NEON_PASSWORD", ""),
-                        "DB_NEON_HOST": os.getenv("DB_NEON_HOST", ""),
+                        "DB_NEON_NAME": os.getenv("DB_NEON_NAME", "neondb"),
+                        "DB_NEON_USER": os.getenv("DB_NEON_USER", "neondb_owner"),
+                        "DB_NEON_PASSWORD": os.getenv("DB_NEON_PASSWORD", "npg_81IXpKWZQxEa"),
+                        "DB_NEON_HOST": os.getenv("DB_NEON_HOST", "ep-super-credit-a9zsuu7x-pooler.gwc.azure.neon.tech"),
                         "DB_NEON_PORT": os.getenv("DB_NEON_PORT", "5432"),
-                        "PINECONE_API_KEY": os.getenv("PINECONE_API_KEY", "")
+                        "PINECONE_API_KEY": os.getenv("PINECONE_API_KEY", "pcsk_6FLreq_PQ9dENviDRu7WwTHg5BF27PWBmFoVMPqJNzrJcNQSWywSns973idr5vqgTixqF2"),
+                        "DB_USER": os.getenv("DB_USER", "db_user"),
+                        "DB_PASSWORD": os.getenv("DB_PASSWORD", "pwd"),
+                        "DB_NAME": os.getenv("DB_NAME", "faqbuddy_db"),
+                        "DB_HOST": os.getenv("DB_HOST", "localhost"),
+                        "DB_PORT": os.getenv("DB_PORT", "5433"),
+                        "EMAIL_FROM": os.getenv("EMAIL_FROM", "tutordimatematica.ing@gmail.com"),
+                        "EMAIL_PASS": os.getenv("EMAIL_PASS", "ohxrysinakqpryrb"),
+                        "EMAIL_USER": os.getenv("EMAIL_USER", "tutordimatematica.ing@gmail.com")
                     }
                 else:
                     # If no .env file exists, use the loaded env_vars
@@ -1285,20 +1310,34 @@ class SetupWizard:
                         if entry and entry.winfo_exists():
                             env_content[var_name] = entry.get()
                         else:
-                            # If widget doesn't exist, use existing value or empty string
+                            # If widget doesn't exist, use existing value or default
                             env_content[var_name] = self.env_vars.get(var_name, "")
                     except tk.TclError:
-                        # Widget was destroyed, use existing value or empty string
+                        # Widget was destroyed, use existing value or default
                         env_content[var_name] = self.env_vars.get(var_name, "")
-            
-            # Add legacy database variables for compatibility
-            env_content.update({
-                "DB_NAME": env_content.get("DB_NEON_NAME", ""),
-                "DB_USER": env_content.get("DB_NEON_USER", ""),
-                "DB_PASSWORD": env_content.get("DB_NEON_PASSWORD", ""),
-                "DB_HOST": env_content.get("DB_NEON_HOST", ""),
-                "DB_PORT": env_content.get("DB_NEON_PORT", "5432")
-            })
+                
+                # Add all other environment variables that weren't in the form
+                all_vars = {
+                    "DB_NEON_NAME": "neondb",
+                    "DB_NEON_USER": "neondb_owner", 
+                    "DB_NEON_PASSWORD": "npg_81IXpKWZQxEa",
+                    "DB_NEON_HOST": "ep-super-credit-a9zsuu7x-pooler.gwc.azure.neon.tech",
+                    "DB_NEON_PORT": "5432",
+                    "PINECONE_API_KEY": "pcsk_6FLreq_PQ9dENviDRu7WwTHg5BF27PWBmFoVMPqJNzrJcNQSWywSns973idr5vqgTixqF2",
+                    "DB_USER": "db_user",
+                    "DB_PASSWORD": "pwd",
+                    "DB_NAME": "faqbuddy_db",
+                    "DB_HOST": "localhost",
+                    "DB_PORT": "5433",
+                    "EMAIL_FROM": "tutordimatematica.ing@gmail.com",
+                    "EMAIL_PASS": "ohxrysinakqpryrb",
+                    "EMAIL_USER": "tutordimatematica.ing@gmail.com"
+                }
+                
+                # Update with any values from the form, otherwise use defaults
+                for var_name, default_value in all_vars.items():
+                    if var_name not in env_content:
+                        env_content[var_name] = default_value
             
             # Write .env file
             with open(".env", 'w') as f:
