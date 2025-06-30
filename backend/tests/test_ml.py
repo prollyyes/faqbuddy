@@ -1,7 +1,7 @@
 import pytest
 from sklearn.metrics import classification_report
-from src.switcher.MLmodel import MLModel
-from src.utils.llm_gemma import classify_question
+from ..src.switcher.MLmodel import MLModel
+from ..src.utils.llm_gemma import classify_question
 
 ml_model = MLModel()
 

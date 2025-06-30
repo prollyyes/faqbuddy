@@ -2,7 +2,7 @@ import os
 import pytest
 from dotenv import load_dotenv
 from src.rag.rag_core import RAGSystem
-from src.rag.utils.vector_db import NAMESPACE
+from ..src.rag.utils.vector_db import NAMESPACE
 
 @pytest.fixture(scope="module")
 def rag_system():

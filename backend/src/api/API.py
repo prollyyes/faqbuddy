@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.api.AuthAPI import router as auth_router
-from src.api.Search import router as search_router
-from src.api.Profile import router as profile_router
-from src.api.Chat import router as chat_router
+from .AuthAPI import router as auth_router
+from .Search import router as search_router
+from .Profile import router as profile_router
+from .Chat import router as chat_router
 
 app = FastAPI(title="api")
 

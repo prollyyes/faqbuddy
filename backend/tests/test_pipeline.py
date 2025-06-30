@@ -1,11 +1,12 @@
 import time
 import pytest
-from src.switcher.MLmodel import MLModel
-from src.text_2_SQL.converter import TextToSQLConverter
-from src.utils.db_utils import get_connection, MODE
-from src.utils.db_handler import DBHandler
-from src.utils.llm_gemma import classify_question
-from src.rag.rag_core import RAGSystem
+from ..src.switcher.MLmodel import MLModel
+from ..src.text_2_SQL.converter import TextToSQLConverter
+from ..src.utils.db_utils import get_connection, MODE
+from ..src.utils.db_handler import DBHandler
+from ..src.utils.llm_gemma import classify_question
+#import deprecated, to be updated in future versions
+from ..src.rag.rag_core import RAGSystem
 
 # Inizializza risorse condivise
 ml_model = MLModel()

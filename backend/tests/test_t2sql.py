@@ -1,7 +1,7 @@
 import pytest
-from src.text_2_SQL import TextToSQLConverter
-from src.utils.db_handler import DBHandler
-from src.utils.db_utils import get_connection, MODE
+from ..src.text_2_SQL import TextToSQLConverter
+from ..src.utils.db_handler import DBHandler
+from ..src.utils.db_utils import get_connection, MODE
 import time
 
 @pytest.fixture(scope="module")

@@ -141,3 +141,6 @@ class CompleteCourseRequest(BaseModel):
 # Chat.py
 class T2SQLRequest(BaseModel):
     question: str
+
+class ChatRequest(BaseModel):
+    question: str

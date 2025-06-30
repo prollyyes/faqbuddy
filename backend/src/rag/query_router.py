@@ -2,12 +2,12 @@ import os
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone
-from src.rag.utils.pdf_chunker import chunk_pdf
-from src.rag.hybrid_retrieval import (
+from .utils.pdf_chunker import chunk_pdf
+from .hybrid_retrieval import (
     load_all_chunks, bm25_search, pinecone_search, fuse_and_rerank, cross_encoder_rerank, ALPHA, TOP_K, EMBEDDING_MODEL, INDEX_NAME, DOCS_NAMESPACE, DB_NAMESPACE
 )
 # For structured queries, import your DB chunking logic
-from src.rag.utils.generate_chunks import ChunkGenerator
+from .utils.generate_chunks import ChunkGenerator
 
 # Simple rule-based intent classifier
 def classify_intent(query):
@@ -22,16 +22,23 @@ def classify_intent(query):
 
 def structured_retrieval(query, top_k=TOP_K):
     # For demo: BM25 over structured tuples
-    generator = ChunkGenerator()
-    chunks = generator.get_chunks()
-    texts = [chunk['text'] for chunk in chunks]
-    from rank_bm25 import BM25Okapi
-    tokenized_corpus = [text.split() for text in texts]
-    bm25 = BM25Okapi(tokenized_corpus)
-    tokenized_query = query.split()
-    scores = bm25.get_scores(tokenized_query)
-    top_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:top_k]
-    return [(chunks[i], scores[i]) for i in top_indices]
+    try:
+        generator = ChunkGenerator()
+        chunks = generator.get_chunks()
+        texts = [chunk['text'] for chunk in chunks]
+        from rank_bm25 import BM25Okapi
+        tokenized_corpus = [text.split() for text in texts]
+        bm25 = BM25Okapi(tokenized_corpus)
+        tokenized_query = query.split()
+        scores = bm25.get_scores(tokenized_query)
+        top_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:top_k]
+        return [(chunks[i], scores[i]) for i in top_indices]
+    except Exception as e:
+        print(f"⚠️  Warning: Could not connect to Neon database for structured retrieval: {e}")
+        print("   Falling back to unstructured retrieval only.")
+        print("   To enable structured retrieval, ensure your Neon database is properly configured in .env")
+        print("   and contains the required tables for RAG chunk generation.")
+        return []
 
 def unstructured_retrieval(query, model, pc, all_chunks):
     dense_results = pinecone_search(query, model, pc, top_k=TOP_K)
@@ -73,6 +80,9 @@ def main():
     if intent == 'structured':
         print("\nRunning structured retrieval...")
         structured_results = structured_retrieval(query)
+        if not structured_results:
+            print("⚠️  Structured retrieval failed, falling back to unstructured retrieval...")
+            unstructured_results = unstructured_retrieval(query, model, pc, all_chunks)
     elif intent == 'unstructured':
         print("\nRunning unstructured (hybrid) retrieval...")
         unstructured_results = unstructured_retrieval(query, model, pc, all_chunks)

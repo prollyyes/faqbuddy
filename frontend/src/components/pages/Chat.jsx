@@ -26,33 +26,137 @@ const Chat = () => {
         setMessage('');
         setIsLoading(true);
 
+        // Create a placeholder for the streaming response
+        const streamingMessageIndex = messages.length + 1;
+        setMessages(prev => [...prev, {
+            text: '',
+            sender: 'bot',
+            timestamp: new Date(),
+            isStreaming: true,
+            metadata: {}
+        }]);
+
         try {
-            const response = await axios.post('http://127.0.0.1:8000/t2sql', {
-                question: currentMessage
+            // Try streaming first, fallback to regular if it fails
+            await sendMessageStreaming(currentMessage, streamingMessageIndex);
+        } catch (error) {
+            console.error('Streaming failed, falling back to regular API:', error);
+            await sendMessageRegular(currentMessage, streamingMessageIndex);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const sendMessageStreaming = async (question, messageIndex) => {
+        try {
+            const response = await fetch('http://127.0.0.1:8000/chat?streaming=true', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ question }),
             });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let accumulatedText = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n');
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const data = JSON.parse(line.slice(6));
+                            console.log('Streaming data:', data);
+                            
+                            if (data.type === 'token') {
+                                accumulatedText += data.token;
+                                setMessages(prev => {
+                                    const newMessages = [...prev];
+                                    newMessages[messageIndex] = {
+                                        ...newMessages[messageIndex],
+                                        text: accumulatedText,
+                                        isStreaming: true
+                                    };
+                                    return newMessages;
+                                });
+                            } else if (data.type === 'complete') {
+                                setMessages(prev => {
+                                    const newMessages = [...prev];
+                                    newMessages[messageIndex] = {
+                                        ...newMessages[messageIndex],
+                                        isStreaming: false,
+                                        metadata: {
+                                            chosen: data.chosen || 'RAG',
+                                            streaming: true
+                                        }
+                                    };
+                                    return newMessages;
+                                });
+                                return;
+                            } else if (data.type === 'error') {
+                                throw new Error(data.message);
+                            }
+                        } catch (parseError) {
+                            console.error('Error parsing streaming data:', parseError);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Streaming error:', error);
+            throw error;
+        }
+    };
+
+    const sendMessageRegular = async (question, messageIndex) => {
+        try {
+            const response = await axios.post('http://127.0.0.1:8000/chat', {
+                question: question
+            });
+
+            console.log('Backend response:', response.data);
 
             const botMessage = {
                 text: response.data.natural_response || response.data.result,
                 sender: 'bot',
                 timestamp: new Date(),
+                isStreaming: false,
                 metadata: {
                     chosen: response.data.chosen,
                     ml_confidence: response.data.ml_confidence,
                     query: response.data.query
                 }
             };
-            setMessages(prev => [...prev, botMessage]);
+
+            setMessages(prev => {
+                const newMessages = [...prev];
+                newMessages[messageIndex] = botMessage;
+                return newMessages;
+            });
         } catch (error) {
             console.error('Error sending message:', error);
             const errorMessage = {
                 text: 'Mi dispiace, si è verificato un errore. Riprova più tardi.',
                 sender: 'bot',
                 timestamp: new Date(),
-                isError: true
+                isError: true,
+                isStreaming: false
             };
-            setMessages(prev => [...prev, errorMessage]);
-        } finally {
-            setIsLoading(false);
+            setMessages(prev => {
+                const newMessages = [...prev];
+                newMessages[messageIndex] = errorMessage;
+                return newMessages;
+            });
         }
     };
 
@@ -98,15 +202,6 @@ const Chat = () => {
 
                     {chatExpanded && (
                         <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[calc(100vh-200px)] pt-10">
-                            {/* <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-lg font-semibold text-[#822433]">FAQBuddy Chat</h2>
-                                <button
-                                    onClick={() => setChatExpanded(false)}
-                                    className="text-gray-500 hover:text-[#822433] transition-colors"
-                                >
-                                    ✕
-                                </button>
-                            </div> */}
                             {messages.map((msg, index) => (
                                 <motion.div
                                     key={index}
@@ -139,11 +234,20 @@ const Chat = () => {
                                                 {msg.text}
                                             </ReactMarkdown>
                                         </div>
-                                        {msg.metadata && (
+                                        {msg.isStreaming && (
+                                            <div className="flex items-center mt-2">
+                                                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse mr-2"></div>
+                                                <span className="text-xs text-gray-500">Scrivendo...</span>
+                                            </div>
+                                        )}
+                                        {msg.metadata && !msg.isStreaming && (
                                             <div className="text-xs mt-2 opacity-70">
                                                 <p>Metodo: {msg.metadata.chosen}</p>
                                                 {msg.metadata.ml_confidence && (
                                                     <p>Confidenza: {(msg.metadata.ml_confidence * 100).toFixed(1)}%</p>
+                                                )}
+                                                {msg.metadata.streaming && (
+                                                    <p>Streaming: Attivato</p>
                                                 )}
                                             </div>
                                         )}
@@ -199,7 +303,7 @@ const Chat = () => {
                 </motion.div>
             </motion.div>
         </div>
-    )
-}
+    );
+};
 
-export default Chat
+export default Chat;

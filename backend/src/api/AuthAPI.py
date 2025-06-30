@@ -1,10 +1,10 @@
 from uuid import uuid4
-from src.utils.db_utils import get_connection, MODE
-from src.utils.db_handler import DBHandler
+from ..utils.db_utils import get_connection, MODE
+from ..utils.db_handler import DBHandler
 from fastapi import APIRouter, HTTPException, status, UploadFile, File, Form
-from src.api.BaseModel import LoginRequest, SignupRequest
-from src.api.utils import *
-from src.api.drive_utils import *
+from .BaseModel import LoginRequest, SignupRequest
+from .utils import *
+from .drive_utils import *
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
 
@@ -219,6 +219,6 @@ def login(data: LoginRequest):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Devi prima verificare la tua email"
         )
-    from src.auth.jwt_handler import create_access_token
+    from ..auth.jwt_handler import create_access_token
     access_token = create_access_token({"user_id": user_id})
     return {"access_token": access_token}
