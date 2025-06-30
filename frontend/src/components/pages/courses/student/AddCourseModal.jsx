@@ -47,7 +47,7 @@ export default function AddCourseModal({
                                 {availableCourses.map(corso => (
                                     <div
                                         key={corso.id}
-                                        className="border border-gray-400 rounded-lg p-4 shadow hover:bg-gray-100 cursor-pointer transition"
+                                        className="border border-black rounded-lg p-4 shadow hover:bg-gray-100 cursor-pointer transition"
                                         onClick={() => handleSelectCourse(corso.id)}
                                     >
                                         <div className="font-bold text-[#991B1B]">{corso.nome}</div>
@@ -64,7 +64,7 @@ export default function AddCourseModal({
                                 {editions.map(edition => (
                                     <div
                                         key={edition.id + "_" + edition.data}
-                                        className="border border-gray-400 rounded-lg p-3 flex items-center justify-between hover:bg-gray-100 cursor-pointer transition"
+                                        className="border border-black rounded-lg p-3 flex items-center justify-between hover:bg-gray-100 cursor-pointer transition"
                                     >
                                         <span>
                                             <div className='text-black'>{edition.data}</div>
