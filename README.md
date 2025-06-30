@@ -314,8 +314,7 @@ The setup automatically downloads:
 **RAG System Extension:**
 1. Modify retrieval logic in `backend/src/rag/`
 2. Update chunking in `utils/generate_chunks.py`
-3. Adjust prompts in `build_prompt.py`
-4. Test with `run_rag_cli.py`
+3. Test with `run_rag_cli.py`
 
 ### Testing
 
