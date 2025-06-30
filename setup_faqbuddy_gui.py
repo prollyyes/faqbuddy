@@ -206,11 +206,6 @@ class SetupWizard:
                 "DB_NEON_HOST": os.getenv("DB_NEON_HOST", "ep-super-credit-a9zsuu7x-pooler.gwc.azure.neon.tech"),
                 "DB_NEON_PORT": os.getenv("DB_NEON_PORT", "5432"),
                 "PINECONE_API_KEY": os.getenv("PINECONE_API_KEY", "pcsk_6FLreq_PQ9dENviDRu7WwTHg5BF27PWBmFoVMPqJNzrJcNQSWywSns973idr5vqgTixqF2"),
-                "DB_USER": os.getenv("DB_USER", "db_user"),
-                "DB_PASSWORD": os.getenv("DB_PASSWORD", "pwd"),
-                "DB_NAME": os.getenv("DB_NAME", "faqbuddy_db"),
-                "DB_HOST": os.getenv("DB_HOST", "localhost"),
-                "DB_PORT": os.getenv("DB_PORT", "5433"),
                 "EMAIL_FROM": os.getenv("EMAIL_FROM", "tutordimatematica.ing@gmail.com"),
                 "EMAIL_PASS": os.getenv("EMAIL_PASS", "ohxrysinakqpryrb"),
                 "EMAIL_USER": os.getenv("EMAIL_USER", "tutordimatematica.ing@gmail.com")
@@ -224,11 +219,6 @@ class SetupWizard:
                 "DB_NEON_HOST": "ep-super-credit-a9zsuu7x-pooler.gwc.azure.neon.tech",
                 "DB_NEON_PORT": "5432",
                 "PINECONE_API_KEY": "pcsk_6FLreq_PQ9dENviDRu7WwTHg5BF27PWBmFoVMPqJNzrJcNQSWywSns973idr5vqgTixqF2",
-                "DB_USER": "db_user",
-                "DB_PASSWORD": "pwd",
-                "DB_NAME": "faqbuddy_db",
-                "DB_HOST": "localhost",
-                "DB_PORT": "5433",
                 "EMAIL_FROM": "tutordimatematica.ing@gmail.com",
                 "EMAIL_PASS": "ohxrysinakqpryrb",
                 "EMAIL_USER": "tutordimatematica.ing@gmail.com"
@@ -1876,6 +1866,11 @@ class SetupWizard:
                 "3. Access: http://localhost:3000"
             ]
         
+        # Add database setup instructions
+        instructions.append("")
+        instructions.append("📋 Note: RAG functionality uses a Neon database for structured queries.")
+        instructions.append("   Ensure your .env file has the correct Neon database credentials.")
+        
         for instruction in instructions:
             instruction_label = tk.Label(
                 instructions_frame,
@@ -1980,11 +1975,6 @@ class SetupWizard:
                         "DB_NEON_HOST": os.getenv("DB_NEON_HOST", "ep-super-credit-a9zsuu7x-pooler.gwc.azure.neon.tech"),
                         "DB_NEON_PORT": os.getenv("DB_NEON_PORT", "5432"),
                         "PINECONE_API_KEY": os.getenv("PINECONE_API_KEY", "pcsk_6FLreq_PQ9dENviDRu7WwTHg5BF27PWBmFoVMPqJNzrJcNQSWywSns973idr5vqgTixqF2"),
-                        "DB_USER": os.getenv("DB_USER", "db_user"),
-                        "DB_PASSWORD": os.getenv("DB_PASSWORD", "pwd"),
-                        "DB_NAME": os.getenv("DB_NAME", "faqbuddy_db"),
-                        "DB_HOST": os.getenv("DB_HOST", "localhost"),
-                        "DB_PORT": os.getenv("DB_PORT", "5433"),
                         "EMAIL_FROM": os.getenv("EMAIL_FROM", "tutordimatematica.ing@gmail.com"),
                         "EMAIL_PASS": os.getenv("EMAIL_PASS", "ohxrysinakqpryrb"),
                         "EMAIL_USER": os.getenv("EMAIL_USER", "tutordimatematica.ing@gmail.com")
@@ -2014,11 +2004,6 @@ class SetupWizard:
                     "DB_NEON_HOST": "ep-super-credit-a9zsuu7x-pooler.gwc.azure.neon.tech",
                     "DB_NEON_PORT": "5432",
                     "PINECONE_API_KEY": "pcsk_6FLreq_PQ9dENviDRu7WwTHg5BF27PWBmFoVMPqJNzrJcNQSWywSns973idr5vqgTixqF2",
-                    "DB_USER": "db_user",
-                    "DB_PASSWORD": "pwd",
-                    "DB_NAME": "faqbuddy_db",
-                    "DB_HOST": "localhost",
-                    "DB_PORT": "5433",
                     "EMAIL_FROM": "tutordimatematica.ing@gmail.com",
                     "EMAIL_PASS": "ohxrysinakqpryrb",
                     "EMAIL_USER": "tutordimatematica.ing@gmail.com"

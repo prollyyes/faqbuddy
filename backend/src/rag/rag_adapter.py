@@ -10,6 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.rag.rag_pipeline import RAGPipeline
 from src.rag.hybrid_retrieval import determine_namespace_boost
+from typing import Generator, Dict, Any
 
 class RAGSystem:
     """
@@ -65,6 +66,43 @@ class RAGSystem:
             "total_time": round(total_time, 3),
             "context_used": context_info
         }
+
+    def generate_response_streaming(self, question: str) -> Generator[str, None, None]:
+        """
+        Generate a streaming response using the RAG pipeline.
+        Yields tokens as they are generated for reduced perceived latency.
+        """
+        # Get namespace boost information for context
+        docs_boost, db_boost = determine_namespace_boost(question)
+        
+        # Generate the streaming answer using the pipeline
+        for token in self.pipeline.answer_streaming(question):
+            yield token
+
+    def generate_response_streaming_with_metadata(self, question: str) -> Generator[Dict[str, Any], None, None]:
+        """
+        Generate a streaming response with metadata using the RAG pipeline.
+        Yields dictionaries with tokens and metadata for enhanced client experience.
+        """
+        # Get namespace boost information for context
+        docs_boost, db_boost = determine_namespace_boost(question)
+        
+        # Generate the streaming answer with metadata using the pipeline
+        for chunk in self.pipeline.answer_streaming_with_metadata(question):
+            # Add adapter-specific metadata
+            if chunk["type"] == "metadata":
+                chunk.update({
+                    "namespace_boosts": {
+                        "documents": docs_boost,
+                        "database": db_boost
+                    },
+                    "pipeline_used": "hybrid_retrieval",
+                    "model": "mistral",
+                    "retrieval_method": "hybrid_dense_sparse",
+                    "reranking": "cross_encoder",
+                    "namespaces_searched": ["documents", "db"]
+                })
+            yield chunk
     
     def get_system_info(self) -> dict:
         """Get information about the RAG system configuration."""
@@ -77,6 +115,7 @@ class RAGSystem:
                 "namespace_aware_retrieval",
                 "hybrid_search",
                 "cross_encoder_reranking",
-                "dynamic_boost_calculation"
+                "dynamic_boost_calculation",
+                "streaming_response"
             ]
         } 

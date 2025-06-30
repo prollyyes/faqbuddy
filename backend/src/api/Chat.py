@@ -6,6 +6,9 @@ from src.text_2_SQL import TextToSQLConverter
 from src.rag.rag_adapter import RAGSystem
 from src.utils.db_utils import get_connection, MODE
 from fastapi import APIRouter
+from fastapi.responses import StreamingResponse
+import json
+from typing import Generator
 
 
 # Initialize router
@@ -131,4 +134,95 @@ def t2sql_endpoint(req: T2SQLRequest):
             "generation_time": rag_result["generation_time"],
             "total_time": rag_result["total_time"],
             "context_used": rag_result["context_used"]
+        }
+
+@router.post("/rag/stream")
+def rag_streaming_endpoint(req: ChatRequest):
+    """
+    Streaming RAG endpoint that yields tokens as they are generated.
+    Reduces perceived latency by showing response in real-time.
+    """
+    question = req.question
+    
+    def generate_stream() -> Generator[str, None, None]:
+        """Generate streaming response."""
+        try:
+            rag = get_rag()
+            for token in rag.generate_response_streaming(question):
+                # Send each token as a JSON line
+                yield f"data: {json.dumps({'token': token, 'type': 'token'})}\n\n"
+            
+            # Send completion signal
+            yield f"data: {json.dumps({'type': 'complete'})}\n\n"
+            
+        except Exception as e:
+            # Send error signal
+            yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+    
+    return StreamingResponse(
+        generate_stream(),
+        media_type="text/plain",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "Content-Type": "text/event-stream",
+        }
+    )
+
+@router.post("/rag/stream/metadata")
+def rag_streaming_metadata_endpoint(req: ChatRequest):
+    """
+    Streaming RAG endpoint with metadata that yields tokens and metadata.
+    Provides enhanced client experience with detailed information.
+    """
+    question = req.question
+    
+    def generate_stream() -> Generator[str, None, None]:
+        """Generate streaming response with metadata."""
+        try:
+            rag = get_rag()
+            for chunk in rag.generate_response_streaming_with_metadata(question):
+                # Send each chunk as a JSON line
+                yield f"data: {json.dumps(chunk)}\n\n"
+            
+        except Exception as e:
+            # Send error signal
+            yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+    
+    return StreamingResponse(
+        generate_stream(),
+        media_type="text/plain",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "Content-Type": "text/event-stream",
+        }
+    )
+
+@router.post("/rag")
+def rag_endpoint(req: ChatRequest):
+    """
+    Standard RAG endpoint for non-streaming responses.
+    Returns complete response with timing information.
+    """
+    question = req.question
+    
+    try:
+        rag = get_rag()
+        rag_result = rag.generate_response(question)
+        
+        return {
+            "result": rag_result["response"],
+            "chosen": "RAG",
+            "retrieval_time": rag_result["retrieval_time"],
+            "generation_time": rag_result["generation_time"],
+            "total_time": rag_result["total_time"],
+            "context_used": rag_result["context_used"]
+        }
+        
+    except Exception as e:
+        return {
+            "error": str(e),
+            "chosen": "RAG",
+            "result": "Si è verificato un errore durante la generazione della risposta."
         }
