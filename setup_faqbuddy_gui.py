@@ -1562,7 +1562,7 @@ class SetupWizard:
         widget.bind("<Enter>", show_tooltip)
         widget.bind("<Leave>", hide_tooltip)
         
-    def save_env_vars(self):
+    def save_env_vars(self, show_message=True):
         """Save environment variables to .env file."""
         try:
             env_content = {}
@@ -1637,8 +1637,8 @@ class SetupWizard:
             # Update the stored env_vars
             self.env_vars.update(env_content)
             
-            # Show success message only for admin or when actually saving
-            if self.is_admin or self.env_entries:
+            # Show success message only if requested and for admin or when actually saving
+            if show_message and (self.is_admin or self.env_entries):
                 messagebox.showinfo("Success", "Environment variables saved successfully!")
                     
         except Exception as e:
@@ -1680,7 +1680,7 @@ class SetupWizard:
         if self.current_step < self.total_steps:
             # Save environment variables if on env setup step and admin or entries exist
             if self.current_step == 1 and (self.is_admin or self.env_entries):
-                self.save_env_vars()
+                self.save_env_vars(show_message=False)
             self.show_step(self.current_step + 1)
             
     def run(self):
@@ -1718,7 +1718,7 @@ class SetupWizard:
         def test():
             try:
                 # Save current env vars
-                self.save_env_vars()
+                self.save_env_vars(show_message=False)
                 
                 import psycopg2
                 from dotenv import load_dotenv
@@ -1835,7 +1835,7 @@ class SetupWizard:
                 self.update_status("Setting up vector database...")
                 
                 # Save env vars first
-                self.save_env_vars()
+                self.save_env_vars(show_message=False)
                 
                 result = subprocess.run([
                     sys.executable, "backend/src/rag/update_pinecone_from_neon.py"
