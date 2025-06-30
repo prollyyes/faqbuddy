@@ -142,15 +142,17 @@ CREATE TABLE Corsi_seguiti (
 ------------------------------------------------
 
 CREATE TABLE Materiale_Didattico (
-    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    Utente_id    UUID NOT NULL REFERENCES Utente(id),
-    course_id  UUID NOT NULL REFERENCES Corso(id), -- cambia in edizione_corso(id, data), quindi aggingi data nel Materiale_Didattico
-    path_file  TEXT NOT NULL,
-    tipo       TEXT,
-    verificato BOOLEAN NOT NULL DEFAULT false,
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    utente_id       UUID NOT NULL REFERENCES Utente(id),
+    edition_id      UUID NOT NULL, -- (edition_id, edition_data) REFERENCES EdizioneCorso(id, data)
+    edition_data    semestre NOT NULL, -- FK composta per coerenza con la PK di EdizioneCorso
+    path_file       TEXT NOT NULL,
+    tipo            TEXT,
+    verificato      BOOLEAN NOT NULL DEFAULT false,
     data_caricamento TEXT NOT NULL DEFAULT to_char(CURRENT_DATE, 'DD/MM/YYYY'),
-    rating_medio FLOAT,
-    numero_voti INT
+    rating_medio    FLOAT,
+    numero_voti     INT,
+    FOREIGN KEY (edition_id, edition_data) REFERENCES EdizioneCorso(id, data)
 );
 
 CREATE TABLE Valutazione (
