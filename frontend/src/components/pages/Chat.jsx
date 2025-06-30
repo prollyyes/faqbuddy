@@ -49,7 +49,7 @@ const Chat = () => {
 
     const sendMessageStreaming = async (question, messageIndex) => {
         try {
-            const response = await fetch('http://127.0.0.1:8000/rag/stream', {
+            const response = await fetch('http://127.0.0.1:8000/chat?streaming=true', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -76,6 +76,7 @@ const Chat = () => {
                     if (line.startsWith('data: ')) {
                         try {
                             const data = JSON.parse(line.slice(6));
+                            console.log('Streaming data:', data);
                             
                             if (data.type === 'token') {
                                 accumulatedText += data.token;
@@ -95,7 +96,7 @@ const Chat = () => {
                                         ...newMessages[messageIndex],
                                         isStreaming: false,
                                         metadata: {
-                                            chosen: 'RAG',
+                                            chosen: data.chosen || 'RAG',
                                             streaming: true
                                         }
                                     };
@@ -119,9 +120,11 @@ const Chat = () => {
 
     const sendMessageRegular = async (question, messageIndex) => {
         try {
-            const response = await axios.post('http://127.0.0.1:8000/t2sql', {
+            const response = await axios.post('http://127.0.0.1:8000/chat', {
                 question: question
             });
+
+            console.log('Backend response:', response.data);
 
             const botMessage = {
                 text: response.data.natural_response || response.data.result,
