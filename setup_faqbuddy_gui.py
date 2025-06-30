@@ -105,37 +105,35 @@ class ModernLabel(tk.Label):
 
 class SetupWizard:
     def __init__(self):
+        """Initialize the setup wizard."""
         self.root = tk.Tk()
         self.root.title("FAQBuddy Setup Wizard")
         self.root.geometry("900x700")
-        self.root.resizable(True, True)
-        self.root.configure(bg='#f0f0f0')
-        
-        # Initialize admin status
-        self.is_admin = False
+        self.root.configure(bg=Colors.BACKGROUND)
+        self.root.resizable(False, False)
         
         # Center the window
         self.center_window()
         
-        # Setup variables
-        self.current_step = 0
+        # Initialize variables
+        self.current_step = -1  # Start with login step
         self.total_steps = 6
+        self.is_admin = False
         self.env_vars = {}
-        self.env_entries = {}  # Dictionary to store entry widgets
+        self.env_entries = {}
         self.progress_queue = queue.Queue()
         
-        # Load existing .env if present
+        # Load existing environment variables
         self.load_existing_env()
         
-        # Create UI
+        # Create widgets
         self.create_widgets()
-        self.show_step(0)
+        
+        # Start with login screen
+        self.show_login_screen()
         
         # Start progress monitoring
         self.monitor_progress()
-        
-        # Role selection and admin authentication logic
-        self.role_selection()
         
     def center_window(self):
         """Center the window on screen."""
@@ -315,8 +313,8 @@ class SetupWizard:
         # Logout button (left side)
         self.logout_btn = tk.Button(
             nav_frame,
-            text="🔄 Logout",
-            command=self.return_to_role_selection,
+            text="🔄 Restart",
+            command=self.restart_setup,
             width=10,
             bg=Colors.WARNING,
             fg="white",
@@ -328,7 +326,6 @@ class SetupWizard:
             activebackground="#E6850E",
             activeforeground="white"
         )
-        self.logout_btn.pack(side="left")
         
         # Back button
         self.back_btn = ModernButton(
@@ -338,7 +335,6 @@ class SetupWizard:
             width=10
         )
         self.back_btn.configure_secondary()
-        self.back_btn.pack(side="left", padx=(10, 0))
         
         # Next button
         self.next_btn = ModernButton(
@@ -348,10 +344,11 @@ class SetupWizard:
             width=10
         )
         self.next_btn.configure_primary()
-        self.next_btn.pack(side="right")
         
-        # Initially disable back button
-        self.back_btn.configure(state="disabled")
+        # Initially hide all navigation buttons (will be shown after login)
+        self.back_btn.pack_forget()
+        self.next_btn.pack_forget()
+        self.logout_btn.pack_forget()
         
     def create_status_bar(self):
         """Create the status bar fixed at bottom."""
@@ -368,6 +365,11 @@ class SetupWizard:
         )
         self.status_label.pack(fill="x", padx=10, pady=10)
         
+    def show_login_screen(self):
+        """Show the login screen."""
+        self.current_step = 0
+        self.show_step(0)
+        
     def show_step(self, step):
         """Show the specified step."""
         # Clear content
@@ -380,39 +382,319 @@ class SetupWizard:
         self.current_step = step
         
         # Update progress based on role
-        if self.is_admin:
-            progress = ((step + 1) / self.total_steps) * 100
+        if step == 0:
+            # Login screen - no progress bar
+            self.progress_bar['value'] = 0
+            self.progress_label.config(text="Login Required")
+            self.show_login_interface()
+        elif self.is_admin:
+            progress = ((step) / self.total_steps) * 100
+            self.progress_label.config(text=f"Step {step} of {self.total_steps}")
         else:
             # For users, skip admin-only steps
-            user_steps = [0, 1, 3, 4, 5, 6]  # Python check, env setup, model download, vector db, deps, completion
+            user_steps = [1, 2, 3, 4, 5, 6]  # Python check, env setup, model download, vector db, deps, completion
             if step in user_steps:
                 user_step_index = user_steps.index(step)
                 progress = ((user_step_index + 1) / len(user_steps)) * 100
+                self.progress_label.config(text=f"Step {user_step_index + 1} of {len(user_steps)}")
             else:
                 progress = 0
         self.progress_bar['value'] = progress
         
-        # Show appropriate step
+        # Show appropriate step (skip step 0 as it's handled above)
         if step == 0:
-            self.show_python_check()
+            pass  # Already handled above
         elif step == 1:
-            self.show_env_setup()
+            self.show_python_check()
         elif step == 2:
+            self.show_env_setup()
+        elif step == 3:
             if self.is_admin:
                 self.show_db_test()
             else:
-                self.show_step(3)  # Skip DB test for users
-        elif step == 3:
-            self.show_model_download()
+                self.show_step(4)  # Skip DB test for users
         elif step == 4:
-            self.show_vector_db_setup()
+            self.show_model_download()
         elif step == 5:
-            self.show_dependency_install()
+            self.show_vector_db_setup()
         elif step == 6:
+            self.show_dependency_install()
+        elif step == 7:
             self.show_completion()
             
         # Update navigation
         self.update_navigation()
+        
+    def show_login_interface(self):
+        """Show the integrated login interface."""
+        # Hide progress bar for login screen
+        self.progress_bar.pack_forget()
+        self.progress_label.pack_forget()
+        
+        # Create main login container
+        login_frame = tk.Frame(self.content_frame, bg=Colors.BACKGROUND)
+        login_frame.pack(fill="both", expand=True, padx=50, pady=50)
+        
+        # Icon
+        icon_label = tk.Label(
+            login_frame, 
+            text="🚀", 
+            font=("Segoe UI", 64), 
+            bg=Colors.BACKGROUND
+        )
+        icon_label.pack(pady=(0, 30))
+        
+        # Title
+        title_label = tk.Label(
+            login_frame, 
+            text="Welcome to FAQBuddy Setup", 
+            font=("Segoe UI", 24, "bold"), 
+            fg=Colors.PRIMARY, 
+            bg=Colors.BACKGROUND
+        )
+        title_label.pack(pady=(0, 10))
+        
+        subtitle_label = tk.Label(
+            login_frame, 
+            text="Choose your role to continue with the setup", 
+            font=("Segoe UI", 14), 
+            fg=Colors.SECONDARY, 
+            bg=Colors.BACKGROUND
+        )
+        subtitle_label.pack(pady=(0, 40))
+        
+        # Role selection buttons
+        btn_frame = tk.Frame(login_frame, bg=Colors.BACKGROUND)
+        btn_frame.pack(fill="x", pady=20)
+        
+        # Admin button
+        admin_btn = tk.Button(
+            btn_frame, 
+            text="👨‍💼 Admin Setup", 
+            width=25, 
+            height=3, 
+            bg=Colors.PRIMARY, 
+            fg="white", 
+            font=("SF Pro Display", 14, "bold"),
+            activebackground=Colors.BUTTON_HOVER, 
+            activeforeground="white", 
+            relief="flat", 
+            cursor="hand2",
+            command=self.show_admin_login, 
+            padx=30, 
+            pady=15,
+            borderwidth=0
+        )
+        admin_btn.pack(pady=(0, 20), fill="x")
+        
+        # User button
+        user_btn = tk.Button(
+            btn_frame, 
+            text="👤 User Setup", 
+            width=25, 
+            height=3, 
+            bg=Colors.SECONDARY, 
+            fg="white", 
+            font=("SF Pro Display", 14, "bold"),
+            activebackground="#6D6D70", 
+            activeforeground="white", 
+            relief="flat", 
+            cursor="hand2",
+            command=self.select_user_role, 
+            padx=30, 
+            pady=15,
+            borderwidth=0
+        )
+        user_btn.pack(fill="x")
+        
+        # Add hover effects
+        def on_admin_enter(e):
+            admin_btn.configure(bg=Colors.BUTTON_HOVER)
+        
+        def on_admin_leave(e):
+            admin_btn.configure(bg=Colors.PRIMARY)
+            
+        def on_user_enter(e):
+            user_btn.configure(bg="#6D6D70")
+            
+        def on_user_leave(e):
+            user_btn.configure(bg=Colors.SECONDARY)
+            
+        admin_btn.bind("<Enter>", on_admin_enter)
+        admin_btn.bind("<Leave>", on_admin_leave)
+        user_btn.bind("<Enter>", on_user_enter)
+        user_btn.bind("<Leave>", on_user_leave)
+        
+    def show_admin_login(self):
+        """Show admin login interface."""
+        # Clear content
+        for widget in self.content_frame.winfo_children():
+            widget.destroy()
+            
+        # Create admin login container
+        login_frame = tk.Frame(self.content_frame, bg=Colors.BACKGROUND)
+        login_frame.pack(fill="both", expand=True, padx=50, pady=50)
+        
+        # Icon
+        icon_label = tk.Label(
+            login_frame, 
+            text="🔐", 
+            font=("Segoe UI", 64), 
+            bg=Colors.BACKGROUND
+        )
+        icon_label.pack(pady=(0, 30))
+        
+        # Title
+        title_label = tk.Label(
+            login_frame, 
+            text="Admin Login", 
+            font=("Segoe UI", 24, "bold"), 
+            fg=Colors.PRIMARY, 
+            bg=Colors.BACKGROUND
+        )
+        title_label.pack(pady=(0, 10))
+        
+        subtitle_label = tk.Label(
+            login_frame, 
+            text="Enter admin password to access full setup options", 
+            font=("Segoe UI", 14), 
+            fg=Colors.SECONDARY, 
+            bg=Colors.BACKGROUND
+        )
+        subtitle_label.pack(pady=(0, 40))
+        
+        # Password entry frame
+        entry_frame = tk.Frame(login_frame, bg=Colors.BACKGROUND)
+        entry_frame.pack(fill="x", pady=(0, 20))
+        
+        self.admin_pw_var = tk.StringVar()
+        pw_entry = tk.Entry(
+            entry_frame, 
+            textvariable=self.admin_pw_var, 
+            show="*", 
+            font=("Segoe UI", 16), 
+            width=30, 
+            relief="flat", 
+            bd=2,
+            bg=Colors.CARD_BG,
+            fg=Colors.TEXT,
+            insertbackground=Colors.PRIMARY
+        )
+        pw_entry.pack(pady=(0, 10))
+        pw_entry.focus_set()
+        
+        # Error label
+        self.admin_pw_error = tk.Label(
+            login_frame, 
+            text="", 
+            font=("Segoe UI", 12), 
+            fg=Colors.ERROR, 
+            bg=Colors.BACKGROUND
+        )
+        self.admin_pw_error.pack(pady=(0, 30))
+        
+        # Buttons frame
+        btn_frame = tk.Frame(login_frame, bg=Colors.BACKGROUND)
+        btn_frame.pack(fill="x", pady=20)
+        
+        # Submit button
+        submit_btn = tk.Button(
+            btn_frame, 
+            text="🔓 Login", 
+            width=20, 
+            height=2, 
+            bg=Colors.PRIMARY, 
+            fg="white", 
+            font=("SF Pro Display", 14, "bold"),
+            activebackground=Colors.BUTTON_HOVER, 
+            activeforeground="white", 
+            relief="flat", 
+            cursor="hand2",
+            command=self.check_admin_password, 
+            padx=25, 
+            pady=10,
+            borderwidth=0
+        )
+        submit_btn.pack(side="left", padx=(0, 10), fill="x", expand=True)
+        
+        # Back button
+        back_btn = tk.Button(
+            btn_frame, 
+            text="← Back", 
+            width=20, 
+            height=2, 
+            bg=Colors.SECONDARY, 
+            fg="white", 
+            font=("SF Pro Display", 14, "bold"),
+            activebackground="#6D6D70", 
+            activeforeground="white", 
+            relief="flat", 
+            cursor="hand2",
+            command=self.show_login_interface, 
+            padx=25, 
+            pady=10,
+            borderwidth=0
+        )
+        back_btn.pack(side="right", fill="x", expand=True)
+        
+        # Add hover effects
+        def on_submit_enter(e):
+            submit_btn.configure(bg=Colors.BUTTON_HOVER)
+        
+        def on_submit_leave(e):
+            submit_btn.configure(bg=Colors.PRIMARY)
+            
+        def on_back_enter(e):
+            back_btn.configure(bg="#6D6D70")
+            
+        def on_back_leave(e):
+            back_btn.configure(bg=Colors.SECONDARY)
+            
+        submit_btn.bind("<Enter>", on_submit_enter)
+        submit_btn.bind("<Leave>", on_submit_leave)
+        back_btn.bind("<Enter>", on_back_enter)
+        back_btn.bind("<Leave>", on_back_leave)
+        
+        # Bind Enter key to submit
+        pw_entry.bind("<Return>", lambda e: self.check_admin_password())
+        
+    def check_admin_password(self):
+        """Check admin password and proceed."""
+        pw = self.admin_pw_var.get()
+        if pw == 'faqbuddy-admin-panel-funtori-yessir-1970':
+            self.is_admin = True
+            self.admin_pw_error.config(text="✅ Login successful! Proceeding to setup...", fg=Colors.SUCCESS)
+            self.root.after(1000, lambda: self.show_step(1))  # Proceed to step 1 after 1 second
+        else:
+            self.admin_pw_error.config(text="❌ Incorrect password. Please try again.", fg=Colors.ERROR)
+            
+    def select_user_role(self):
+        """Select user role and proceed."""
+        self.is_admin = False
+        self.show_step(1)  # Proceed to step 1
+        
+    def update_navigation(self):
+        """Update navigation buttons."""
+        if self.current_step == 0:
+            # Login screen - hide navigation
+            self.back_btn.pack_forget()
+            self.next_btn.pack_forget()
+            self.logout_btn.pack_forget()
+        else:
+            # Show navigation for other steps
+            self.back_btn.pack(side="left", padx=(10, 0))
+            self.next_btn.pack(side="right")
+            self.logout_btn.pack(side="left")
+            
+            if self.current_step == 1:
+                self.back_btn.configure(state="disabled")
+            else:
+                self.back_btn.configure(state="normal")
+                
+            if self.current_step == self.total_steps:
+                self.next_btn.configure(text="Finish", state="disabled")
+            else:
+                self.next_btn.configure(text="Next →", state="normal")
         
     def show_python_check(self):
         """Show Python version check step."""
@@ -1402,309 +1684,6 @@ class SetupWizard:
         """Run the setup wizard."""
         self.root.mainloop()
 
-    def role_selection(self):
-        """Show a modal for role selection and handle admin authentication."""
-        self.role_window = tk.Toplevel(self.root)
-        self.role_window.title("Select Role")
-        self.role_window.geometry("500x350")
-        self.role_window.configure(bg=Colors.BACKGROUND)
-        self.role_window.grab_set()
-        self.role_window.resizable(False, False)
-        self.role_window.transient(self.root)
-        self.role_window.protocol("WM_DELETE_WINDOW", self.root.destroy)
-
-        # Center the modal
-        self.role_window.update_idletasks()
-        width = self.role_window.winfo_width()
-        height = self.role_window.winfo_height()
-        x = (self.role_window.winfo_screenwidth() // 2) - (width // 2)
-        y = (self.role_window.winfo_screenheight() // 2) - (height // 2)
-        self.role_window.geometry(f"{width}x{height}+{x}+{y}")
-
-        # Main container
-        main_frame = tk.Frame(self.role_window, bg=Colors.BACKGROUND)
-        main_frame.pack(fill="both", expand=True, padx=40, pady=40)
-
-        # Icon
-        icon_label = tk.Label(
-            main_frame, 
-            text="🚀", 
-            font=("Segoe UI", 48), 
-            bg=Colors.BACKGROUND
-        )
-        icon_label.pack(pady=(0, 20))
-
-        # Title
-        title = tk.Label(
-            main_frame, 
-            text="Welcome to FAQBuddy Setup", 
-            font=("Segoe UI", 20, "bold"), 
-            fg=Colors.PRIMARY, 
-            bg=Colors.BACKGROUND
-        )
-        title.pack(pady=(0, 10))
-
-        subtitle = tk.Label(
-            main_frame, 
-            text="Please select your role to continue:", 
-            font=("Segoe UI", 12), 
-            fg=Colors.SECONDARY, 
-            bg=Colors.BACKGROUND
-        )
-        subtitle.pack(pady=(0, 30))
-
-        # Buttons container
-        btn_frame = tk.Frame(main_frame, bg=Colors.BACKGROUND)
-        btn_frame.pack(fill="x", pady=20)
-
-        # Admin button with modern styling
-        admin_btn = tk.Button(
-            btn_frame, 
-            text="👨‍💼 Admin", 
-            width=20, 
-            height=3, 
-            bg=Colors.PRIMARY, 
-            fg="white", 
-            font=("SF Pro Display", 12, "bold"),
-            activebackground=Colors.BUTTON_HOVER, 
-            activeforeground="white", 
-            relief="flat", 
-            cursor="hand2",
-            command=self.admin_login_modal, 
-            padx=30, 
-            pady=12,
-            borderwidth=0
-        )
-        admin_btn.pack(pady=(0, 15), fill="x")
-
-        # User button with modern styling
-        user_btn = tk.Button(
-            btn_frame, 
-            text="👤 User", 
-            width=20, 
-            height=3, 
-            bg=Colors.SECONDARY, 
-            fg="white", 
-            font=("SF Pro Display", 12, "bold"),
-            activebackground="#6D6D70", 
-            activeforeground="white", 
-            relief="flat", 
-            cursor="hand2",
-            command=self.user_select, 
-            padx=30, 
-            pady=12,
-            borderwidth=0
-        )
-        user_btn.pack(fill="x")
-
-        # Add hover effects
-        def on_admin_enter(e):
-            admin_btn.configure(bg=Colors.BUTTON_HOVER)
-        
-        def on_admin_leave(e):
-            admin_btn.configure(bg=Colors.PRIMARY)
-            
-        def on_user_enter(e):
-            user_btn.configure(bg="#6D6D70")
-            
-        def on_user_leave(e):
-            user_btn.configure(bg=Colors.SECONDARY)
-            
-        admin_btn.bind("<Enter>", on_admin_enter)
-        admin_btn.bind("<Leave>", on_admin_leave)
-        user_btn.bind("<Enter>", on_user_enter)
-        user_btn.bind("<Leave>", on_user_leave)
-
-    def admin_login_modal(self):
-        """Prompt for admin password."""
-        for widget in self.role_window.winfo_children():
-            widget.destroy()
-        
-        # Main container
-        main_frame = tk.Frame(self.role_window, bg=Colors.BACKGROUND)
-        main_frame.pack(fill="both", expand=True, padx=40, pady=40)
-        
-        # Icon
-        icon_label = tk.Label(
-            main_frame, 
-            text="🔐", 
-            font=("Segoe UI", 48), 
-            bg=Colors.BACKGROUND
-        )
-        icon_label.pack(pady=(0, 20))
-        
-        title = tk.Label(
-            main_frame, 
-            text="Admin Login", 
-            font=("Segoe UI", 20, "bold"), 
-            fg=Colors.PRIMARY, 
-            bg=Colors.BACKGROUND
-        )
-        title.pack(pady=(0, 10))
-        
-        subtitle = tk.Label(
-            main_frame, 
-            text="Enter admin password to continue:", 
-            font=("Segoe UI", 12), 
-            fg=Colors.SECONDARY, 
-            bg=Colors.BACKGROUND
-        )
-        subtitle.pack(pady=(0, 30))
-        
-        # Password entry frame
-        entry_frame = tk.Frame(main_frame, bg=Colors.BACKGROUND)
-        entry_frame.pack(fill="x", pady=(0, 20))
-        
-        self.admin_pw_var = tk.StringVar()
-        pw_entry = tk.Entry(
-            entry_frame, 
-            textvariable=self.admin_pw_var, 
-            show="*", 
-            font=("Segoe UI", 14), 
-            width=25, 
-            relief="flat", 
-            bd=2,
-            bg=Colors.CARD_BG,
-            fg=Colors.TEXT,
-            insertbackground=Colors.PRIMARY
-        )
-        pw_entry.pack(pady=(0, 10))
-        pw_entry.focus_set()
-        
-        # Error label
-        self.admin_pw_error = tk.Label(
-            main_frame, 
-            text="", 
-            font=("Segoe UI", 10), 
-            fg=Colors.ERROR, 
-            bg=Colors.BACKGROUND
-        )
-        self.admin_pw_error.pack(pady=(0, 30))
-        
-        # Buttons frame
-        btn_frame = tk.Frame(main_frame, bg=Colors.BACKGROUND)
-        btn_frame.pack(fill="x", pady=20)
-        
-        # Submit button
-        submit_btn = tk.Button(
-            btn_frame, 
-            text="🔓 Login", 
-            width=15, 
-            height=2, 
-            bg=Colors.PRIMARY, 
-            fg="white", 
-            font=("SF Pro Display", 12, "bold"),
-            activebackground=Colors.BUTTON_HOVER, 
-            activeforeground="white", 
-            relief="flat", 
-            cursor="hand2",
-            command=self.check_admin_password, 
-            padx=20, 
-            pady=8,
-            borderwidth=0
-        )
-        submit_btn.pack(side="left", padx=(0, 10), fill="x", expand=True)
-        
-        # Back button
-        back_btn = tk.Button(
-            btn_frame, 
-            text="← Back", 
-            width=15, 
-            height=2, 
-            bg=Colors.SECONDARY, 
-            fg="white", 
-            font=("SF Pro Display", 12, "bold"),
-            activebackground="#6D6D70", 
-            activeforeground="white", 
-            relief="flat", 
-            cursor="hand2",
-            command=self.reset_role_modal, 
-            padx=20, 
-            pady=8,
-            borderwidth=0
-        )
-        back_btn.pack(side="right", fill="x", expand=True)
-        
-        # Add hover effects
-        def on_submit_enter(e):
-            submit_btn.configure(bg=Colors.BUTTON_HOVER)
-        
-        def on_submit_leave(e):
-            submit_btn.configure(bg=Colors.PRIMARY)
-            
-        def on_back_enter(e):
-            back_btn.configure(bg="#6D6D70")
-            
-        def on_back_leave(e):
-            back_btn.configure(bg=Colors.SECONDARY)
-            
-        submit_btn.bind("<Enter>", on_submit_enter)
-        submit_btn.bind("<Leave>", on_submit_leave)
-        back_btn.bind("<Enter>", on_back_enter)
-        back_btn.bind("<Leave>", on_back_leave)
-        
-        # Bind Enter key to submit
-        pw_entry.bind("<Return>", lambda e: self.check_admin_password())
-
-    def check_admin_password(self):
-        pw = self.admin_pw_var.get()
-        if pw == 'faqbuddy-admin-panel-funtori-yessir-1970':
-            self.is_admin = True
-            self.role_window.destroy()
-        else:
-            self.admin_pw_error.config(text="Incorrect password. Please try again.")
-
-    def user_select(self):
-        self.is_admin = False
-        self.role_window.destroy()
-
-    def reset_role_modal(self):
-        self.role_window.destroy()
-        self.role_selection()
-
-    def return_to_role_selection(self):
-        """Return to the role selection modal from anywhere in the wizard."""
-        self.role_selection()
-
-    def show_tooltip(self, event, text):
-        """Show a tooltip with help text."""
-        tooltip = tk.Toplevel()
-        tooltip.wm_overrideredirect(True)
-        tooltip.wm_geometry(f"+{event.x_root+10}+{event.y_root+10}")
-        
-        label = tk.Label(tooltip, text=text, justify="left", background="#ffffe0", relief="solid", borderwidth=1, font=("Segoe UI", 9))
-        label.pack()
-        
-        def hide_tooltip():
-            tooltip.destroy()
-        
-        tooltip.bind("<Leave>", lambda e: hide_tooltip())
-        tooltip.bind("<Button-1>", lambda e: hide_tooltip())
-        
-        # Auto-hide after 3 seconds
-        tooltip.after(3000, hide_tooltip)
-
-    def update_navigation(self):
-        """Update navigation buttons."""
-        if self.current_step == 0:
-            self.back_btn.configure(state="disabled")
-        else:
-            self.back_btn.configure(state="normal")
-            
-        if self.current_step == self.total_steps:
-            self.next_btn.configure(text="Finish", state="disabled")
-        else:
-            self.next_btn.configure(text="Next →", state="normal")
-            
-    def toggle_password_visibility(self, entry, button):
-        """Toggle password field visibility."""
-        if entry.cget('show') == '*':
-            entry.configure(show='')
-            button.configure(text="🙈 Hide")
-        else:
-            entry.configure(show='*')
-            button.configure(text="👁 Show")
-            
     def check_python_version(self):
         """Check Python version compatibility."""
         def check():
@@ -1947,6 +1926,21 @@ class SetupWizard:
                 self.update_status("Dependency installation failed")
                 
         threading.Thread(target=install, daemon=True).start()
+
+    def toggle_password_visibility(self, entry, button):
+        """Toggle password field visibility."""
+        if entry.cget('show') == '*':
+            entry.configure(show='')
+            button.configure(text="🙈 Hide")
+        else:
+            entry.configure(show='*')
+            button.configure(text="👁 Show")
+
+    def restart_setup(self):
+        """Restart the setup wizard."""
+        self.current_step = 0
+        self.is_admin = False
+        self.show_step(0)
 
 def main():
     """Main function."""
