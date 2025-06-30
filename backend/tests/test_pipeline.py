@@ -2,7 +2,7 @@ import time
 import pytest
 from src.switcher.MLmodel import MLModel
 from src.text_2_SQL.converter import TextToSQLConverter
-from src.utils.db_utils import get_connection
+from src.utils.db_utils import get_connection, MODE
 from src.utils.db_handler import DBHandler
 from src.utils.llm_gemma import classify_question
 from src.rag.rag_core import RAGSystem
@@ -26,7 +26,7 @@ def test_question_pipeline(question):
     start = time.time()
 
     # Nuova connessione per ogni test
-    db = DBHandler(get_connection(mode="neon"))
+    db = DBHandler(get_connection(mode=MODE))
     schema = db.get_schema()
 
     ml_pred, proba = ml_model.inference(question)

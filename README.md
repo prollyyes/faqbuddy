@@ -35,17 +35,30 @@ Scarica e inserisci i file `.gguf` nella cartella `models`:
 
 ### 3. Configura le variabili d’ambiente
 
+### just foR PRODUCTION, IN RELEASE LEVIAMO TUTTO SENNO è LA FINE, sto pushando anche il .env.local ma quello andrà nel gitignore
 Crea un file `.env` nella root del progetto con questo contenuto:
+
 
 ```env
 PINECONE_API_KEY=pcsk_6FLreq_PQ9dENviDRu7WwTHg5BF27PWBmFoVMPqJNzrJcNQSWywSns973idr5vqgTixqF2
 PINECONE_HOST=exams-index-y83qnfa.svc.aped-4627-b74a.pinecone.io
 PINECONE_INDEX=exams-index
+
 DB_USER=db_user
 DB_PASSWORD=pwd
 DB_NAME=faqbuddy_db
 DB_HOST=localhost
 DB_PORT=5433
+
+DB_NEON_NAME=neondb
+DB_NEON_USER=neondb_owner
+DB_NEON_PASSWORD=npg_81IXpKWZQxEa
+DB_NEON_HOST=ep-super-credit-a9zsuu7x-pooler.gwc.azure.neon.tech
+DB_NEON_PORT=5432
+
+EMAIL_FROM=tutordimatematica.ing@gmail.com
+EMAIL_PASS=ohxrysinakqpryrb
+EMAIL_USER=tutordimatematica.ing@gmail.com
 ```
 
 ### 4. imposta il `PYTHONPATH` per puntare a `backend/src` se necessario.
@@ -73,7 +86,7 @@ python rag/embed_and_index.py
 
 ---
 
-### 7. Esegui i test
+### 7. Esegui i test, o con python o con pytest
 
 ```sh
 cd ..
@@ -89,37 +102,16 @@ python src/rag/test_rag.py
 **Backend (FastAPI):**
 ```sh
 cd backend/src
-uvicorn main:app --reload
+uvicorn api.API:app --reload
 ```
 
 **Frontend (Next.js):**
 ```sh
 cd frontend
-npm install
+npm i
 npm run dev
 ```
 ### Dev test sul RAG
 
 Per testare solo le funzionalita' del RAG, potete eseguire il file `interactive_test.py`, trovato in `/backend/src/rag/`.
 Il resto delle operazioni deve essere fatto, e' semplicemente un basico modo per interagire da CL con il modello e testare velocemente le funzionalita'.
-
----
-
-## Esempi di domande complex gestite dal RAG
-
-Queste domande richiedono ragionamento, spiegazioni o informazioni non strutturate e **non possono essere risolte con una semplice query SQL**:
-
-- **Come posso pianificare il mio percorso di studi per laurearmi nei tempi previsti?**
-- **Quali strategie posso adottare per migliorare la mia media degli esami universitari?**
-- **Cosa succede se non supero un esame obbligatorio entro la scadenza prevista dal regolamento?**
-- **Quali sono i vantaggi e le opportunità offerte da un curriculum internazionale?**
-- **Come posso conciliare efficacemente lavoro e studio durante il mio percorso universitario?**
-- **Quali sono le procedure dettagliate per ottenere il riconoscimento di esami sostenuti all’estero?**
-- **Quali passi devo seguire se desidero cambiare corso di laurea?**
-- **Come posso evitare sovrapposizioni tra esami obbligatori nel mio piano di studi?**
-- **Quali documenti sono necessari per presentare la domanda di laurea e dove posso reperirli?**
-- **Quali risorse online o materiali sono consigliati per prepararsi al meglio agli esami di informatica?**
-
----
-
-Buon divertimento con FAQBuddy!

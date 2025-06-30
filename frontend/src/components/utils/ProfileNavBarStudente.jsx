@@ -8,7 +8,7 @@ import { IoStatsChart } from "react-icons/io5";
 import { motion } from 'framer-motion';
 import { usePathname, useRouter } from 'next/navigation';
 
-const ProfileNavBar = () => {
+const ProfileNavBaStudente = () => {
   const pathname = usePathname();
   const router = useRouter();
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
@@ -97,4 +97,4 @@ const ProfileNavBar = () => {
   )
 }
 
-export default ProfileNavBar
+export default ProfileNavBaStudente

@@ -1,11 +1,31 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
 import Button from '@/components/utils/Button';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { SignupInsegnante } from './SignupInsegnante';
+import { SignupStudente } from './SignupStudente';
+import InputField from '@/components/utils/InputField';
+
+const HOST = process.env.NEXT_PUBLIC_HOST;
+
+async function uploadCV(cvFile, nome, cognome) {
+  const formData = new FormData();
+  formData.append("file", cvFile);
+  formData.append("parent_folder", "FAQBuddy");
+  formData.append("child_folder", "CV");
+  formData.append("nome", nome);
+  formData.append("cognome", cognome);
+
+  const response = await axios.post(
+    `${HOST}/files/upload`,
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return response.data;
+}
 
 export default function Auth() {
   const router = useRouter();
@@ -18,8 +38,12 @@ export default function Auth() {
     sesso: '',
     eta: '',
     corsoDiLaurea: '',
-    annoDiImmatricolazione: '',
     numeroDiMatricola: '',
+    infoMail: '',
+    sitoWeb: '',
+    cv: '',
+    ricevimento: '',
+    ruolo: 'studente',
     email: '',
     password: '',
     confermaPassword: '',
@@ -36,8 +60,12 @@ export default function Auth() {
       sesso: '',
       eta: '',
       corsoDiLaurea: '',
-      annoDiImmatricolazione: '',
       numeroDiMatricola: '',
+      infoMail: '',
+      sitoWeb: '',
+      cv: '',
+      ricevimento: '',
+      ruolo: 'studente',
       email: '',
       password: '',
       confermaPassword: '',
@@ -62,16 +90,29 @@ export default function Auth() {
         return;
       }
       try {
+        // 1. Se insegnante, carica prima il CV
+        if (formData.ruolo === 'insegnante' && formData.cv) {
+          const uploadResult = await uploadCV(formData.cv, formData.nome, formData.cognome);
+          formData.cv = uploadResult.file_id;
+        }
+
+        // 2. Poi invia i dati di signup
         const signupData = {
           nome: formData.nome,
           cognome: formData.cognome,
-          sesso: formData.sesso,
-          eta: formData.eta,
-          corsoDiLaurea: formData.corsoDiLaurea,
-          annoDiImmatricolazione: formData.annoDiImmatricolazione,
-          numeroDiMatricola: formData.numeroDiMatricola,
+          ruolo: formData.ruolo,
           email: formData.email,
           password: formData.password,
+          ...(formData.ruolo === 'studente' && {
+            corsoDiLaurea: formData.corsoDiLaurea,
+            numeroDiMatricola: parseInt(formData.numeroDiMatricola, 10) || undefined,
+          }),
+          ...(formData.ruolo === 'insegnante' && {
+            infoMail: formData.infoMail,
+            sitoWeb: formData.sitoWeb,
+            ricevimento: formData.ricevimento,
+            cv: formData.cv,
+          }),
         };
         await axios.post('http://127.0.0.1:8000/signup', signupData);
         setSuccess('Registrazione avvenuta con successo! Effettua il login.');
@@ -83,8 +124,12 @@ export default function Auth() {
           sesso: '',
           eta: '',
           corsoDiLaurea: '',
-          annoDiImmatricolazione: '',
           numeroDiMatricola: '',
+          infoMail: '',
+          sitoWeb: '',
+          cv: '',
+          ricevimento: '',
+          ruolo: 'studente',
           email: '',
           password: '',
           confermaPassword: '',
@@ -93,6 +138,8 @@ export default function Auth() {
         const msg = err.response?.data?.detail;
         if (msg === 'Email già registrata') {
           setError('Questa email è già stata registrata');
+        } else if (msg) {
+          setError(msg);
         } else {
           setError('Errore durante la registrazione');
         }
@@ -104,10 +151,8 @@ export default function Auth() {
           password: formData.password,
         };
         const response = await axios.post('http://127.0.0.1:8000/login', loginData);
-        // Save user_id as token in localStorage
         const { access_token } = response.data;
         localStorage.setItem('token', access_token);
-        // attende che localStorage sia "committed" prima del redirect
         setTimeout(() => {
           router.push('/homepage/chat');
         }, 500);
@@ -149,7 +194,6 @@ export default function Auth() {
         )}
       </div>
 
-      {/* Content below header */}
       <main className="flex-1 flex items-center justify-center pt-36 px-6">
         <div className="w-full max-w-sm">
           <AnimatePresence mode="wait">
@@ -173,64 +217,44 @@ export default function Auth() {
                 )}
                 {mode === 'signup' && signupStep === 1 && (
                   <>
-                    <input
-                      type="text"
+                    <div className="flex items-center justify-center mb-4">
+                      <span className={`mr-2 font-semibold ${formData.ruolo !== 'insegnante' ? 'text-[#822433]' : 'text-gray-400'}`}>Studente</span>
+                      <button
+                        type="button"
+                        className={`w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out ${formData.ruolo === 'insegnante' ? 'bg-[#822433]' : 'bg-gray-300'}`}
+                        onClick={() =>
+                          setFormData(prev => ({
+                            ...prev,
+                            ruolo: prev.ruolo === 'insegnante' ? 'studente' : 'insegnante'
+                          }))
+                        }
+                      >
+                        <div
+                          className={`bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out ${formData.ruolo === 'insegnante' ? 'translate-x-7' : ''}`}
+                        />
+                      </button>
+                      <span className={`ml-2 font-semibold ${formData.ruolo === 'insegnante' ? 'text-[#822433]' : 'text-gray-400'}`}>Insegnante</span>
+                    </div>
+                    <InputField
                       name="nome"
                       placeholder="Nome"
                       required
                       value={formData.nome}
                       onChange={handleChange}
-                      className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#822433]"
                     />
-                    <input
-                      type="text"
+                    <InputField
                       name="cognome"
                       placeholder="Cognome"
                       required
                       value={formData.cognome}
                       onChange={handleChange}
-                      className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#822433]"
                     />
-                    <input
-                      type="text"
-                      name="sesso"
-                      placeholder="Sesso"
-                      value={formData.sesso}
-                      onChange={handleChange}
-                      className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#822433]"
-                    />
-                    <input
-                      type="number"
-                      name="eta"
-                      placeholder="Età"
-                      value={formData.eta}
-                      onChange={handleChange}
-                      className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#822433]"
-                    />
-                    <input
-                      type="text"
-                      name="corsoDiLaurea"
-                      placeholder="Corso di laurea"
-                      value={formData.corsoDiLaurea}
-                      onChange={handleChange}
-                      className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#822433]"
-                    />
-                    <input
-                      type="text"
-                      name="annoDiImmatricolazione"
-                      placeholder="Anno di immatricolazione"
-                      value={formData.annoDiImmatricolazione}
-                      onChange={handleChange}
-                      className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#822433]"
-                    />
-                    <input
-                      type="text"
-                      name="numeroDiMatricola"
-                      placeholder="Numero di matricola"
-                      value={formData.numeroDiMatricola}
-                      onChange={handleChange}
-                      className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#822433]"
-                    />
+                    {formData.ruolo === 'studente' && (
+                      <SignupStudente formData={formData} handleChange={handleChange} />
+                    )}
+                    {formData.ruolo === 'insegnante' && (
+                      <SignupInsegnante formData={formData} handleChange={handleChange} setFormData={setFormData} />
+                    )}
                     <Button type="button" onClick={() => setSignupStep(2)} className="w-full bg-[#822433] hover:bg-red-900 text-[#822433] rounded-xl py-3">Avanti</Button>
                   </>
                 )}
@@ -240,22 +264,21 @@ export default function Auth() {
                     {mode === 'signup' && (
                       <button type="button" onClick={() => setSignupStep(1)} className="text-sm text-[#822433] underline">← Indietro</button>
                     )}
-                    <input
+                    <InputField
                       type="email"
                       name="email"
                       placeholder="Email"
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#822433]"
                     />
                     <div className="relative">
-                      <input
+                      <InputField
                         type={showPassword ? 'text' : 'password'}
                         name="password"
                         placeholder="Password"
                         value={formData.password}
                         onChange={handleChange}
-                        className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#822433] pr-10"
+                        style={{ paddingRight: '2.5rem' }}
                       />
                       <button
                         type="button"
@@ -266,13 +289,12 @@ export default function Auth() {
                       </button>
                     </div>
                     {mode === 'signup' && (
-                      <input
+                      <InputField
                         type={showPassword ? 'text' : 'password'}
                         name="confermaPassword"
                         placeholder="Conferma Password"
                         value={formData.confermaPassword}
                         onChange={handleChange}
-                        className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#822433]"
                       />
                     )}
                     <Button type="submit" className="w-full bg-[#822433] hover:bg-red-900 text-[#822433] rounded-xl py-3">

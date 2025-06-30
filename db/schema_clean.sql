@@ -1,3 +1,5 @@
+--- ATTENZIONE QUESTO CLEAN SCHEMA NON E' COERENTE CON SCHEMA.sql, EDO CHE FACCIO? 
+
 ------------------------------------------------
 -- CLEAN SCHEMA WITH DROP STATEMENTS
 ------------------------------------------------

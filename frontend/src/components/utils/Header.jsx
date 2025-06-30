@@ -23,7 +23,7 @@ export default function Header() {
           <BackButton href={backHref} />
         </div>
       )}
-      <Link href="/homepage/chat" className="text-4xl font-bold tracking-wider mr-2">
+      <Link href="/homepage/chat" className="text-4xl font-bold tracking-wider mr-2 ramaraja-regular">
         FAQBuddy
       </Link>
     </header>

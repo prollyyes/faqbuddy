@@ -20,30 +20,33 @@ class TextToSQLConverter:
     - Niente testo extra, commenti o spiegazioni.
 
     ### Esempi
-
-    Domanda: Elenca tutti i professori
-    SQL: SELECT * FROM Insegnanti;
-
-    Domanda: Mostra tutti i corsi di laurea  
-    SQL: SELECT * FROM Corso_di_Laurea;
-
-    Domanda: Mostra tutti i corsi del primo semestre  
-    SQL: SELECT c.nome FROM Corso c JOIN EdizioneCorso e ON c.id = e.id WHERE e.data LIKE 'S1/%';
     
-    Domanda: Mostra tutte le informazioni sul corso Fondamenti di Informatica
-    SQL: SELECT * FROM Corso WHERE nome = 'Fondamenti di Informatica';
+        Domanda: Elenca tutti i professori
+        SQL: SELECT * FROM Insegnanti_Anagrafici;
     
-    Domanda: Quali sono i corsi di Ingegneria Informatica ?  
-    SQL: SELECT Corso.nome FROM Corso JOIN Corso_di_Laurea ON Corso.id_corso = Corso_di_Laurea.id WHERE Corso_di_Laurea.nome = 'Ingegneria Informatica' OR Corso_di_Laurea.nome = 'Ingegneria Informatica e Automatica';
-
-    Domanda: Mostra i corsi offerti nel 2023  
-    SQL: SELECT Corso.nome FROM Corso JOIN Corso_di_Laurea ON Corso.id_corso = Corso_di_Laurea.id WHERE Corso.semestre = 'S1/2023' OR Corso.semestre = 'S2/2023';
-
-    Domanda: Qual'è la mail del professore 'Roberto Baldoni'?
-    SQL: SELECT infoMail FROM Insegnanti JOIN Utente ON Insegnanti.id = Utente.id WHERE nome = 'Roberto' AND cognome = 'Baldoni';
+        Domanda: Mostra tutti i corsi di laurea  
+        SQL: SELECT * FROM Corso_di_Laurea;
     
-    Domanda: Elenca tutti i professori di nome Roberto.
-    SQL: SELECT * FROM Insegnanti JOIN Utente ON Insegnanti.id = Utente.id WHERE nome = 'Roberto';
+        Domanda: Mostra tutti i corsi del primo semestre  
+        SQL: SELECT c.nome FROM Corso c JOIN EdizioneCorso e ON c.id = e.id WHERE e.data LIKE 'S1/%';
+        
+        Domanda: Mostra tutte le informazioni sul corso Fondamenti di Informatica
+        SQL: SELECT * FROM Corso WHERE nome = 'Fondamenti di Informatica';
+        
+        Domanda: Quali sono i corsi di Ingegneria Informatica ?  
+        SQL: SELECT Corso.nome FROM Corso JOIN Corso_di_Laurea ON Corso.id_corso = Corso_di_Laurea.id WHERE Corso_di_Laurea.nome = 'Ingegneria Informatica' OR Corso_di_Laurea.nome = 'Ingegneria Informatica e Automatica';
+    
+        Domanda: Mostra i corsi offerti nel 2023  
+        SQL: SELECT Corso.nome FROM Corso JOIN Corso_di_Laurea ON Corso.id_corso = Corso_di_Laurea.id WHERE Corso.semestre = 'S1/2023' OR Corso.semestre = 'S2/2023';
+    
+        Domanda: Qual'è la mail del professore 'Roberto Baldoni'?
+        SQL: SELECT ir.infoMail FROM Insegnanti_Anagrafici ia LEFT JOIN Insegnanti_Registrati ir ON ia.id = ir.anagrafico_id WHERE ia.nome = 'Roberto' AND ia.cognome = 'Baldoni';
+        
+        Domanda: Elenca tutti i professori di nome Roberto.
+        SQL: SELECT * FROM Insegnanti_Anagrafici WHERE nome = 'Roberto';
+        
+        Domanda: Quali sono i professori che insegnano il corso Fondamenti di algebra e geometria?
+        SQL: SELECT ia.nome, ia.cognome FROM Insegnanti_Anagrafici ia JOIN EdizioneCorso e ON ia.id = e.insegnante_anagrafico JOIN Corso c ON e.id = c.id WHERE c.nome = 'Fondamenti di algebra e geometria';
     ### SCHEMA
     {schema}
 

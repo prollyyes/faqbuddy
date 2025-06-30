@@ -56,14 +56,15 @@ export default function Tutorial() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-between pt-20 py-6 px-4 bg-white gap-6">
-      <div className="absolute top-25 right-8">
+      {/* Non mi piace questo bottone piazzato cosi */}
+      {/* <div className="absolute top-25 right-8">
         <button 
           onClick={handleSkip} 
           className="text-xl text-[#822433] hover:underline"
         >
           Skip
         </button>
-      </div>
+      </div> */}
       {/* ---------------------------------------------------------- */}
       {/* Animated Step Content                                     */}
       {/* ---------------------------------------------------------- */}
