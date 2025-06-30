@@ -3,9 +3,10 @@
 ------------------------------------------------
 
 CREATE TYPE attend_status AS ENUM ('attivo','completato','abbandonato');
-CREATE TYPE tipoCorso AS ENUM ('triennale','magistrale','ciclo unico');
+CREATE TYPE tipoCorso AS ENUM ('Triennale','Magistrale','Ciclo unico');
 CREATE DOMAIN semestre AS TEXT 
   CHECK (VALUE ~ '^(S[12])/[0-9]{4}$');
+CREATE TYPE statoEdizioneCorso AS ENUM ('attivo', 'archiviato', 'annullato');
 
 ------------------------------------------------
 -- 1. Utente (studenti/insegnanti)
@@ -15,16 +16,40 @@ CREATE TABLE Utente (
   email        TEXT  NOT NULL UNIQUE,
   pwd_hash     TEXT  NOT NULL,
   nome         TEXT  NOT NULL,
-  cognome      TEXT  NOT NULL
+  cognome      TEXT  NOT NULL,
+  email_verificata BOOLEAN NOT NULL DEFAULT FALSE -- serve per sapere se l'utente ha verificato la sua email
 );
 
-CREATE TABLE Insegnanti (
-  id           UUID PRIMARY KEY REFERENCES Utente(id),
-  infoMail     TEXT,
-  sitoWeb      TEXT,
-  cv           TEXT,
-  ricevimento  TEXT
+-- è una tabella con record temporanei, appena un utente è registrato viene inserito un record in questa tabella
+-- e poi viene cancellato quando l'utente verifica la sua email
+CREATE TABLE EmailVerification (
+    user_id UUID REFERENCES Utente(id) ON DELETE CASCADE,
+    token TEXT PRIMARY KEY
 );
+
+-- ho la necessità di avere sia una tabella per gli insegnanti registrati che una per gli insegnanti anagrafici,
+-- perché alcuni insegnanti potrebbero non essere registrati al sito, ma avere comunque un'anagrafica.
+-- e quindi voglio poter assegnare un corso anche a insegnanti non registrati.
+CREATE TABLE Insegnanti_Anagrafici (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    nome TEXT NOT NULL,
+    cognome TEXT NOT NULL,
+    email TEXT,
+    utente_id UUID REFERENCES Utente(id) -- NULL se non registrato
+);
+
+
+CREATE TABLE Insegnanti_Registrati (
+    id UUID PRIMARY KEY REFERENCES Utente(id) ON DELETE CASCADE,
+    anagrafico_id UUID REFERENCES Insegnanti_Anagrafici(id),
+    infoMail TEXT,
+    sitoWeb TEXT,
+    cv TEXT,
+    ricevimento TEXT
+);
+
+
+
 
 -- Student vedi dopo causa Foreign key
 
@@ -51,15 +76,16 @@ CREATE TABLE Corso_di_Laurea (
     id_facolta UUID NOT NULL REFERENCES Facolta(id),
     nome    TEXT NOT NULL,
     descrizione TEXT,
-    classe  TEXT NOT NULL,
+    classe  TEXT,
     tipologia tipoCorso NOT NULL,
     mail_segreteria TEXT,
     domanda_laurea TEXT,
-    test    BOOLEAN NOT NULL DEFAULT false
+    test    BOOLEAN NOT NULL DEFAULT false,
+    cfu_totali INT NOT NULL DEFAULT 180
 );
 
 CREATE TABLE Studenti (
-  id           UUID PRIMARY KEY REFERENCES Utente(id),
+  id           UUID PRIMARY KEY REFERENCES Utente(id) ON DELETE CASCADE,
   corso_laurea_id UUID NOT NULL REFERENCES Corso_di_Laurea(id),
   matricola    INT NOT NULL
 );
@@ -82,12 +108,12 @@ CREATE TABLE Piattaforme (
 
 CREATE TABLE EdizioneCorso (
     id         UUID NOT NULL REFERENCES Corso(id),
-    insegnante UUID NOT NULL REFERENCES Insegnanti(id),
-    piattaforma TEXT REFERENCES Piattaforme(Nome),
+    insegnante_anagrafico UUID NOT NULL REFERENCES Insegnanti_Anagrafici(id),
     data       semestre NOT NULL,
     orario     TEXT,
     esonero    BOOLEAN NOT NULL,
     mod_Esame  TEXT NOT NULL,
+    stato      statoEdizioneCorso NOT NULL DEFAULT 'attivo',
     PRIMARY KEY (id, data)
 );
 
@@ -108,7 +134,7 @@ CREATE TABLE Corsi_seguiti (
     stato      attend_status NOT NULL,
     voto       INT CHECK (voto BETWEEN 18 AND 31),
     PRIMARY KEY (student_id, edition_id, edition_data),
-    FOREIGN KEY (edition_id, edition_data) REFERENCES EdizioneCorso(id, data)
+    FOREIGN KEY (edition_id, edition_data) REFERENCES EdizioneCorso(id, data) ON UPDATE CASCADE
 );
 
 ------------------------------------------------
@@ -116,15 +142,17 @@ CREATE TABLE Corsi_seguiti (
 ------------------------------------------------
 
 CREATE TABLE Materiale_Didattico (
-    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    Utente_id    UUID NOT NULL REFERENCES Utente(id),
-    course_id  UUID NOT NULL REFERENCES Corso(id),    
-    path_file  TEXT NOT NULL,
-    tipo       TEXT,
-    verificato BOOLEAN NOT NULL DEFAULT false,
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    utente_id       UUID NOT NULL REFERENCES Utente(id),
+    edition_id      UUID NOT NULL, -- (edition_id, edition_data) REFERENCES EdizioneCorso(id, data)
+    edition_data    semestre NOT NULL, -- FK composta per coerenza con la PK di EdizioneCorso
+    path_file       TEXT NOT NULL,
+    tipo            TEXT,
+    verificato      BOOLEAN NOT NULL DEFAULT false,
     data_caricamento TEXT NOT NULL DEFAULT to_char(CURRENT_DATE, 'DD/MM/YYYY'),
-    rating_medio FLOAT,
-    numero_voti INT
+    rating_medio    FLOAT,
+    numero_voti     INT,
+    FOREIGN KEY (edition_id, edition_data) REFERENCES EdizioneCorso(id, data)
 );
 
 CREATE TABLE Valutazione (
@@ -198,3 +226,33 @@ CREATE TRIGGER trigger_aggiorna_stato_corso
 BEFORE INSERT OR UPDATE ON Corsi_seguiti
 FOR EACH ROW
 EXECUTE FUNCTION aggiorna_stato_corso();
+
+
+CREATE OR REPLACE FUNCTION set_email_verificata_true()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE Utente SET email_verificata = TRUE WHERE id = OLD.user_id;
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_set_email_verificata_true
+AFTER DELETE ON EmailVerification
+FOR EACH ROW
+EXECUTE FUNCTION set_email_verificata_true();
+
+CREATE OR REPLACE FUNCTION normalize_text_fields()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.nome := INITCAP(LOWER(NEW.nome));
+    IF NEW.cognome IS NOT NULL THEN
+        NEW.cognome := INITCAP(LOWER(NEW.cognome));
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_normalize_insegnanti
+BEFORE INSERT OR UPDATE ON Insegnanti_Anagrafici
+FOR EACH ROW
+EXECUTE FUNCTION normalize_text_fields();
