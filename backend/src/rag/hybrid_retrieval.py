@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer, CrossEncoder
 from pinecone import Pinecone
 from rank_bm25 import BM25Okapi
-from src.rag.utils.pdf_chunker import chunk_pdf
+from .utils.pdf_chunker import chunk_pdf
 
 # Config
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data'))

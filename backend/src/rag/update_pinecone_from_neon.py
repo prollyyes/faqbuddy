@@ -13,7 +13,7 @@ import datetime
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone, ServerlessSpec
-from src.rag.utils.generate_chunks import ChunkGenerator
+from .utils.generate_chunks import ChunkGenerator
 
 # Load environment variables
 load_dotenv()

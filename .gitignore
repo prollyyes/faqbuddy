@@ -15,11 +15,8 @@ backend/models
 backend/src/token.json
 backend/src/credentials.json
 
-
-venv/
-.env/
-
 # environment
+venv/
 .env
 
 # macOS

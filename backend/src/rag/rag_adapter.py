@@ -8,8 +8,8 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.rag.rag_pipeline import RAGPipeline
-from src.rag.hybrid_retrieval import determine_namespace_boost
+from .rag_pipeline import RAGPipeline
+from .hybrid_retrieval import determine_namespace_boost
 from typing import Generator, Dict, Any
 
 class RAGSystem:
