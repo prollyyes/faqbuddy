@@ -1,10 +1,10 @@
-from src.api.BaseModel import *
-from src.api.utils import *
-from src.utils.db_handler import DBHandler
-from src.switcher.MLmodel import MLModel
-from src.text_2_SQL import TextToSQLConverter
-from src.rag.rag_adapter import RAGSystem
-from src.utils.db_utils import get_connection, MODE
+from .BaseModel import *
+from .utils import *
+from ..utils.db_handler import DBHandler
+from ..switcher.MLmodel import MLModel
+from ..text_2_SQL import TextToSQLConverter
+from ..rag.rag_adapter import RAGSystem
+from ..utils.db_utils import get_connection, MODE
 from fastapi import APIRouter, Query
 from fastapi.responses import StreamingResponse
 import json
