@@ -3,7 +3,7 @@
 ##########################################
 
 import pandas as pd
-from src.utils.llm_gemma import classify_question
+from ..utils.llm_gemma import classify_question
 
 # Parametri
 N_SIMPLE = 20

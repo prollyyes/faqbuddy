@@ -1,6 +1,8 @@
 import os
 import pytest
 from dotenv import load_dotenv
+# ##########################################
+## DEPRECATED IMPORT RAGSystem, to be UPDATED
 from src.rag.rag_core import RAGSystem
 from src.rag.utils.vector_db import NAMESPACE
 

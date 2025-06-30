@@ -1,5 +1,5 @@
 from pinecone import Pinecone
-from src.rag.utils.embeddings import embed_texts
+from .embeddings import embed_texts
 from typing import List
 from dotenv import load_dotenv
 import os

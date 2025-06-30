@@ -1,6 +1,6 @@
 import os
 import joblib
-from src.switcher.ml_utils import extract_features
+from .ml_utils import extract_features
 
 class MLModel:
     def __init__(self, model_path=None):

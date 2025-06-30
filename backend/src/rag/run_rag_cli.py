@@ -1,4 +1,4 @@
-from rag_pipeline import RAGPipeline
+from .rag_pipeline import RAGPipeline
 
 def main():
     rag = RAGPipeline()

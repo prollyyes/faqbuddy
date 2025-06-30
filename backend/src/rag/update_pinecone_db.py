@@ -12,7 +12,7 @@ import datetime
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone, ServerlessSpec
-from utils.generate_chunks import ChunkGenerator
+from .utils.generate_chunks import ChunkGenerator
 
 # Configuration
 INDEX_NAME = "exams-index-enhanced"

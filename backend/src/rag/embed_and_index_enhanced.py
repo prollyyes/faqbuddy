@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone, ServerlessSpec, CreateIndexSpec
 import time
-from src.rag.rag_core_enhanced import EnhancedRAGSystem
+from .rag_core_enhanced import EnhancedRAGSystem
 
 def create_enhanced_index():
     """

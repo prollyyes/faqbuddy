@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Body
-from src.api.BaseModel import *
+from .BaseModel import *
 from typing import List
-from src.utils.db_utils import get_connection, MODE
-from src.utils.db_handler import DBHandler
-from src.auth.jwt_handler import decode_access_token
-from src.api.utils import *
-from src.api.drive_utils import *
+from ..utils.db_utils import get_connection, MODE
+from ..utils.db_handler import DBHandler
+from ..auth.jwt_handler import decode_access_token
+from .utils import *
+from .drive_utils import *
 
 router = APIRouter()
 
