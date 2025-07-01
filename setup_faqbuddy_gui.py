@@ -9,20 +9,18 @@ import sys
 import subprocess
 import threading
 import tkinter as tk
-from tkinter import ttk, messagebox, filedialog
+from tkinter import ttk, messagebox
 from pathlib import Path
-import json
 import requests
 from dotenv import load_dotenv
 import queue
 
-# Import Sun Valley theme
-SUN_VALLEY_AVAILABLE = False
+# Ensure sv_ttk is installed before importing
 try:
     import sv_ttk
-    SUN_VALLEY_AVAILABLE = True
 except ImportError:
-    print("Warning: Sun Valley theme not available. Using default theme.")
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'sv-ttk'])
+    import sv_ttk
 
 class Colors:
     """Color scheme for the application using Apple design language."""
@@ -116,10 +114,10 @@ class SetupWizard:
         """Initialize the setup wizard."""
         self.root = tk.Tk()
         self.root.title("FAQBuddy Setup Wizard")
-        self.root.geometry("900x700")
+        self.root.geometry("800x600")
         
         # Apply Sun Valley theme if available
-        self.sun_valley_available = SUN_VALLEY_AVAILABLE
+        self.sun_valley_available = sv_ttk.get_theme() != "light"
         if self.sun_valley_available:
             try:
                 # Default to dark theme, but you can change this to "light" if preferred
@@ -252,7 +250,7 @@ class SetupWizard:
             self.main_frame = tk.Frame(self.root)
         else:
             self.main_frame = tk.Frame(self.root, bg=Colors.BACKGROUND)
-        self.main_frame.pack(fill="both", expand=True, padx=20, pady=(20, 0))
+        self.main_frame.pack(fill="both", expand=True, padx=15, pady=(15, 0))
         
         # Header
         self.create_header()
@@ -275,7 +273,7 @@ class SetupWizard:
             header_frame = tk.Frame(self.main_frame)
         else:
             header_frame = tk.Frame(self.main_frame, bg=Colors.BACKGROUND)
-        header_frame.pack(fill="x", pady=(0, 20))
+        header_frame.pack(fill="x", pady=(0, 15))
         
         # Title and theme switcher row
         title_row = tk.Frame(header_frame)
@@ -316,7 +314,7 @@ class SetupWizard:
             progress_frame = tk.Frame(self.main_frame)
         else:
             progress_frame = tk.Frame(self.main_frame, bg=Colors.BACKGROUND)
-        progress_frame.pack(fill="x", pady=(0, 20))
+        progress_frame.pack(fill="x", pady=(0, 15))
         
         # Progress label
         self.progress_label = tk.Label(
@@ -360,21 +358,21 @@ class SetupWizard:
             content_container = tk.Frame(self.main_frame)
         else:
             content_container = tk.Frame(self.main_frame, bg=Colors.BACKGROUND)
-        content_container.pack(fill="both", expand=True, pady=(20, 10))
+        content_container.pack(fill="both", expand=True, pady=(15, 10))
         
         # Create canvas and scrollbar
         if self.sun_valley_available:
             self.canvas = tk.Canvas(content_container, highlightthickness=0)
         else:
             self.canvas = tk.Canvas(content_container, bg=Colors.BACKGROUND, highlightthickness=0)
-        scrollbar = ttk.Scrollbar(content_container, orient="vertical", command=self.canvas.yview)
+        self.scrollbar = ttk.Scrollbar(content_container, orient="vertical", command=self.canvas.yview)
         
         # Configure canvas
-        self.canvas.configure(yscrollcommand=scrollbar.set)
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
         
-        # Pack canvas and scrollbar
+        # Pack canvas (scrollbar will be packed conditionally)
         self.canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
+        # Do not pack scrollbar yet
         
         # Create the content frame inside the canvas
         if self.sun_valley_available:
@@ -384,8 +382,18 @@ class SetupWizard:
         self.canvas_window = self.canvas.create_window((0, 0), window=self.content_frame, anchor="nw")
         
         # Configure scrolling
-        self.content_frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
-        self.canvas.bind("<Configure>", self.on_canvas_configure)
+        def update_scrollbar(event=None):
+            self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+            # Show scrollbar only if content is taller than canvas
+            needs_scroll = self.content_frame.winfo_height() > self.canvas.winfo_height()
+            if needs_scroll:
+                if not self.scrollbar.winfo_ismapped():
+                    self.scrollbar.pack(side="right", fill="y")
+            else:
+                if self.scrollbar.winfo_ismapped():
+                    self.scrollbar.pack_forget()
+        self.content_frame.bind("<Configure>", update_scrollbar)
+        self.canvas.bind("<Configure>", lambda e: [self.on_canvas_configure(e), update_scrollbar()])
         
         # Bind mouse wheel scrolling
         self.canvas.bind_all("<MouseWheel>", self.on_mousewheel)
@@ -407,7 +415,7 @@ class SetupWizard:
             nav_frame = tk.Frame(self.root, relief="flat", bd=1)
         else:
             nav_frame = tk.Frame(self.root, bg=Colors.BACKGROUND, relief="flat", bd=1)
-        nav_frame.pack(side="bottom", fill="x", padx=20, pady=(10, 20))
+        nav_frame.pack(side="bottom", fill="x", padx=15, pady=(8, 15))
         
         # Logout button (left side)
         if self.sun_valley_available:
@@ -479,7 +487,7 @@ class SetupWizard:
             self.status_frame = tk.Frame(self.root, relief="flat", bd=1)
         else:
             self.status_frame = tk.Frame(self.root, bg=Colors.CARD_BG, relief="flat", bd=1)
-        self.status_frame.pack(side="bottom", fill="x", padx=20, pady=(0, 5))
+        self.status_frame.pack(side="bottom", fill="x", padx=15, pady=(0, 5))
         
         self.status_label = tk.Label(
             self.status_frame,
@@ -545,7 +553,10 @@ class SetupWizard:
         elif step == 5:
             self.show_model_download()
         elif step == 6:
-            self.show_vector_db_setup()
+            if self.is_admin:
+                self.show_vector_db_setup()
+            else:
+                self.show_step(7)  # Skip vector db setup for regular users
         elif step == 7:
             self.show_dependency_install()
         elif step == 8:
@@ -851,15 +862,16 @@ class SetupWizard:
                 self.back_btn.configure(state="normal")
                 
             if self.current_step == self.total_steps:
+                # Last step - change next button to finish button
                 if self.sun_valley_available:
-                    self.next_btn.configure(text="Finish")
+                    self.next_btn.configure(text="✅ Finish", command=self.finish_setup)
                 else:
-                    self.next_btn.configure(text="Finish", state="disabled")
+                    self.next_btn.configure(text="✅ Finish", command=self.finish_setup, state="normal")
             else:
                 if self.sun_valley_available:
-                    self.next_btn.configure(text="Next →")
+                    self.next_btn.configure(text="Next →", command=self.next_step)
                 else:
-                    self.next_btn.configure(text="Next →", state="normal")
+                    self.next_btn.configure(text="Next →", command=self.next_step, state="normal")
         
     def show_python_check(self):
         """Show Python version check step."""
@@ -870,7 +882,7 @@ class SetupWizard:
             card = tk.Frame(self.content_frame, relief="flat", bd=1)
         else:
             card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
-        card.pack(fill="both", expand=True, padx=20, pady=10)
+        card.pack(fill="both", expand=True, padx=15, pady=8)
         
         # Content
         if self.sun_valley_available:
@@ -950,7 +962,7 @@ class SetupWizard:
             card = tk.Frame(self.content_frame, relief="flat", bd=1)
         else:
             card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
-        card.pack(fill="both", expand=True, padx=20, pady=10)
+        card.pack(fill="both", expand=True, padx=15, pady=8)
         
         # Content
         if self.sun_valley_available:
@@ -1248,7 +1260,7 @@ class SetupWizard:
             card = tk.Frame(self.content_frame, relief="flat", bd=1)
         else:
             card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
-        card.pack(fill="both", expand=True, padx=20, pady=10)
+        card.pack(fill="both", expand=True, padx=15, pady=8)
         
         # Content
         if self.sun_valley_available:
@@ -1265,14 +1277,14 @@ class SetupWizard:
         )
         icon_label.pack(pady=(0, 20))
         
-        title_label = tk.Label(
+        title_label = self.create_themed_label(
             content_frame,
             text="Python Environment Setup",
             font=("Segoe UI", 18, "bold")
         )
         title_label.pack()
         
-        desc_label = tk.Label(
+        desc_label = self.create_themed_label(
             content_frame,
             text="Detecting and setting up Python environment for FAQBuddy",
             font=("Segoe UI", 11),
@@ -1398,26 +1410,16 @@ class SetupWizard:
             self.env_name_entry.pack(anchor="w")
             
             # Create environment button
-            create_btn = tk.Button(
+            create_btn = self.create_themed_button(
                 create_frame,
                 text="🔧 Create Environment",
                 command=self.create_environment,
-                width=25,
-                height=2,
-                bg=Colors.PRIMARY,
-                fg="white",
-                font=("SF Pro Display", 12, "bold"),
-                relief="flat",
-                cursor="hand2",
-                activebackground=Colors.BUTTON_HOVER,
-                activeforeground="white",
-                padx=20,
-                pady=8
+                width=25
             )
             create_btn.pack(pady=(0, 20))
             
             # Progress frame
-            self.env_progress_frame = tk.Frame(create_frame, bg=Colors.CARD_BG)
+            self.env_progress_frame = self.create_themed_frame(create_frame)
             self.env_progress_frame.pack(fill="x", pady=(20, 0))
             
             self.env_progress_bar = ttk.Progressbar(
@@ -1428,31 +1430,19 @@ class SetupWizard:
             self.env_progress_bar.pack(fill="x")
             
             # Result label
-            self.env_result_label = tk.Label(
+            self.env_result_label = self.create_themed_label(
                 create_frame,
                 text="",
-                font=("Segoe UI", 10),
-                bg=Colors.CARD_BG,
                 wraplength=500
             )
             self.env_result_label.pack(pady=(20, 0))
         
         # Skip button (if environment exists or user wants to skip)
-        skip_btn = tk.Button(
+        skip_btn = self.create_themed_button(
             content_frame,
             text="⏭️ Continue with Current Environment",
             command=self.next_step,
-            width=25,
-            height=2,
-            bg=Colors.SECONDARY,
-            fg="white",
-            font=("SF Pro Display", 12, "bold"),
-            relief="flat",
-            cursor="hand2",
-            activebackground="#6D6D70",
-            activeforeground="white",
-            padx=20,
-            pady=8
+            width=25
         )
         skip_btn.pack(pady=(20, 0))
         
@@ -1565,7 +1555,7 @@ class SetupWizard:
         
         # Create card
         card = self.create_themed_frame(self.content_frame, relief="flat", bd=1)
-        card.pack(fill="both", expand=True, padx=20, pady=10)
+        card.pack(fill="both", expand=True, padx=15, pady=8)
         
         # Content
         content_frame = self.create_themed_frame(card)
@@ -1664,7 +1654,7 @@ class SetupWizard:
         
         # Create card
         card = self.create_themed_frame(self.content_frame, relief="flat", bd=1)
-        card.pack(fill="both", expand=True, padx=20, pady=10)
+        card.pack(fill="both", expand=True, padx=15, pady=8)
         
         # Content
         content_frame = self.create_themed_frame(card)
@@ -1678,14 +1668,14 @@ class SetupWizard:
         )
         icon_label.pack(pady=(0, 20))
         
-        title_label = tk.Label(
+        title_label = self.create_themed_label(
             content_frame,
             text="Vector Database Setup",
             font=("Segoe UI", 18, "bold")
         )
         title_label.pack()
         
-        desc_label = tk.Label(
+        desc_label = self.create_themed_label(
             content_frame,
             text="Setting up Pinecone vector database for semantic search",
             font=("Segoe UI", 11),
@@ -1743,17 +1733,7 @@ class SetupWizard:
             content_frame,
             text="⚙️ Setup Vector Database",
             command=self.setup_vector_database,
-            width=25,
-            height=2,
-            bg=Colors.PRIMARY,
-            fg="white",
-            font=("SF Pro Display", 12, "bold"),
-            relief="flat",
-            cursor="hand2",
-            activebackground=Colors.BUTTON_HOVER,
-            activeforeground="white",
-            padx=20,
-            pady=8
+            width=25
         )
         setup_btn.pack(pady=(0, 20))
         
@@ -1761,11 +1741,9 @@ class SetupWizard:
         self.create_tooltip(setup_btn, "Configure Pinecone vector database for semantic search")
         
         # Result label
-        self.vector_result_label = tk.Label(
+        self.vector_result_label = self.create_themed_label(
             content_frame,
             text="",
-            font=("Segoe UI", 10),
-            bg=Colors.CARD_BG,
             wraplength=500
         )
         self.vector_result_label.pack(pady=(20, 0))
@@ -1775,51 +1753,44 @@ class SetupWizard:
         self.progress_label.config(text="Step 7 of 8: Installing Dependencies")
         
         # Create card
-        card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
-        card.pack(fill="both", expand=True, padx=20, pady=10)
+        card = self.create_themed_frame(self.content_frame, relief="flat", bd=1)
+        card.pack(fill="both", expand=True, padx=15, pady=8)
         
         # Content
-        content_frame = tk.Frame(card, bg=Colors.CARD_BG)
+        content_frame = self.create_themed_frame(card)
         content_frame.pack(fill="both", expand=True, padx=30, pady=30)
         
         # Icon and title
         icon_label = tk.Label(
             content_frame,
             text="📦",
-            font=("Segoe UI", 48),
-            bg=Colors.CARD_BG
+            font=("Segoe UI", 48)
         )
         icon_label.pack(pady=(0, 20))
         
-        title_label = tk.Label(
+        title_label = self.create_themed_label(
             content_frame,
             text="Installing Dependencies",
-            font=("Segoe UI", 18, "bold"),
-            fg=Colors.TEXT,
-            bg=Colors.CARD_BG
+            font=("Segoe UI", 18, "bold")
         )
         title_label.pack()
         
-        desc_label = tk.Label(
+        desc_label = self.create_themed_label(
             content_frame,
             text="Installing Python and Node.js dependencies",
             font=("Segoe UI", 11),
-            fg=Colors.SECONDARY,
-            bg=Colors.CARD_BG,
             wraplength=500
         )
         desc_label.pack(pady=(10, 30))
         
         # Dependencies info
-        deps_info = tk.Frame(content_frame, bg=Colors.CARD_BG)
+        deps_info = self.create_themed_frame(content_frame)
         deps_info.pack(fill="x", pady=(0, 20))
         
         deps_label = tk.Label(
             deps_info,
             text="📋 Dependencies to install:",
             font=("Segoe UI", 12, "bold"),
-            fg=Colors.TEXT,
-            bg=Colors.CARD_BG,
             anchor="w"
         )
         deps_label.pack(anchor="w", pady=(0, 10))
@@ -1834,22 +1805,18 @@ class SetupWizard:
                 deps_info,
                 text=dep,
                 font=("Segoe UI", 10),
-                fg=Colors.TEXT,
-                bg=Colors.CARD_BG,
                 anchor="w"
             )
             dep_item.pack(anchor="w", pady=2)
         
         # Environment info
-        env_info_frame = tk.Frame(content_frame, bg=Colors.CARD_BG)
+        env_info_frame = self.create_themed_frame(content_frame)
         env_info_frame.pack(fill="x", pady=(20, 0))
         
         env_info_label = tk.Label(
             env_info_frame,
             text="🐍 Python Environment:",
             font=("Segoe UI", 12, "bold"),
-            fg=Colors.TEXT,
-            bg=Colors.CARD_BG,
             anchor="w"
         )
         env_info_label.pack(anchor="w", pady=(0, 10))
@@ -1874,7 +1841,6 @@ class SetupWizard:
             text=env_text,
             font=("Segoe UI", 10),
             fg=env_color,
-            bg=Colors.CARD_BG,
             anchor="w"
         )
         env_status_label.pack(anchor="w", pady=2)
@@ -1883,28 +1849,16 @@ class SetupWizard:
             env_info_frame,
             text=f"Path: {self.get_python_executable()}",
             font=("Segoe UI", 9),
-            fg=Colors.SECONDARY,
-            bg=Colors.CARD_BG,
             anchor="w"
         )
         python_path_label.pack(anchor="w", pady=(5, 0))
         
         # Install button with improved styling
-        install_btn = tk.Button(
+        install_btn = self.create_themed_button(
             content_frame,
             text="🔧 Install Dependencies",
             command=self.install_dependencies,
-            width=25,
-            height=2,
-            bg=Colors.PRIMARY,
-            fg="white",
-            font=("SF Pro Display", 12, "bold"),
-            relief="flat",
-            cursor="hand2",
-            activebackground=Colors.BUTTON_HOVER,
-            activeforeground="white",
-            padx=20,
-            pady=8
+            width=25
         )
         install_btn.pack(pady=(0, 20))
         
@@ -1912,7 +1866,7 @@ class SetupWizard:
         self.create_tooltip(install_btn, "Install all required Python and Node.js packages")
         
         # Progress frame
-        self.install_progress_frame = tk.Frame(content_frame, bg=Colors.CARD_BG)
+        self.install_progress_frame = self.create_themed_frame(content_frame)
         self.install_progress_frame.pack(fill="x", pady=(20, 0))
         
         self.install_progress_bar = ttk.Progressbar(
@@ -1923,11 +1877,9 @@ class SetupWizard:
         self.install_progress_bar.pack(fill="x")
         
         # Result label
-        self.install_result_label = tk.Label(
+        self.install_result_label = self.create_themed_label(
             content_frame,
             text="",
-            font=("Segoe UI", 10),
-            bg=Colors.CARD_BG,
             wraplength=500
         )
         self.install_result_label.pack(pady=(20, 0))
@@ -1937,28 +1889,26 @@ class SetupWizard:
         self.progress_label.config(text="Setup Complete! 🎉")
         
         # Create card
-        card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
-        card.pack(fill="both", expand=True, padx=20, pady=10)
+        card = self.create_themed_frame(self.content_frame, relief="flat", bd=1)
+        card.pack(fill="both", expand=True, padx=15, pady=8)
         
         # Content
-        content_frame = tk.Frame(card, bg=Colors.CARD_BG)
+        content_frame = self.create_themed_frame(card)
         content_frame.pack(fill="both", expand=True, padx=30, pady=30)
         
         # Icon and title
         icon_label = tk.Label(
             content_frame,
             text="🎉",
-            font=("Segoe UI", 48),
-            bg=Colors.CARD_BG
+            font=("Segoe UI", 48)
         )
         icon_label.pack(pady=(0, 20))
         
-        title_label = tk.Label(
+        title_label = self.create_themed_label(
             content_frame,
             text="Setup Complete!",
             font=("Segoe UI", 24, "bold"),
-            fg=Colors.SUCCESS,
-            bg=Colors.CARD_BG
+            fg=Colors.SUCCESS
         )
         title_label.pack()
         
@@ -1968,26 +1918,23 @@ class SetupWizard:
         else:
             role_msg = "You have successfully configured FAQBuddy as a regular user!"
             
-        desc_label = tk.Label(
+        desc_label = self.create_themed_label(
             content_frame,
             text=role_msg,
             font=("Segoe UI", 12),
-            fg=Colors.SECONDARY,
-            bg=Colors.CARD_BG,
             wraplength=500
         )
         desc_label.pack(pady=(10, 30))
         
         # Instructions with better styling
-        instructions_frame = tk.Frame(content_frame, bg=Colors.CARD_BG)
+        instructions_frame = self.create_themed_frame(content_frame)
         instructions_frame.pack(fill="x", pady=(0, 30))
         
         instructions_title = tk.Label(
             instructions_frame,
             text="🚀 To launch FAQBuddy:",
             font=("Segoe UI", 14, "bold"),
-            fg=Colors.TEXT,
-            bg=Colors.CARD_BG
+            anchor="w"
         )
         instructions_title.pack(anchor="w", pady=(0, 15))
         
@@ -2039,59 +1986,43 @@ class SetupWizard:
                 instructions_frame,
                 text=instruction,
                 font=("Segoe UI", 10),
-                fg=Colors.TEXT,
-                bg=Colors.CARD_BG,
                 anchor="w"
             )
             instruction_label.pack(anchor="w", pady=2)
         
-        # Button frame
-        button_frame = tk.Frame(content_frame, bg=Colors.CARD_BG)
-        button_frame.pack(pady=(20, 0))
+        # Auto-launch checkbox frame
+        checkbox_frame = self.create_themed_frame(content_frame)
+        checkbox_frame.pack(pady=(20, 0))
         
-        # Launch button with improved styling
-        launch_btn = tk.Button(
-            button_frame,
-            text="🚀 Launch FAQBuddy",
-            command=self.launch_faqbuddy,
-            width=20,
-            height=2,
-            bg=Colors.SUCCESS,
-            fg="white",
-            font=("SF Pro Display", 12, "bold"),
-            relief="flat",
-            cursor="hand2",
-            activebackground="#2FB344",
-            activeforeground="white",
-            padx=20,
-            pady=8
-        )
-        launch_btn.pack(side="left", padx=(0, 10))
+        # Auto-launch checkbox
+        self.auto_launch_var = tk.BooleanVar(value=True)  # Default to checked
         
-        # Add tooltip
-        self.create_tooltip(launch_btn, "Launch both backend and frontend servers")
+        if self.sun_valley_available:
+            auto_launch_checkbox = ttk.Checkbutton(
+                checkbox_frame,
+                text="🚀 Launch FAQBuddy automatically when setup closes",
+                variable=self.auto_launch_var,
+                style="TCheckbutton"
+            )
+        else:
+            auto_launch_checkbox = tk.Checkbutton(
+                checkbox_frame,
+                text="🚀 Launch FAQBuddy automatically when setup closes",
+                variable=self.auto_launch_var,
+                font=("Segoe UI", 11),
+                bg=Colors.CARD_BG,
+                fg=Colors.TEXT,
+                selectcolor=Colors.PRIMARY,
+                activebackground=Colors.CARD_BG,
+                activeforeground=Colors.TEXT
+            )
         
-        # Finish button
-        finish_btn = tk.Button(
-            button_frame,
-            text="✅ Finish Setup",
-            command=self.root.destroy,
-            width=15,
-            height=2,
-            bg=Colors.SECONDARY,
-            fg="white",
-            font=("SF Pro Display", 12, "bold"),
-            relief="flat",
-            cursor="hand2",
-            activebackground="#6D6D70",
-            activeforeground="white",
-            padx=20,
-            pady=8
-        )
-        finish_btn.pack(side="left")
+        auto_launch_checkbox.pack(pady=(0, 10))
         
         # Add tooltip
-        self.create_tooltip(finish_btn, "Close the setup wizard")
+        self.create_tooltip(auto_launch_checkbox, "If checked, FAQBuddy will start automatically when you close the setup")
+        
+
         
     def create_tooltip(self, widget, text):
         """Create a tooltip for a widget."""
@@ -2103,16 +2034,16 @@ class SetupWizard:
             label = tk.Label(tooltip, text=text, justify="left", background="#ffffe0", relief="solid", borderwidth=1, font=("Segoe UI", 9))
             label.pack()
             
-            def hide_tooltip():
+            def hide_tooltip(event=None):
                 tooltip.destroy()
             
-            tooltip.bind("<Leave>", lambda e: hide_tooltip())
-            tooltip.bind("<Button-1>", lambda e: hide_tooltip())
+            tooltip.bind("<Leave>", hide_tooltip)
+            tooltip.bind("<Button-1>", hide_tooltip)
             tooltip.after(3000, hide_tooltip)
             
             widget.tooltip = tooltip
             
-        def hide_tooltip(event):
+        def hide_tooltip(event=None):
             if hasattr(widget, 'tooltip'):
                 widget.tooltip.destroy()
                 delattr(widget, 'tooltip')
@@ -2203,6 +2134,137 @@ class SetupWizard:
         except Exception as e:
             messagebox.showerror("Launch Error", f"Failed to launch FAQBuddy: {e}")
             
+    def finish_setup(self):
+        """Finish setup and optionally launch FAQBuddy."""
+        try:
+            # Check if auto-launch is enabled
+            if hasattr(self, 'auto_launch_var') and self.auto_launch_var.get():
+                # Schedule the launch sequence after the setup closes
+                self.schedule_launch_sequence()
+            
+            # Close the setup window
+            self.root.destroy()
+        except Exception as e:
+            messagebox.showerror("Error", f"Error during setup completion: {e}")
+            self.root.destroy()
+            
+    def schedule_launch_sequence(self):
+        """Schedule the process cleaner and launch sequence."""
+        try:
+            # Get the correct Python executable
+            python_executable = self.get_python_executable()
+            
+            # Create a standalone launcher script that will run independently
+            launcher_script = f'''#!/usr/bin/env python3
+import subprocess
+import sys
+import time
+import os
+import signal
+import re
+import platform
+from pathlib import Path
+
+def cleanup_processes():
+    """Clean up any existing FAQBuddy processes."""
+    print("🧹 Cleaning up any existing FAQBuddy processes...")
+    
+    try:
+        # Use platform-specific ps command
+        if platform.system() == "Darwin":  # macOS
+            result = subprocess.run(['ps', 'ax'], capture_output=True, text=True)
+        else:  # Linux and others
+            result = subprocess.run(['ps', 'aux'], capture_output=True, text=True)
+            
+        lines = result.stdout.splitlines()
+        killed_count = 0
+        
+        keywords = ['python', 'uvicorn', 'node', 'next', 'faqbuddy']
+        
+        for line in lines:
+            if any(kw in line.lower() for kw in keywords) and 'process_cleaner' not in line and 'temp_launch' not in line:
+                parts = line.split()
+                if len(parts) > 1 and parts[1].isdigit():
+                    try:
+                        pid = int(parts[1])
+                        os.kill(pid, signal.SIGKILL)
+                        killed_count += 1
+                        print(f"Killed process with PID {{pid}}")
+                    except Exception as e:
+                        print(f"Failed to kill PID {{pid}}: {{e}}")
+        
+        print(f"Cleaned up {{killed_count}} processes")
+        return killed_count
+    except Exception as e:
+        print(f"Error during cleanup: {{e}}")
+        return 0
+
+def main():
+    print("Starting FAQBuddy launch sequence...")
+    
+    # Clean up processes first
+    cleanup_processes()
+    
+    # Wait a moment for cleanup
+    time.sleep(2)
+    
+    print("🚀 Launching FAQBuddy...")
+    
+    # Launch the servers
+    try:
+        print(f"Executing: {python_executable} launch_servers.py")
+        subprocess.Popen([r"{python_executable}", "launch_servers.py"])
+        print("FAQBuddy launch initiated successfully!")
+    except Exception as e:
+        print(f"Failed to launch FAQBuddy: {{e}}")
+    
+    # Clean up this launcher script
+    try:
+        script_path = Path(__file__)
+        if script_path.name == "faqbuddy_launcher.py":
+            script_path.unlink()
+    except Exception:
+        pass
+
+if __name__ == "__main__":
+    main()
+'''
+            
+            # Write the launcher script
+            launcher_path = Path("faqbuddy_launcher.py")
+            with open(launcher_path, 'w') as f:
+                f.write(launcher_script)
+            
+            # Make it executable on Unix systems
+            if platform.system() != "Windows":
+                os.chmod(launcher_path, 0o755)
+            
+            # Launch the script directly with a delay using Python threading
+            def delayed_launch():
+                time.sleep(2)  # Wait 2 seconds
+                try:
+                    subprocess.Popen([python_executable, str(launcher_path)])
+                except Exception as e:
+                    print(f"Failed to launch: {e}")
+            
+            # Start the delayed launch in a separate thread
+            launch_thread = threading.Thread(target=delayed_launch, daemon=True)
+            launch_thread.start()
+                
+        except Exception as e:
+            print(f"Error scheduling launch sequence: {e}")
+            # Fallback: try direct launch
+            try:
+                python_executable = self.get_python_executable()
+                subprocess.Popen([python_executable, "launch_servers.py"])
+            except Exception as fallback_error:
+                print(f"Fallback launch also failed: {fallback_error}")
+            
+    def quit_setup(self):
+        """Quit the setup wizard."""
+        if messagebox.askyesno("Quit Setup", "Are you sure you want to quit the setup wizard?"):
+            self.root.destroy()
+            
     def update_status(self, message):
         """Update status bar message."""
         self.status_label.config(text=message)
@@ -2241,22 +2303,37 @@ class SetupWizard:
             try:
                 version = sys.version_info
                 if version.major < 3 or (version.major == 3 and version.minor < 8):
-                    self.python_result_label.config(
-                        text=f"❌ Python {version.major}.{version.minor} is not compatible. Python 3.8+ required.",
-                        fg=Colors.ERROR
-                    )
+                    if self.sun_valley_available:
+                        self.python_result_label.config(
+                            text=f"❌ Python {version.major}.{version.minor} is not compatible. Python 3.8+ required."
+                        )
+                    else:
+                        self.python_result_label.config(
+                            text=f"❌ Python {version.major}.{version.minor} is not compatible. Python 3.8+ required.",
+                            fg=Colors.ERROR
+                        )
                     self.update_status("Python version check failed")
                 else:
-                    self.python_result_label.config(
-                        text=f"✅ Python {version.major}.{version.minor}.{version.micro} is compatible!",
-                        fg=Colors.SUCCESS
-                    )
+                    if self.sun_valley_available:
+                        self.python_result_label.config(
+                            text=f"✅ Python {version.major}.{version.minor}.{version.micro} is compatible!"
+                        )
+                    else:
+                        self.python_result_label.config(
+                            text=f"✅ Python {version.major}.{version.minor}.{version.micro} is compatible!",
+                            fg=Colors.SUCCESS
+                        )
                     self.update_status("Python version check passed")
             except Exception as e:
-                self.python_result_label.config(
-                    text=f"❌ Error checking Python version: {e}",
-                    fg=Colors.ERROR
-                )
+                if self.sun_valley_available:
+                    self.python_result_label.config(
+                        text=f"❌ Error checking Python version: {e}"
+                    )
+                else:
+                    self.python_result_label.config(
+                        text=f"❌ Error checking Python version: {e}",
+                        fg=Colors.ERROR
+                    )
                 self.update_status("Python version check failed")
                 
         threading.Thread(target=check, daemon=True).start()
@@ -2287,17 +2364,27 @@ class SetupWizard:
                 cursor.close()
                 conn.close()
                 
-                self.db_result_label.config(
-                    text=f"✅ Database connection successful! PostgreSQL {version[0]}",
-                    fg=Colors.SUCCESS
-                )
+                if self.sun_valley_available:
+                    self.db_result_label.config(
+                        text=f"✅ Database connection successful! PostgreSQL {version[0]}"
+                    )
+                else:
+                    self.db_result_label.config(
+                        text=f"✅ Database connection successful! PostgreSQL {version[0]}",
+                        fg=Colors.SUCCESS
+                    )
                 self.update_status("Database connection test passed")
                 
             except Exception as e:
-                self.db_result_label.config(
-                    text=f"❌ Database connection failed: {e}",
-                    fg=Colors.ERROR
-                )
+                if self.sun_valley_available:
+                    self.db_result_label.config(
+                        text=f"❌ Database connection failed: {e}"
+                    )
+                else:
+                    self.db_result_label.config(
+                        text=f"❌ Database connection failed: {e}",
+                        fg=Colors.ERROR
+                    )
                 self.update_status("Database connection test failed")
                 
         threading.Thread(target=test, daemon=True).start()
@@ -2327,10 +2414,15 @@ class SetupWizard:
                     model_path = models_dir / model_name
                     
                     if model_path.exists():
-                        self.download_result_label.config(
-                            text=f"✅ {model_name} already exists",
-                            fg=Colors.SUCCESS
-                        )
+                        if self.sun_valley_available:
+                            self.download_result_label.config(
+                                text=f"✅ {model_name} already exists"
+                            )
+                        else:
+                            self.download_result_label.config(
+                                text=f"✅ {model_name} already exists",
+                                fg=Colors.SUCCESS
+                            )
                         continue
                     
                     self.update_status(f"Downloading {model_name}...")
@@ -2350,20 +2442,30 @@ class SetupWizard:
                                     percent = (downloaded / total_size) * 100
                                     self.update_status(f"Downloading {model_name}: {percent:.1f}%")
                     
-                    self.download_result_label.config(
-                        text=f"✅ Downloaded {model_name} successfully",
-                        fg=Colors.SUCCESS
-                    )
+                    if self.sun_valley_available:
+                        self.download_result_label.config(
+                            text=f"✅ Downloaded {model_name} successfully"
+                        )
+                    else:
+                        self.download_result_label.config(
+                            text=f"✅ Downloaded {model_name} successfully",
+                            fg=Colors.SUCCESS
+                        )
                 
                 self.download_progress_bar.stop()
                 self.update_status("AI models downloaded successfully")
                 
             except Exception as e:
                 self.download_progress_bar.stop()
-                self.download_result_label.config(
-                    text=f"❌ Failed to download models: {e}",
-                    fg=Colors.ERROR
-                )
+                if self.sun_valley_available:
+                    self.download_result_label.config(
+                        text=f"❌ Failed to download models: {e}"
+                    )
+                else:
+                    self.download_result_label.config(
+                        text=f"❌ Failed to download models: {e}",
+                        fg=Colors.ERROR
+                    )
                 self.update_status("Model download failed")
                 
         threading.Thread(target=download, daemon=True).start()
@@ -2373,10 +2475,15 @@ class SetupWizard:
         def setup():
             try:
                 if not self.update_vec_db_var.get():
-                    self.vector_result_label.config(
-                        text="⏭️ Skipping vector database update",
-                        fg=Colors.WARNING
-                    )
+                    if self.sun_valley_available:
+                        self.vector_result_label.config(
+                            text="⏭️ Skipping vector database update"
+                        )
+                    else:
+                        self.vector_result_label.config(
+                            text="⏭️ Skipping vector database update",
+                            fg=Colors.WARNING
+                        )
                     self.update_status("Vector database update skipped")
                     return
                 
@@ -2393,23 +2500,38 @@ class SetupWizard:
                 ], capture_output=True, text=True)
                 
                 if result.returncode == 0:
-                    self.vector_result_label.config(
-                        text="✅ Vector database updated successfully",
-                        fg=Colors.SUCCESS
-                    )
+                    if self.sun_valley_available:
+                        self.vector_result_label.config(
+                            text="✅ Vector database updated successfully"
+                        )
+                    else:
+                        self.vector_result_label.config(
+                            text="✅ Vector database updated successfully",
+                            fg=Colors.SUCCESS
+                        )
                     self.update_status("Vector database setup completed")
                 else:
-                    self.vector_result_label.config(
-                        text=f"❌ Vector database update failed: {result.stderr}",
-                        fg=Colors.ERROR
-                    )
+                    if self.sun_valley_available:
+                        self.vector_result_label.config(
+                            text=f"❌ Vector database update failed: {result.stderr}"
+                        )
+                    else:
+                        self.vector_result_label.config(
+                            text=f"❌ Vector database update failed: {result.stderr}",
+                            fg=Colors.ERROR
+                        )
                     self.update_status("Vector database setup failed")
                     
             except Exception as e:
-                self.vector_result_label.config(
-                    text=f"❌ Error setting up vector database: {e}",
-                    fg=Colors.ERROR
-                )
+                if self.sun_valley_available:
+                    self.vector_result_label.config(
+                        text=f"❌ Error setting up vector database: {e}"
+                    )
+                else:
+                    self.vector_result_label.config(
+                        text=f"❌ Error setting up vector database: {e}",
+                        fg=Colors.ERROR
+                    )
                 self.update_status("Vector database setup failed")
                 
         threading.Thread(target=setup, daemon=True).start()
@@ -2443,43 +2565,80 @@ class SetupWizard:
                 # Install Node.js dependencies
                 frontend_dir = Path("frontend")
                 if not frontend_dir.exists():
-                    self.install_result_label.config(
-                        text="❌ Frontend directory not found",
-                        fg=Colors.ERROR
-                    )
+                    if self.sun_valley_available:
+                        self.install_result_label.config(
+                            text="❌ Frontend directory not found"
+                        )
+                    else:
+                        self.install_result_label.config(
+                            text="❌ Frontend directory not found",
+                            fg=Colors.ERROR
+                        )
                     self.install_progress_bar.stop()
                     self.update_status("Dependency installation failed")
                     return
                 
-                result = subprocess.run(
-                    ["npm", "install"], 
-                    cwd=frontend_dir, 
-                    capture_output=True, 
-                    text=True
-                )
-                
-                if result.returncode != 0:
-                    self.install_result_label.config(
-                        text=f"❌ Failed to install Node.js dependencies: {result.stderr}",
-                        fg=Colors.ERROR
+                # Use timeout for npm install to prevent hanging
+                try:
+                    result = subprocess.run(
+                        ["npm", "install"], 
+                        cwd=frontend_dir, 
+                        capture_output=True, 
+                        text=True,
+                        timeout=300  # 5 minute timeout
                     )
+                    
+                    if result.returncode != 0:
+                        if self.sun_valley_available:
+                            self.install_result_label.config(
+                                text=f"❌ Failed to install Node.js dependencies: {result.stderr}"
+                            )
+                        else:
+                            self.install_result_label.config(
+                                text=f"❌ Failed to install Node.js dependencies: {result.stderr}",
+                                fg=Colors.ERROR
+                            )
+                        self.install_progress_bar.stop()
+                        self.update_status("Dependency installation failed")
+                        return
+                        
+                except subprocess.TimeoutExpired:
+                    if self.sun_valley_available:
+                        self.install_result_label.config(
+                            text="❌ Node.js installation timed out (5 minutes). Please try again."
+                        )
+                    else:
+                        self.install_result_label.config(
+                            text="❌ Node.js installation timed out (5 minutes). Please try again.",
+                            fg=Colors.ERROR
+                        )
                     self.install_progress_bar.stop()
-                    self.update_status("Dependency installation failed")
+                    self.update_status("Dependency installation timed out")
                     return
                 
                 self.install_progress_bar.stop()
-                self.install_result_label.config(
-                    text="✅ All dependencies installed successfully",
-                    fg=Colors.SUCCESS
-                )
+                if self.sun_valley_available:
+                    self.install_result_label.config(
+                        text="✅ All dependencies installed successfully"
+                    )
+                else:
+                    self.install_result_label.config(
+                        text="✅ All dependencies installed successfully",
+                        fg=Colors.SUCCESS
+                    )
                 self.update_status("Dependencies installed successfully")
                 
             except Exception as e:
                 self.install_progress_bar.stop()
-                self.install_result_label.config(
-                    text=f"❌ Error installing dependencies: {e}",
-                    fg=Colors.ERROR
-                )
+                if self.sun_valley_available:
+                    self.install_result_label.config(
+                        text=f"❌ Error installing dependencies: {e}"
+                    )
+                else:
+                    self.install_result_label.config(
+                        text=f"❌ Error installing dependencies: {e}",
+                        fg=Colors.ERROR
+                    )
                 self.update_status("Dependency installation failed")
                 
         threading.Thread(target=install, daemon=True).start()
@@ -2503,15 +2662,19 @@ class SetupWizard:
     def create_themed_label(self, parent, **kwargs):
         """Create a themed label based on Sun Valley availability."""
         if self.sun_valley_available:
-            return ttk.Label(parent, **kwargs)
+            # Filter out parameters that ttk.Label doesn't support
+            ttk_unsupported = ['fg', 'bg', 'relief', 'borderwidth']
+            ttk_kwargs = {k: v for k, v in kwargs.items() if k not in ttk_unsupported}
+            return ttk.Label(parent, **ttk_kwargs)
         else:
             return ModernLabel(parent, **kwargs)
     
     def create_themed_button(self, parent, **kwargs):
         """Create a themed button based on Sun Valley availability."""
         if self.sun_valley_available:
-            # Filter out height parameter as ttk.Button doesn't support it
-            ttk_kwargs = {k: v for k, v in kwargs.items() if k != 'height'}
+            # Filter out parameters that ttk.Button doesn't support
+            ttk_unsupported = ['height', 'bg', 'fg', 'activebackground', 'activeforeground', 'relief', 'cursor', 'padx', 'pady']
+            ttk_kwargs = {k: v for k, v in kwargs.items() if k not in ttk_unsupported}
             return ttk.Button(parent, **ttk_kwargs)
         else:
             btn = ModernButton(parent, **kwargs)
@@ -2552,57 +2715,49 @@ class SetupWizard:
         self.progress_label.config(text="Step 3 of 8: Testing Database Connection")
         
         # Create card
-        card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
-        card.pack(fill="both", expand=True, padx=20, pady=10)
+        card = self.create_themed_frame(self.content_frame, relief="flat", bd=1)
+        card.pack(fill="both", expand=True, padx=15, pady=8)
         
         # Content
-        content_frame = tk.Frame(card, bg=Colors.CARD_BG)
+        content_frame = self.create_themed_frame(card)
         content_frame.pack(fill="both", expand=True, padx=30, pady=30)
         
         # Icon and title
         icon_label = tk.Label(
             content_frame,
             text="🗄️",
-            font=("Segoe UI", 48),
-            bg=Colors.CARD_BG
+            font=("Segoe UI", 48)
         )
         icon_label.pack(pady=(0, 20))
         
-        title_label = tk.Label(
+        title_label = self.create_themed_label(
             content_frame,
             text="Database Connection Test",
-            font=("Segoe UI", 18, "bold"),
-            fg=Colors.TEXT,
-            bg=Colors.CARD_BG
+            font=("Segoe UI", 18, "bold")
         )
         title_label.pack()
         
-        desc_label = tk.Label(
+        desc_label = self.create_themed_label(
             content_frame,
             text="Testing connection to your Neon PostgreSQL database",
             font=("Segoe UI", 11),
-            fg=Colors.SECONDARY,
-            bg=Colors.CARD_BG,
             wraplength=500
         )
         desc_label.pack(pady=(10, 30))
         
         # Test button
-        test_btn = ModernButton(
+        test_btn = self.create_themed_button(
             content_frame,
             text="Test Database Connection",
             command=self.test_database_connection,
             width=20
         )
-        test_btn.configure_primary()
         test_btn.pack()
         
         # Result label
-        self.db_result_label = tk.Label(
+        self.db_result_label = self.create_themed_label(
             content_frame,
             text="",
-            font=("Segoe UI", 10),
-            bg=Colors.CARD_BG,
             wraplength=500
         )
         self.db_result_label.pack(pady=(20, 0))
