@@ -16,6 +16,14 @@ import requests
 from dotenv import load_dotenv
 import queue
 
+# Import Sun Valley theme
+SUN_VALLEY_AVAILABLE = False
+try:
+    import sv_ttk
+    SUN_VALLEY_AVAILABLE = True
+except ImportError:
+    print("Warning: Sun Valley theme not available. Using default theme.")
+
 class Colors:
     """Color scheme for the application using Apple design language."""
     PRIMARY = "#007AFF"      # Apple Blue
@@ -109,7 +117,20 @@ class SetupWizard:
         self.root = tk.Tk()
         self.root.title("FAQBuddy Setup Wizard")
         self.root.geometry("900x700")
-        self.root.configure(bg=Colors.BACKGROUND)
+        
+        # Apply Sun Valley theme if available
+        self.sun_valley_available = SUN_VALLEY_AVAILABLE
+        if self.sun_valley_available:
+            try:
+                # Default to dark theme, but you can change this to "light" if preferred
+                sv_ttk.set_theme("dark")
+                print(f"Sun Valley theme applied: {sv_ttk.get_theme()}")
+            except Exception as e:
+                print(f"Warning: Could not set Sun Valley theme: {e}")
+                self.sun_valley_available = False
+        else:
+            self.root.configure(bg=Colors.BACKGROUND)
+            
         self.root.resizable(False, False)
         
         # Center the window
@@ -227,7 +248,10 @@ class SetupWizard:
     def create_widgets(self):
         """Create the main UI widgets."""
         # Main container
-        self.main_frame = tk.Frame(self.root, bg=Colors.BACKGROUND)
+        if self.sun_valley_available:
+            self.main_frame = tk.Frame(self.root)
+        else:
+            self.main_frame = tk.Frame(self.root, bg=Colors.BACKGROUND)
         self.main_frame.pack(fill="both", expand=True, padx=20, pady=(20, 0))
         
         # Header
@@ -247,73 +271,102 @@ class SetupWizard:
         
     def create_header(self):
         """Create the header section."""
-        header_frame = tk.Frame(self.main_frame, bg=Colors.BACKGROUND)
+        if self.sun_valley_available:
+            header_frame = tk.Frame(self.main_frame)
+        else:
+            header_frame = tk.Frame(self.main_frame, bg=Colors.BACKGROUND)
         header_frame.pack(fill="x", pady=(0, 20))
+        
+        # Title and theme switcher row
+        title_row = tk.Frame(header_frame)
+        title_row.pack(fill="x")
         
         # Title
         title_label = tk.Label(
-            header_frame,
+            title_row,
             text="🚀 FAQBuddy Setup Wizard",
-            font=("Segoe UI", 24, "bold"),
-            fg=Colors.PRIMARY,
-            bg=Colors.BACKGROUND
+            font=("Segoe UI", 24, "bold")
         )
-        title_label.pack()
+        title_label.pack(side="left")
+        
+        # Theme switcher (only if Sun Valley is available)
+        if self.sun_valley_available:
+            try:
+                self.theme_btn = ttk.Button(
+                    title_row,
+                    text="🌙",
+                    command=self.toggle_theme,
+                    width=3
+                )
+                self.theme_btn.pack(side="right", padx=(0, 10))
+            except Exception as e:
+                print(f"Could not create theme button: {e}")
         
         # Subtitle
         subtitle_label = tk.Label(
             header_frame,
             text="Configure your intelligent university assistant",
-            font=("Segoe UI", 12),
-            fg=Colors.SECONDARY,
-            bg=Colors.BACKGROUND
+            font=("Segoe UI", 12)
         )
         subtitle_label.pack(pady=(5, 0))
         
     def create_progress_bar(self):
         """Create the progress bar."""
-        progress_frame = tk.Frame(self.main_frame, bg=Colors.BACKGROUND)
+        if self.sun_valley_available:
+            progress_frame = tk.Frame(self.main_frame)
+        else:
+            progress_frame = tk.Frame(self.main_frame, bg=Colors.BACKGROUND)
         progress_frame.pack(fill="x", pady=(0, 20))
         
         # Progress label
         self.progress_label = tk.Label(
             progress_frame,
             text="Step 1 of 8: Checking Python Version",
-            font=("Segoe UI", 10, "bold"),
-            fg=Colors.TEXT,
-            bg=Colors.BACKGROUND
+            font=("Segoe UI", 10, "bold")
         )
         self.progress_label.pack()
         
         # Progress bar
-        self.progress_bar = ttk.Progressbar(
-            progress_frame,
-            length=700,
-            mode='determinate',
-            style='Modern.Horizontal.TProgressbar'
-        )
+        if self.sun_valley_available:
+            self.progress_bar = ttk.Progressbar(
+                progress_frame,
+                length=700,
+                mode='determinate'
+            )
+        else:
+            self.progress_bar = ttk.Progressbar(
+                progress_frame,
+                length=700,
+                mode='determinate',
+                style='Modern.Horizontal.TProgressbar'
+            )
+            # Configure progress bar style for fallback
+            style = ttk.Style()
+            style.theme_use('clam')
+            style.configure(
+                'Modern.Horizontal.TProgressbar',
+                background=Colors.PRIMARY,
+                troughcolor=Colors.BACKGROUND,
+                borderwidth=0,
+                lightcolor=Colors.PRIMARY,
+                darkcolor=Colors.PRIMARY
+            )
         self.progress_bar.pack(pady=(10, 0))
-        
-        # Configure progress bar style
-        style = ttk.Style()
-        style.theme_use('clam')
-        style.configure(
-            'Modern.Horizontal.TProgressbar',
-            background=Colors.PRIMARY,
-            troughcolor=Colors.BACKGROUND,
-            borderwidth=0,
-            lightcolor=Colors.PRIMARY,
-            darkcolor=Colors.PRIMARY
-        )
         
     def create_scrollable_content(self):
         """Create a scrollable content area."""
         # Create a frame for the scrollable content
-        content_container = tk.Frame(self.main_frame, bg=Colors.BACKGROUND)
+        if self.sun_valley_available:
+            content_container = tk.Frame(self.main_frame)
+        else:
+            content_container = tk.Frame(self.main_frame, bg=Colors.BACKGROUND)
         content_container.pack(fill="both", expand=True, pady=(20, 10))
         
         # Create canvas and scrollbar
-        self.canvas = tk.Canvas(content_container, bg=Colors.BACKGROUND, highlightthickness=0)
+        if self.sun_valley_available:
+            self.canvas = tk.Canvas(content_container, highlightthickness=0)
+        else:
+            self.canvas = tk.Canvas(content_container, bg=Colors.BACKGROUND, highlightthickness=0)
         scrollbar = ttk.Scrollbar(content_container, orient="vertical", command=self.canvas.yview)
         
         # Configure canvas
@@ -324,7 +377,10 @@ class SetupWizard:
         scrollbar.pack(side="right", fill="y")
         
         # Create the content frame inside the canvas
-        self.content_frame = tk.Frame(self.canvas, bg=Colors.BACKGROUND)
+        if self.sun_valley_available:
+            self.content_frame = tk.Frame(self.canvas)
+        else:
+            self.content_frame = tk.Frame(self.canvas, bg=Colors.BACKGROUND)
         self.canvas_window = self.canvas.create_window((0, 0), window=self.content_frame, anchor="nw")
         
         # Configure scrolling
@@ -347,43 +403,70 @@ class SetupWizard:
     def create_navigation(self):
         """Create fixed bottom navigation buttons."""
         # Create a fixed bottom navigation bar
-        nav_frame = tk.Frame(self.root, bg=Colors.BACKGROUND, relief="flat", bd=1)
+        if self.sun_valley_available:
+            nav_frame = tk.Frame(self.root, relief="flat", bd=1)
+        else:
+            nav_frame = tk.Frame(self.root, bg=Colors.BACKGROUND, relief="flat", bd=1)
         nav_frame.pack(side="bottom", fill="x", padx=20, pady=(10, 20))
         
         # Logout button (left side)
-        self.logout_btn = tk.Button(
-            nav_frame,
-            text="🔄 Restart",
-            command=self.restart_setup,
-            width=10,
-            bg=Colors.WARNING,
-            fg="white",
-            font=("SF Pro Display", 9, "bold"),
-            relief="flat",
-            cursor="hand2",
-            padx=15,
-            pady=6,
-            activebackground="#E6850E",
-            activeforeground="white"
-        )
+        if self.sun_valley_available:
+            self.logout_btn = ttk.Button(
+                nav_frame,
+                text="🔄 Restart",
+                command=self.restart_setup,
+                width=10
+            )
+        else:
+            self.logout_btn = tk.Button(
+                nav_frame,
+                text="🔄 Restart",
+                command=self.restart_setup,
+                width=10,
+                bg=Colors.WARNING,
+                fg="white",
+                font=("SF Pro Display", 9, "bold"),
+                relief="flat",
+                cursor="hand2",
+                padx=15,
+                pady=6,
+                activebackground="#E6850E",
+                activeforeground="white"
+            )
         
         # Back button
-        self.back_btn = ModernButton(
-            nav_frame,
-            text="← Back",
-            command=self.previous_step,
-            width=10
-        )
-        self.back_btn.configure_secondary()
+        if self.sun_valley_available:
+            self.back_btn = ttk.Button(
+                nav_frame,
+                text="← Back",
+                command=self.previous_step,
+                width=10
+            )
+        else:
+            self.back_btn = ModernButton(
+                nav_frame,
+                text="← Back",
+                command=self.previous_step,
+                width=10
+            )
+            self.back_btn.configure_secondary()
         
         # Next button
-        self.next_btn = ModernButton(
-            nav_frame,
-            text="Next →",
-            command=self.next_step,
-            width=10
-        )
-        self.next_btn.configure_primary()
+        if self.sun_valley_available:
+            self.next_btn = ttk.Button(
+                nav_frame,
+                text="Next →",
+                command=self.next_step,
+                width=10
+            )
+        else:
+            self.next_btn = ModernButton(
+                nav_frame,
+                text="Next →",
+                command=self.next_step,
+                width=10
+            )
+            self.next_btn.configure_primary()
         
         # Initially hide all navigation buttons (will be shown after login)
         self.back_btn.pack_forget()
@@ -392,15 +475,16 @@ class SetupWizard:
         
     def create_status_bar(self):
         """Create the status bar fixed at bottom."""
-        self.status_frame = tk.Frame(self.root, bg=Colors.CARD_BG, relief="flat", bd=1)
+        if self.sun_valley_available:
+            self.status_frame = tk.Frame(self.root, relief="flat", bd=1)
+        else:
+            self.status_frame = tk.Frame(self.root, bg=Colors.CARD_BG, relief="flat", bd=1)
         self.status_frame.pack(side="bottom", fill="x", padx=20, pady=(0, 5))
         
         self.status_label = tk.Label(
             self.status_frame,
             text="Ready to start setup...",
             font=("SF Pro Display", 9),
-            fg=Colors.SECONDARY,
-            bg=Colors.CARD_BG,
             anchor="w"
         )
         self.status_label.pack(fill="x", padx=10, pady=10)
@@ -477,15 +561,14 @@ class SetupWizard:
         self.progress_label.pack_forget()
         
         # Create main login container
-        login_frame = tk.Frame(self.content_frame, bg=Colors.BACKGROUND)
+        login_frame = self.create_themed_frame(self.content_frame)
         login_frame.pack(fill="both", expand=True, padx=50, pady=50)
         
         # Icon
         icon_label = tk.Label(
             login_frame, 
             text="🚀", 
-            font=("Segoe UI", 64), 
-            bg=Colors.BACKGROUND
+            font=("Segoe UI", 64)
         )
         icon_label.pack(pady=(0, 30))
         
@@ -493,82 +576,95 @@ class SetupWizard:
         title_label = tk.Label(
             login_frame, 
             text="Welcome to FAQBuddy Setup", 
-            font=("Segoe UI", 24, "bold"), 
-            fg=Colors.PRIMARY, 
-            bg=Colors.BACKGROUND
+            font=("Segoe UI", 24, "bold")
         )
         title_label.pack(pady=(0, 10))
         
         subtitle_label = tk.Label(
             login_frame, 
             text="Choose your role to continue with the setup", 
-            font=("Segoe UI", 14), 
-            fg=Colors.SECONDARY, 
-            bg=Colors.BACKGROUND
+            font=("Segoe UI", 14)
         )
         subtitle_label.pack(pady=(0, 40))
         
         # Role selection buttons
-        btn_frame = tk.Frame(login_frame, bg=Colors.BACKGROUND)
+        btn_frame = self.create_themed_frame(login_frame)
         btn_frame.pack(fill="x", pady=20)
         
         # Admin button
-        admin_btn = tk.Button(
-            btn_frame, 
-            text="👨‍💼 Admin Setup", 
-            width=25, 
-            height=3, 
-            bg=Colors.PRIMARY, 
-            fg="white", 
-            font=("SF Pro Display", 14, "bold"),
-            activebackground=Colors.BUTTON_HOVER, 
-            activeforeground="white", 
-            relief="flat", 
-            cursor="hand2",
-            command=self.show_admin_login, 
-            padx=30, 
-            pady=15,
-            borderwidth=0
-        )
+        if self.sun_valley_available:
+            admin_btn = ttk.Button(
+                btn_frame, 
+                text="👨‍💼 Admin Setup", 
+                command=self.show_admin_login,
+                width=25
+            )
+        else:
+            admin_btn = tk.Button(
+                btn_frame, 
+                text="👨‍💼 Admin Setup", 
+                width=25, 
+                height=3, 
+                bg=Colors.PRIMARY, 
+                fg="white", 
+                font=("SF Pro Display", 14, "bold"),
+                activebackground=Colors.BUTTON_HOVER, 
+                activeforeground="white", 
+                relief="flat", 
+                cursor="hand2",
+                command=self.show_admin_login, 
+                padx=30, 
+                pady=15,
+                borderwidth=0
+            )
         admin_btn.pack(pady=(0, 20), fill="x")
         
         # User button
-        user_btn = tk.Button(
-            btn_frame, 
-            text="👤 User Setup", 
-            width=25, 
-            height=3, 
-            bg=Colors.SECONDARY, 
-            fg="white", 
-            font=("SF Pro Display", 14, "bold"),
-            activebackground="#6D6D70", 
-            activeforeground="white", 
-            relief="flat", 
-            cursor="hand2",
-            command=self.select_user_role, 
-            padx=30, 
-            pady=15,
-            borderwidth=0
-        )
+        if self.sun_valley_available:
+            user_btn = ttk.Button(
+                btn_frame, 
+                text="👤 User Setup", 
+                command=self.select_user_role,
+                width=25
+            )
+        else:
+            user_btn = tk.Button(
+                btn_frame, 
+                text="👤 User Setup", 
+                width=25, 
+                height=3, 
+                bg=Colors.SECONDARY, 
+                fg="white", 
+                font=("SF Pro Display", 14, "bold"),
+                activebackground="#6D6D70", 
+                activeforeground="white", 
+                relief="flat", 
+                cursor="hand2",
+                command=self.select_user_role, 
+                padx=30, 
+                pady=15,
+                borderwidth=0
+            )
         user_btn.pack(fill="x")
         
-        # Add hover effects
-        def on_admin_enter(e):
-            admin_btn.configure(bg=Colors.BUTTON_HOVER)
-        
-        def on_admin_leave(e):
-            admin_btn.configure(bg=Colors.PRIMARY)
+        # Add hover effects only for non-themed buttons
+        if not self.sun_valley_available:
+            def on_admin_enter(e):
+                admin_btn.configure(bg=Colors.BUTTON_HOVER)
             
-        def on_user_enter(e):
-            user_btn.configure(bg="#6D6D70")
-            
-        def on_user_leave(e):
-            user_btn.configure(bg=Colors.SECONDARY)
-            
-        admin_btn.bind("<Enter>", on_admin_enter)
-        admin_btn.bind("<Leave>", on_admin_leave)
-        user_btn.bind("<Enter>", on_user_enter)
-        user_btn.bind("<Leave>", on_user_leave)
+            def on_admin_leave(e):
+                admin_btn.configure(bg=Colors.PRIMARY)
+                
+            def on_user_enter(e):
+                user_btn.configure(bg="#6D6D70")
+                
+            def on_user_leave(e):
+                user_btn.configure(bg=Colors.SECONDARY)
+                
+            admin_btn.bind("<Enter>", on_admin_enter)
+            admin_btn.bind("<Leave>", on_admin_leave)
+            user_btn.bind("<Enter>", on_user_enter)
+            user_btn.bind("<Leave>", on_user_leave)
         
     def show_admin_login(self):
         """Show admin login interface."""
@@ -577,15 +673,14 @@ class SetupWizard:
             widget.destroy()
             
         # Create admin login container
-        login_frame = tk.Frame(self.content_frame, bg=Colors.BACKGROUND)
+        login_frame = self.create_themed_frame(self.content_frame)
         login_frame.pack(fill="both", expand=True, padx=50, pady=50)
         
         # Icon
         icon_label = tk.Label(
             login_frame, 
             text="🔐", 
-            font=("Segoe UI", 64), 
-            bg=Colors.BACKGROUND
+            font=("Segoe UI", 64)
         )
         icon_label.pack(pady=(0, 30))
         
@@ -593,38 +688,42 @@ class SetupWizard:
         title_label = tk.Label(
             login_frame, 
             text="Admin Login", 
-            font=("Segoe UI", 24, "bold"), 
-            fg=Colors.PRIMARY, 
-            bg=Colors.BACKGROUND
+            font=("Segoe UI", 24, "bold")
         )
         title_label.pack(pady=(0, 10))
         
         subtitle_label = tk.Label(
             login_frame, 
             text="Enter admin password to access full setup options", 
-            font=("Segoe UI", 14), 
-            fg=Colors.SECONDARY, 
-            bg=Colors.BACKGROUND
+            font=("Segoe UI", 14)
         )
         subtitle_label.pack(pady=(0, 40))
         
         # Password entry frame
-        entry_frame = tk.Frame(login_frame, bg=Colors.BACKGROUND)
+        entry_frame = self.create_themed_frame(login_frame)
         entry_frame.pack(fill="x", pady=(0, 20))
         
         self.admin_pw_var = tk.StringVar()
-        pw_entry = tk.Entry(
-            entry_frame, 
-            textvariable=self.admin_pw_var, 
-            show="*", 
-            font=("Segoe UI", 16), 
-            width=30, 
-            relief="flat", 
-            bd=2,
-            bg=Colors.CARD_BG,
-            fg=Colors.TEXT,
-            insertbackground=Colors.PRIMARY
-        )
+        if self.sun_valley_available:
+            pw_entry = ttk.Entry(
+                entry_frame, 
+                textvariable=self.admin_pw_var, 
+                show="*", 
+                width=30
+            )
+        else:
+            pw_entry = tk.Entry(
+                entry_frame, 
+                textvariable=self.admin_pw_var, 
+                show="*", 
+                font=("Segoe UI", 16), 
+                width=30, 
+                relief="flat", 
+                bd=2,
+                bg=Colors.CARD_BG,
+                fg=Colors.TEXT,
+                insertbackground=Colors.PRIMARY
+            )
         pw_entry.pack(pady=(0, 10))
         pw_entry.focus_set()
         
@@ -632,73 +731,88 @@ class SetupWizard:
         self.admin_pw_error = tk.Label(
             login_frame, 
             text="", 
-            font=("Segoe UI", 12), 
-            fg=Colors.ERROR, 
-            bg=Colors.BACKGROUND
+            font=("Segoe UI", 12)
         )
         self.admin_pw_error.pack(pady=(0, 30))
         
         # Buttons frame
-        btn_frame = tk.Frame(login_frame, bg=Colors.BACKGROUND)
+        btn_frame = self.create_themed_frame(login_frame)
         btn_frame.pack(fill="x", pady=20)
         
         # Submit button
-        submit_btn = tk.Button(
-            btn_frame, 
-            text="🔓 Login", 
-            width=20, 
-            height=2, 
-            bg=Colors.PRIMARY, 
-            fg="white", 
-            font=("SF Pro Display", 14, "bold"),
-            activebackground=Colors.BUTTON_HOVER, 
-            activeforeground="white", 
-            relief="flat", 
-            cursor="hand2",
-            command=self.check_admin_password, 
-            padx=25, 
-            pady=10,
-            borderwidth=0
-        )
+        if self.sun_valley_available:
+            submit_btn = ttk.Button(
+                btn_frame, 
+                text="🔓 Login", 
+                command=self.check_admin_password,
+                width=20
+            )
+        else:
+            submit_btn = tk.Button(
+                btn_frame, 
+                text="🔓 Login", 
+                width=20, 
+                height=2, 
+                bg=Colors.PRIMARY, 
+                fg="white", 
+                font=("SF Pro Display", 14, "bold"),
+                activebackground=Colors.BUTTON_HOVER, 
+                activeforeground="white", 
+                relief="flat", 
+                cursor="hand2",
+                command=self.check_admin_password, 
+                padx=25, 
+                pady=10,
+                borderwidth=0
+            )
         submit_btn.pack(side="left", padx=(0, 10), fill="x", expand=True)
         
         # Back button
-        back_btn = tk.Button(
-            btn_frame, 
-            text="← Back", 
-            width=20, 
-            height=2, 
-            bg=Colors.SECONDARY, 
-            fg="white", 
-            font=("SF Pro Display", 14, "bold"),
-            activebackground="#6D6D70", 
-            activeforeground="white", 
-            relief="flat", 
-            cursor="hand2",
-            command=self.show_login_interface, 
-            padx=25, 
-            pady=10,
-            borderwidth=0
-        )
+        if self.sun_valley_available:
+            back_btn = ttk.Button(
+                btn_frame, 
+                text="← Back", 
+                command=self.show_login_interface,
+                width=20
+            )
+        else:
+            back_btn = tk.Button(
+                btn_frame, 
+                text="← Back", 
+                width=20, 
+                height=2, 
+                bg=Colors.SECONDARY, 
+                fg="white", 
+                font=("SF Pro Display", 14, "bold"),
+                activebackground="#6D6D70", 
+                activeforeground="white", 
+                relief="flat", 
+                cursor="hand2",
+                command=self.show_login_interface, 
+                padx=25, 
+                pady=10,
+                borderwidth=0
+            )
         back_btn.pack(side="right", fill="x", expand=True)
         
-        # Add hover effects
-        def on_submit_enter(e):
-            submit_btn.configure(bg=Colors.BUTTON_HOVER)
-        
-        def on_submit_leave(e):
-            submit_btn.configure(bg=Colors.PRIMARY)
+        # Add hover effects only for non-themed buttons
+        if not self.sun_valley_available:
+            def on_submit_enter(e):
+                submit_btn.configure(bg=Colors.BUTTON_HOVER)
             
-        def on_back_enter(e):
-            back_btn.configure(bg="#6D6D70")
-            
-        def on_back_leave(e):
-            back_btn.configure(bg=Colors.SECONDARY)
-            
-        submit_btn.bind("<Enter>", on_submit_enter)
-        submit_btn.bind("<Leave>", on_submit_leave)
-        back_btn.bind("<Enter>", on_back_enter)
-        back_btn.bind("<Leave>", on_back_leave)
+            def on_submit_leave(e):
+                submit_btn.configure(bg=Colors.PRIMARY)
+                
+            def on_back_enter(e):
+                back_btn.configure(bg="#6D6D70")
+                
+            def on_back_leave(e):
+                back_btn.configure(bg=Colors.SECONDARY)
+                
+            submit_btn.bind("<Enter>", on_submit_enter)
+            submit_btn.bind("<Leave>", on_submit_leave)
+            back_btn.bind("<Enter>", on_back_enter)
+            back_btn.bind("<Leave>", on_back_leave)
         
         # Bind Enter key to submit
         pw_entry.bind("<Return>", lambda e: self.check_admin_password())
@@ -708,10 +822,10 @@ class SetupWizard:
         pw = self.admin_pw_var.get()
         if pw == 'faqbuddy-admin-panel-funtori-yessir-1970':
             self.is_admin = True
-            self.admin_pw_error.config(text="✅ Login successful! Proceeding to setup...", fg=Colors.SUCCESS)
+            self.admin_pw_error.config(text="✅ Login successful! Proceeding to setup...")
             self.root.after(1000, lambda: self.show_step(1))  # Proceed to step 1 after 1 second
         else:
-            self.admin_pw_error.config(text="❌ Incorrect password. Please try again.", fg=Colors.ERROR)
+            self.admin_pw_error.config(text="❌ Incorrect password. Please try again.")
             
     def select_user_role(self):
         """Select user role and proceed."""
@@ -737,37 +851,46 @@ class SetupWizard:
                 self.back_btn.configure(state="normal")
                 
             if self.current_step == self.total_steps:
-                self.next_btn.configure(text="Finish", state="disabled")
+                if self.sun_valley_available:
+                    self.next_btn.configure(text="Finish")
+                else:
+                    self.next_btn.configure(text="Finish", state="disabled")
             else:
-                self.next_btn.configure(text="Next →", state="normal")
+                if self.sun_valley_available:
+                    self.next_btn.configure(text="Next →")
+                else:
+                    self.next_btn.configure(text="Next →", state="normal")
         
     def show_python_check(self):
         """Show Python version check step."""
         self.progress_label.config(text="Step 1 of 8: Checking Python Version")
         
         # Create card
-        card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
+        if self.sun_valley_available:
+            card = tk.Frame(self.content_frame, relief="flat", bd=1)
+        else:
+            card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
         card.pack(fill="both", expand=True, padx=20, pady=10)
         
         # Content
-        content_frame = tk.Frame(card, bg=Colors.CARD_BG)
+        if self.sun_valley_available:
+            content_frame = tk.Frame(card)
+        else:
+            content_frame = tk.Frame(card, bg=Colors.CARD_BG)
         content_frame.pack(fill="both", expand=True, padx=30, pady=30)
         
         # Icon and title
         icon_label = tk.Label(
             content_frame,
             text="🐍",
-            font=("Segoe UI", 48),
-            bg=Colors.CARD_BG
+            font=("Segoe UI", 48)
         )
         icon_label.pack(pady=(0, 20))
         
         title_label = tk.Label(
             content_frame,
             text="Python Version Check",
-            font=("Segoe UI", 18, "bold"),
-            fg=Colors.TEXT,
-            bg=Colors.CARD_BG
+            font=("Segoe UI", 18, "bold")
         )
         title_label.pack()
         
@@ -775,29 +898,35 @@ class SetupWizard:
             content_frame,
             text="Checking if your Python version is compatible with FAQBuddy",
             font=("Segoe UI", 11),
-            fg=Colors.SECONDARY,
-            bg=Colors.CARD_BG,
             wraplength=500
         )
         desc_label.pack(pady=(10, 30))
         
         # Check button with improved styling
-        check_btn = tk.Button(
-            content_frame,
-            text="🔍 Check Python Version",
-            command=self.check_python_version,
-            width=25,
-            height=2,
-            bg=Colors.PRIMARY,
-            fg="white",
-            font=("SF Pro Display", 12, "bold"),
-            relief="flat",
-            cursor="hand2",
-            activebackground=Colors.BUTTON_HOVER,
-            activeforeground="white",
-            padx=20,
-            pady=8
-        )
+        if self.sun_valley_available:
+            check_btn = ttk.Button(
+                content_frame,
+                text="🔍 Check Python Version",
+                command=self.check_python_version,
+                width=25
+            )
+        else:
+            check_btn = tk.Button(
+                content_frame,
+                text="🔍 Check Python Version",
+                command=self.check_python_version,
+                width=25,
+                height=2,
+                bg=Colors.PRIMARY,
+                fg="white",
+                font=("SF Pro Display", 12, "bold"),
+                relief="flat",
+                cursor="hand2",
+                activebackground=Colors.BUTTON_HOVER,
+                activeforeground="white",
+                padx=20,
+                pady=8
+            )
         check_btn.pack(pady=(0, 20))
         
         # Add tooltip
@@ -808,7 +937,6 @@ class SetupWizard:
             content_frame,
             text="",
             font=("Segoe UI", 10),
-            bg=Colors.CARD_BG,
             wraplength=500
         )
         self.python_result_label.pack(pady=(20, 0))
@@ -818,20 +946,24 @@ class SetupWizard:
         self.progress_label.config(text="Step 2 of 8: Environment Configuration")
         
         # Create card
-        card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
+        if self.sun_valley_available:
+            card = tk.Frame(self.content_frame, relief="flat", bd=1)
+        else:
+            card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
         card.pack(fill="both", expand=True, padx=20, pady=10)
         
         # Content
-        content_frame = tk.Frame(card, bg=Colors.CARD_BG)
+        if self.sun_valley_available:
+            content_frame = tk.Frame(card)
+        else:
+            content_frame = tk.Frame(card, bg=Colors.CARD_BG)
         content_frame.pack(fill="both", expand=True, padx=30, pady=30)
         
         # Title
         title_label = tk.Label(
             content_frame,
             text="🔧 Environment Configuration",
-            font=("Segoe UI", 18, "bold"),
-            fg=Colors.TEXT,
-            bg=Colors.CARD_BG
+            font=("Segoe UI", 18, "bold")
         )
         title_label.pack(pady=(0, 20))
         
@@ -845,8 +977,6 @@ class SetupWizard:
                 content_frame,
                 text="✅ Environment file already exists and is configured.",
                 font=("Segoe UI", 11),
-                fg=Colors.SUCCESS,
-                bg=Colors.CARD_BG,
                 wraplength=500
             )
             desc_label.pack(pady=(0, 30))
@@ -855,28 +985,34 @@ class SetupWizard:
                 content_frame,
                 text="As a regular user, you cannot view or modify environment variables for security reasons.",
                 font=("Segoe UI", 10),
-                fg=Colors.SECONDARY,
-                bg=Colors.CARD_BG,
                 wraplength=500
             )
             info_label.pack(pady=(0, 30))
             
             # Skip button
-            skip_btn = tk.Button(
-                content_frame,
-                text="Continue to Next Step",
-                command=lambda: self.show_step(3),  # Skip to model download
-                width=20,
-                bg=Colors.PRIMARY,
-                fg="white",
-                font=("SF Pro Display", 11, "bold"),
-                relief="flat",
-                cursor="hand2",
-                padx=20,
-                pady=8,
-                activebackground=Colors.BUTTON_HOVER,
-                activeforeground="white"
-            )
+            if self.sun_valley_available:
+                skip_btn = ttk.Button(
+                    content_frame,
+                    text="Continue to Next Step",
+                    command=lambda: self.show_step(3),  # Skip to model download
+                    width=20
+                )
+            else:
+                skip_btn = tk.Button(
+                    content_frame,
+                    text="Continue to Next Step",
+                    command=lambda: self.show_step(3),  # Skip to model download
+                    width=20,
+                    bg=Colors.PRIMARY,
+                    fg="white",
+                    font=("SF Pro Display", 11, "bold"),
+                    relief="flat",
+                    cursor="hand2",
+                    padx=20,
+                    pady=8,
+                    activebackground=Colors.BUTTON_HOVER,
+                    activeforeground="white"
+                )
             skip_btn.pack()
             
         else:
@@ -886,8 +1022,6 @@ class SetupWizard:
                     content_frame,
                     text="Configure your database and API credentials. You can view and edit all values.",
                     font=("Segoe UI", 11),
-                    fg=Colors.SECONDARY,
-                    bg=Colors.CARD_BG,
                     wraplength=500
                 )
             else:
@@ -895,23 +1029,22 @@ class SetupWizard:
                     content_frame,
                     text="Configure your database and API credentials securely. Values will be masked for privacy.",
                     font=("Segoe UI", 11),
-                    fg=Colors.SECONDARY,
-                    bg=Colors.CARD_BG,
                     wraplength=500
                 )
             desc_label.pack(pady=(0, 30))
             
             # Form frame
-            form_frame = tk.Frame(content_frame, bg=Colors.CARD_BG)
+            if self.sun_valley_available:
+                form_frame = tk.Frame(content_frame)
+            else:
+                form_frame = tk.Frame(content_frame, bg=Colors.CARD_BG)
             form_frame.pack(fill="x")
             
             # Database section
             db_label = tk.Label(
                 form_frame,
                 text="Database Configuration (Neon PostgreSQL)",
-                font=("Segoe UI", 12, "bold"),
-                fg=Colors.TEXT,
-                bg=Colors.CARD_BG
+                font=("Segoe UI", 12, "bold")
             )
             db_label.pack(anchor="w", pady=(0, 10))
             
@@ -927,14 +1060,23 @@ class SetupWizard:
             self.env_entries = {}
             
             for var_name, label_text, tooltip_text in fields:
-                field_frame = tk.Frame(form_frame, bg=Colors.CARD_BG)
+                if self.sun_valley_available:
+                    field_frame = tk.Frame(form_frame)
+                else:
+                    field_frame = tk.Frame(form_frame, bg=Colors.CARD_BG)
                 field_frame.pack(fill="x", pady=5)
                 
                 # Label with tooltip
-                label_frame = tk.Frame(field_frame, bg=Colors.CARD_BG)
+                if self.sun_valley_available:
+                    label_frame = tk.Frame(field_frame)
+                else:
+                    label_frame = tk.Frame(field_frame, bg=Colors.CARD_BG)
                 label_frame.pack(fill="x")
                 
-                label = ModernLabel(label_frame, text=f"{label_text}:")
+                if self.sun_valley_available:
+                    label = ttk.Label(label_frame, text=f"{label_text}:")
+                else:
+                    label = ModernLabel(label_frame, text=f"{label_text}:")
                 label.pack(side="left")
                 
                 # Tooltip icon
@@ -942,18 +1084,22 @@ class SetupWizard:
                     label_frame,
                     text="ℹ️",
                     font=("Segoe UI", 8),
-                    fg=Colors.SECONDARY,
-                    bg=Colors.CARD_BG,
                     cursor="hand2"
                 )
                 tooltip_btn.pack(side="right")
                 tooltip_btn.bind("<Button-1>", lambda e, text=tooltip_text: self.show_tooltip(e, text))
                 
                 # Entry field
-                if var_name == "DB_NEON_PASSWORD" or (not self.is_admin and var_name == "PINECONE_API_KEY"):
-                    entry = ModernEntry(field_frame, width=50, show="*")
+                if self.sun_valley_available:
+                    if var_name == "DB_NEON_PASSWORD" or (not self.is_admin and var_name == "PINECONE_API_KEY"):
+                        entry = ttk.Entry(field_frame, width=50, show="*")
+                    else:
+                        entry = ttk.Entry(field_frame, width=50)
                 else:
-                    entry = ModernEntry(field_frame, width=50)
+                    if var_name == "DB_NEON_PASSWORD" or (not self.is_admin and var_name == "PINECONE_API_KEY"):
+                        entry = ModernEntry(field_frame, width=50, show="*")
+                    else:
+                        entry = ModernEntry(field_frame, width=50)
                 entry.pack(fill="x", pady=(5, 0))
                 
                 # Show current value for admin
@@ -964,10 +1110,95 @@ class SetupWizard:
                 
                 # Show/hide toggle for password fields (admin only)
                 if var_name == "DB_NEON_PASSWORD" and self.is_admin:
-                    show_btn = tk.Button(
-                        field_frame,
+                    if self.sun_valley_available:
+                        show_btn = ttk.Button(
+                            field_frame,
+                            text="👁 Show",
+                            command=lambda e=entry, b=None: self.toggle_password_visibility(e, b),
+                            width=8
+                        )
+                    else:
+                        show_btn = tk.Button(
+                            field_frame,
+                            text="👁 Show",
+                            command=lambda e=entry, b=None: self.toggle_password_visibility(e, b),
+                            width=8,
+                            bg=Colors.SECONDARY,
+                            fg="white",
+                            font=("SF Pro Display", 8, "bold"),
+                            relief="flat",
+                            cursor="hand2",
+                            padx=10,
+                            pady=4,
+                            activebackground="#6D6D70",
+                            activeforeground="white"
+                        )
+                    show_btn.pack(anchor="w", pady=(5, 0))
+                    # Update the command to include the button reference
+                    show_btn.configure(command=lambda e=entry, b=show_btn: self.toggle_password_visibility(e, b))
+            
+            # Pinecone section
+            pinecone_label = tk.Label(
+                form_frame,
+                text="Vector Database (Pinecone)",
+                font=("Segoe UI", 12, "bold")
+            )
+            pinecone_label.pack(anchor="w", pady=(20, 10))
+            
+            if self.sun_valley_available:
+                pinecone_frame = tk.Frame(form_frame)
+            else:
+                pinecone_frame = tk.Frame(form_frame, bg=Colors.CARD_BG)
+            pinecone_frame.pack(fill="x", pady=5)
+            
+            # Label with tooltip
+            if self.sun_valley_available:
+                label_frame = tk.Frame(pinecone_frame)
+            else:
+                label_frame = tk.Frame(pinecone_frame, bg=Colors.CARD_BG)
+            label_frame.pack(fill="x")
+            
+            if self.sun_valley_available:
+                pinecone_desc = ttk.Label(label_frame, text="Pinecone API Key:")
+            else:
+                pinecone_desc = ModernLabel(label_frame, text="Pinecone API Key:")
+            pinecone_desc.pack(side="left")
+            
+            tooltip_btn = tk.Label(
+                label_frame,
+                text="ℹ️",
+                font=("Segoe UI", 8),
+                cursor="hand2"
+            )
+            tooltip_btn.pack(side="right")
+            tooltip_btn.bind("<Button-1>", lambda e: self.show_tooltip(e, "Your Pinecone API key for vector database access"))
+            
+            # Entry field (always masked for security)
+            if self.sun_valley_available:
+                pinecone_entry = ttk.Entry(pinecone_frame, width=50, show="*")
+            else:
+                pinecone_entry = ModernEntry(pinecone_frame, width=50, show="*")
+            pinecone_entry.pack(fill="x", pady=(5, 0))
+            
+            if self.is_admin:
+                pinecone_entry.insert(0, self.env_vars.get("PINECONE_API_KEY", ""))
+            
+            self.env_entries["PINECONE_API_KEY"] = pinecone_entry
+            
+            # Show/hide button (admin only)
+            if self.is_admin:
+                if self.sun_valley_available:
+                    show_btn = ttk.Button(
+                        pinecone_frame,
                         text="👁 Show",
-                        command=lambda e=entry, b=None: self.toggle_password_visibility(e, b),
+                        command=lambda e=pinecone_entry, b=None: self.toggle_password_visibility(e, b),
+                        width=8
+                    )
+                else:
+                    show_btn = tk.Button(
+                        pinecone_frame,
+                        text="👁 Show",
+                        command=lambda e=pinecone_entry, b=None: self.toggle_password_visibility(e, b),
                         width=8,
                         bg=Colors.SECONDARY,
                         fg="white",
@@ -979,86 +1210,33 @@ class SetupWizard:
                         activebackground="#6D6D70",
                         activeforeground="white"
                     )
-                    show_btn.pack(anchor="w", pady=(5, 0))
-                    # Update the command to include the button reference
-                    show_btn.configure(command=lambda e=entry, b=show_btn: self.toggle_password_visibility(e, b))
-            
-            # Pinecone section
-            pinecone_label = tk.Label(
-                form_frame,
-                text="Vector Database (Pinecone)",
-                font=("Segoe UI", 12, "bold"),
-                fg=Colors.TEXT,
-                bg=Colors.CARD_BG
-            )
-            pinecone_label.pack(anchor="w", pady=(20, 10))
-            
-            pinecone_frame = tk.Frame(form_frame, bg=Colors.CARD_BG)
-            pinecone_frame.pack(fill="x", pady=5)
-            
-            # Label with tooltip
-            label_frame = tk.Frame(pinecone_frame, bg=Colors.CARD_BG)
-            label_frame.pack(fill="x")
-            
-            pinecone_desc = ModernLabel(label_frame, text="Pinecone API Key:")
-            pinecone_desc.pack(side="left")
-            
-            tooltip_btn = tk.Label(
-                label_frame,
-                text="ℹ️",
-                font=("Segoe UI", 8),
-                fg=Colors.SECONDARY,
-                bg=Colors.CARD_BG,
-                cursor="hand2"
-            )
-            tooltip_btn.pack(side="right")
-            tooltip_btn.bind("<Button-1>", lambda e: self.show_tooltip(e, "Your Pinecone API key for vector database access"))
-            
-            # Entry field (always masked for security)
-            pinecone_entry = ModernEntry(pinecone_frame, width=50, show="*")
-            pinecone_entry.pack(fill="x", pady=(5, 0))
-            
-            if self.is_admin:
-                pinecone_entry.insert(0, self.env_vars.get("PINECONE_API_KEY", ""))
-            
-            self.env_entries["PINECONE_API_KEY"] = pinecone_entry
-            
-            # Show/hide button (admin only)
-            if self.is_admin:
-                show_btn = tk.Button(
-                    pinecone_frame,
-                    text="👁 Show",
-                    command=lambda e=pinecone_entry, b=None: self.toggle_password_visibility(e, b),
-                    width=8,
-                    bg=Colors.SECONDARY,
-                    fg="white",
-                    font=("SF Pro Display", 8, "bold"),
-                    relief="flat",
-                    cursor="hand2",
-                    padx=10,
-                    pady=4,
-                    activebackground="#6D6D70",
-                    activeforeground="white"
-                )
                 show_btn.pack(anchor="w", pady=(5, 0))
                 show_btn.configure(command=lambda e=pinecone_entry, b=show_btn: self.toggle_password_visibility(e, b))
             
             # Save button
-            save_btn = tk.Button(
-                content_frame,
-                text="Save Environment Configuration",
-                command=self.save_env_vars,
-                width=25,
-                bg=Colors.SUCCESS,
-                fg="white",
-                font=("SF Pro Display", 11, "bold"),
-                relief="flat",
-                cursor="hand2",
-                padx=20,
-                pady=8,
-                activebackground="#2FB344",
-                activeforeground="white"
-            )
+            if self.sun_valley_available:
+                save_btn = ttk.Button(
+                    content_frame,
+                    text="Save Environment Configuration",
+                    command=self.save_env_vars,
+                    width=25
+                )
+            else:
+                save_btn = tk.Button(
+                    content_frame,
+                    text="Save Environment Configuration",
+                    command=self.save_env_vars,
+                    width=25,
+                    bg=Colors.SUCCESS,
+                    fg="white",
+                    font=("SF Pro Display", 11, "bold"),
+                    relief="flat",
+                    cursor="hand2",
+                    padx=20,
+                    pady=8,
+                    activebackground="#2FB344",
+                    activeforeground="white"
+                )
             save_btn.pack(pady=(20, 0))
             
     def show_environment_setup(self):
@@ -1066,28 +1244,31 @@ class SetupWizard:
         self.progress_label.config(text="Step 4 of 8: Python Environment Setup")
         
         # Create card
-        card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
+        if self.sun_valley_available:
+            card = tk.Frame(self.content_frame, relief="flat", bd=1)
+        else:
+            card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
         card.pack(fill="both", expand=True, padx=20, pady=10)
         
         # Content
-        content_frame = tk.Frame(card, bg=Colors.CARD_BG)
+        if self.sun_valley_available:
+            content_frame = tk.Frame(card)
+        else:
+            content_frame = tk.Frame(card, bg=Colors.CARD_BG)
         content_frame.pack(fill="both", expand=True, padx=30, pady=30)
         
         # Icon and title
         icon_label = tk.Label(
             content_frame,
             text="🐍",
-            font=("Segoe UI", 48),
-            bg=Colors.CARD_BG
+            font=("Segoe UI", 48)
         )
         icon_label.pack(pady=(0, 20))
         
         title_label = tk.Label(
             content_frame,
             text="Python Environment Setup",
-            font=("Segoe UI", 18, "bold"),
-            fg=Colors.TEXT,
-            bg=Colors.CARD_BG
+            font=("Segoe UI", 18, "bold")
         )
         title_label.pack()
         
@@ -1095,40 +1276,34 @@ class SetupWizard:
             content_frame,
             text="Detecting and setting up Python environment for FAQBuddy",
             font=("Segoe UI", 11),
-            fg=Colors.SECONDARY,
-            bg=Colors.CARD_BG,
             wraplength=500
         )
         desc_label.pack(pady=(10, 30))
         
         # Environment detection frame
-        env_frame = tk.Frame(content_frame, bg=Colors.CARD_BG)
+        env_frame = self.create_themed_frame(content_frame)
         env_frame.pack(fill="x", pady=(0, 20))
         
         # Detect current environment
         has_env = self.detect_python_environment()
         
         # Environment status
-        status_frame = tk.Frame(env_frame, bg=Colors.CARD_BG)
+        status_frame = self.create_themed_frame(env_frame)
         status_frame.pack(fill="x", pady=(0, 20))
         
         if has_env:
             status_icon = "✅"
             status_text = f"Active {self.env_type.upper()} environment detected"
-            status_color = Colors.SUCCESS
             self.python_env = True
         else:
             status_icon = "⚠️"
             status_text = "No virtual environment detected - using system Python"
-            status_color = Colors.WARNING
             self.python_env = False
         
         status_label = tk.Label(
             status_frame,
             text=f"{status_icon} {status_text}",
-            font=("Segoe UI", 12, "bold"),
-            fg=status_color,
-            bg=Colors.CARD_BG
+            font=("Segoe UI", 12, "bold")
         )
         status_label.pack(anchor="w")
         
@@ -1137,23 +1312,19 @@ class SetupWizard:
             status_frame,
             text=f"Path: {self.env_path}",
             font=("Segoe UI", 10),
-            fg=Colors.SECONDARY,
-            bg=Colors.CARD_BG,
             anchor="w"
         )
         path_label.pack(anchor="w", pady=(5, 0))
         
         # Create environment section (only show if no environment detected)
         if not has_env:
-            create_frame = tk.Frame(content_frame, bg=Colors.CARD_BG)
+            create_frame = self.create_themed_frame(content_frame)
             create_frame.pack(fill="x", pady=(20, 0))
             
             create_title = tk.Label(
                 create_frame,
                 text="🔧 Create Virtual Environment",
                 font=("Segoe UI", 14, "bold"),
-                fg=Colors.TEXT,
-                bg=Colors.CARD_BG,
                 anchor="w"
             )
             create_title.pack(anchor="w", pady=(0, 15))
@@ -1162,8 +1333,6 @@ class SetupWizard:
                 create_frame,
                 text="It's recommended to create a virtual environment to avoid conflicts with system packages.",
                 font=("Segoe UI", 10),
-                fg=Colors.SECONDARY,
-                bg=Colors.CARD_BG,
                 wraplength=500,
                 anchor="w"
             )
@@ -1395,28 +1564,25 @@ class SetupWizard:
         self.progress_label.config(text="Step 5 of 8: Downloading AI Models")
         
         # Create card
-        card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
+        card = self.create_themed_frame(self.content_frame, relief="flat", bd=1)
         card.pack(fill="both", expand=True, padx=20, pady=10)
         
         # Content
-        content_frame = tk.Frame(card, bg=Colors.CARD_BG)
+        content_frame = self.create_themed_frame(card)
         content_frame.pack(fill="both", expand=True, padx=30, pady=30)
         
         # Icon and title
         icon_label = tk.Label(
             content_frame,
             text="🤖",
-            font=("Segoe UI", 48),
-            bg=Colors.CARD_BG
+            font=("Segoe UI", 48)
         )
         icon_label.pack(pady=(0, 20))
         
         title_label = tk.Label(
             content_frame,
             text="AI Model Download",
-            font=("Segoe UI", 18, "bold"),
-            fg=Colors.TEXT,
-            bg=Colors.CARD_BG
+            font=("Segoe UI", 18, "bold")
         )
         title_label.pack()
         
@@ -1424,22 +1590,18 @@ class SetupWizard:
             content_frame,
             text="Downloading required AI models for FAQBuddy",
             font=("Segoe UI", 11),
-            fg=Colors.SECONDARY,
-            bg=Colors.CARD_BG,
             wraplength=500
         )
         desc_label.pack(pady=(10, 30))
         
         # Model info with better styling
-        model_info = tk.Frame(content_frame, bg=Colors.CARD_BG)
+        model_info = self.create_themed_frame(content_frame)
         model_info.pack(fill="x", pady=(0, 20))
         
         model_label = tk.Label(
             model_info,
             text="📦 Models to download:",
             font=("Segoe UI", 12, "bold"),
-            fg=Colors.TEXT,
-            bg=Colors.CARD_BG,
             anchor="w"
         )
         model_label.pack(anchor="w", pady=(0, 10))
@@ -1454,28 +1616,16 @@ class SetupWizard:
                 model_info,
                 text=model,
                 font=("Segoe UI", 10),
-                fg=Colors.TEXT,
-                bg=Colors.CARD_BG,
                 anchor="w"
             )
             model_item.pack(anchor="w", pady=2)
         
         # Download button with improved styling
-        download_btn = tk.Button(
+        download_btn = self.create_themed_button(
             content_frame,
             text="⬇️ Download Models",
             command=self.download_models,
-            width=25,
-            height=2,
-            bg=Colors.PRIMARY,
-            fg="white",
-            font=("SF Pro Display", 12, "bold"),
-            relief="flat",
-            cursor="hand2",
-            activebackground=Colors.BUTTON_HOVER,
-            activeforeground="white",
-            padx=20,
-            pady=8
+            width=25
         )
         download_btn.pack(pady=(0, 20))
         
@@ -1483,14 +1633,20 @@ class SetupWizard:
         self.create_tooltip(download_btn, "Download AI models (this may take several minutes)")
         
         # Progress frame
-        self.download_progress_frame = tk.Frame(content_frame, bg=Colors.CARD_BG)
+        self.download_progress_frame = self.create_themed_frame(content_frame)
         self.download_progress_frame.pack(fill="x", pady=(20, 0))
         
-        self.download_progress_bar = ttk.Progressbar(
-            self.download_progress_frame,
-            mode='indeterminate',
-            style='Modern.Horizontal.TProgressbar'
-        )
+        if self.sun_valley_available:
+            self.download_progress_bar = ttk.Progressbar(
+                self.download_progress_frame,
+                mode='indeterminate'
+            )
+        else:
+            self.download_progress_bar = ttk.Progressbar(
+                self.download_progress_frame,
+                mode='indeterminate',
+                style='Modern.Horizontal.TProgressbar'
+            )
         self.download_progress_bar.pack(fill="x")
         
         # Result label
@@ -1498,7 +1654,6 @@ class SetupWizard:
             content_frame,
             text="",
             font=("Segoe UI", 10),
-            bg=Colors.CARD_BG,
             wraplength=500
         )
         self.download_result_label.pack(pady=(20, 0))
@@ -1508,28 +1663,25 @@ class SetupWizard:
         self.progress_label.config(text="Step 6 of 8: Setting up Vector Database")
         
         # Create card
-        card = tk.Frame(self.content_frame, bg=Colors.CARD_BG, relief="flat", bd=1)
+        card = self.create_themed_frame(self.content_frame, relief="flat", bd=1)
         card.pack(fill="both", expand=True, padx=20, pady=10)
         
         # Content
-        content_frame = tk.Frame(card, bg=Colors.CARD_BG)
+        content_frame = self.create_themed_frame(card)
         content_frame.pack(fill="both", expand=True, padx=30, pady=30)
         
         # Icon and title
         icon_label = tk.Label(
             content_frame,
             text="🔍",
-            font=("Segoe UI", 48),
-            bg=Colors.CARD_BG
+            font=("Segoe UI", 48)
         )
         icon_label.pack(pady=(0, 20))
         
         title_label = tk.Label(
             content_frame,
             text="Vector Database Setup",
-            font=("Segoe UI", 18, "bold"),
-            fg=Colors.TEXT,
-            bg=Colors.CARD_BG
+            font=("Segoe UI", 18, "bold")
         )
         title_label.pack()
         
@@ -1537,46 +1689,57 @@ class SetupWizard:
             content_frame,
             text="Setting up Pinecone vector database for semantic search",
             font=("Segoe UI", 11),
-            fg=Colors.SECONDARY,
-            bg=Colors.CARD_BG,
             wraplength=500
         )
         desc_label.pack(pady=(10, 30))
         
         # Options with better styling
-        options_frame = tk.Frame(content_frame, bg=Colors.CARD_BG)
+        options_frame = self.create_themed_frame(content_frame)
         options_frame.pack(fill="x", pady=(0, 20))
         
         self.update_vec_db_var = tk.BooleanVar(value=True)
         
-        update_radio = tk.Radiobutton(
-            options_frame,
-            text="✅ Update vector database (recommended)",
-            variable=self.update_vec_db_var,
-            value=True,
-            font=("Segoe UI", 11),
-            fg=Colors.TEXT,
-            bg=Colors.CARD_BG,
-            selectcolor=Colors.CARD_BG,
-            activebackground=Colors.CARD_BG
-        )
+        if self.sun_valley_available:
+            update_radio = ttk.Radiobutton(
+                options_frame,
+                text="✅ Update vector database (recommended)",
+                variable=self.update_vec_db_var,
+                value=True
+            )
+            skip_radio = ttk.Radiobutton(
+                options_frame,
+                text="⏭️ Skip for now (can be done later)",
+                variable=self.update_vec_db_var,
+                value=False
+            )
+        else:
+            update_radio = tk.Radiobutton(
+                options_frame,
+                text="✅ Update vector database (recommended)",
+                variable=self.update_vec_db_var,
+                value=True,
+                font=("Segoe UI", 11),
+                fg=Colors.TEXT,
+                bg=Colors.CARD_BG,
+                selectcolor=Colors.CARD_BG,
+                activebackground=Colors.CARD_BG
+            )
+            skip_radio = tk.Radiobutton(
+                options_frame,
+                text="⏭️ Skip for now (can be done later)",
+                variable=self.update_vec_db_var,
+                value=False,
+                font=("Segoe UI", 11),
+                fg=Colors.TEXT,
+                bg=Colors.CARD_BG,
+                selectcolor=Colors.CARD_BG,
+                activebackground=Colors.CARD_BG
+            )
         update_radio.pack(anchor="w", pady=5)
-        
-        skip_radio = tk.Radiobutton(
-            options_frame,
-            text="⏭️ Skip for now (can be done later)",
-            variable=self.update_vec_db_var,
-            value=False,
-            font=("Segoe UI", 11),
-            fg=Colors.TEXT,
-            bg=Colors.CARD_BG,
-            selectcolor=Colors.CARD_BG,
-            activebackground=Colors.CARD_BG
-        )
         skip_radio.pack(anchor="w", pady=5)
         
         # Setup button with improved styling
-        setup_btn = tk.Button(
+        setup_btn = self.create_themed_button(
             content_frame,
             text="⚙️ Setup Vector Database",
             command=self.setup_vector_database,
@@ -2329,6 +2492,54 @@ class SetupWizard:
         else:
             entry.configure(show='*')
             button.configure(text="👁 Show")
+
+    def create_themed_frame(self, parent, **kwargs):
+        """Create a themed frame based on Sun Valley availability."""
+        if self.sun_valley_available:
+            return tk.Frame(parent, **kwargs)
+        else:
+            return tk.Frame(parent, bg=Colors.CARD_BG, **kwargs)
+    
+    def create_themed_label(self, parent, **kwargs):
+        """Create a themed label based on Sun Valley availability."""
+        if self.sun_valley_available:
+            return ttk.Label(parent, **kwargs)
+        else:
+            return ModernLabel(parent, **kwargs)
+    
+    def create_themed_button(self, parent, **kwargs):
+        """Create a themed button based on Sun Valley availability."""
+        if self.sun_valley_available:
+            # Filter out height parameter as ttk.Button doesn't support it
+            ttk_kwargs = {k: v for k, v in kwargs.items() if k != 'height'}
+            return ttk.Button(parent, **ttk_kwargs)
+        else:
+            btn = ModernButton(parent, **kwargs)
+            btn.configure_primary()
+            return btn
+    
+    def create_themed_entry(self, parent, **kwargs):
+        """Create a themed entry based on Sun Valley availability."""
+        if self.sun_valley_available:
+            return ttk.Entry(parent, **kwargs)
+        else:
+            return ModernEntry(parent, **kwargs)
+    
+    def toggle_theme(self):
+        """Toggle between light and dark themes."""
+        if self.sun_valley_available:
+            try:
+                current_theme = sv_ttk.get_theme()
+                if current_theme == "dark":
+                    sv_ttk.set_theme("light")
+                    self.theme_btn.configure(text="🌙")
+                else:
+                    sv_ttk.set_theme("dark")
+                    self.theme_btn.configure(text="☀️")
+                print(f"Theme toggled to: {sv_ttk.get_theme()}")
+            except Exception as e:
+                print(f"Error toggling theme: {e}")
+                messagebox.showerror("Theme Error", f"Could not toggle theme: {e}")
 
     def restart_setup(self):
         """Restart the setup wizard."""
