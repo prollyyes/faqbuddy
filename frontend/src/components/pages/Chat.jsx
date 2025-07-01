@@ -254,7 +254,7 @@ const Chat = () => {
                                     </div>
                                 </motion.div>
                             ))}
-                            {isLoading && (
+                            {/* {isLoading && (
                                 <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
@@ -268,7 +268,7 @@ const Chat = () => {
                                         </div>
                                     </div>
                                 </motion.div>
-                            )}
+                            )} */}
                         </div>
                     )}
                 </motion.div>

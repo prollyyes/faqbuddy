@@ -1,10 +1,9 @@
 import os
-import sys
 import time
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone, ServerlessSpec
-from utils.pdf_chunker import chunk_pdf
+from .utils.pdf_chunker import chunk_pdf
 
 # Config
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data'))
