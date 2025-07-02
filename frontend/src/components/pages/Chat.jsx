@@ -6,6 +6,8 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 
+const HOST = process.env.NEXT_PUBLIC_HOST;
+
 const Chat = () => {
     const [chatExpanded, setChatExpanded] = React.useState(false);
     const [message, setMessage] = React.useState('');
@@ -49,7 +51,7 @@ const Chat = () => {
 
     const sendMessageStreaming = async (question, messageIndex) => {
         try {
-            const response = await fetch('http://127.0.0.1:8000/chat?streaming=true', {
+            const response = await fetch(`${HOST}/chat?streaming=true`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -120,7 +122,7 @@ const Chat = () => {
 
     const sendMessageRegular = async (question, messageIndex) => {
         try {
-            const response = await axios.post('http://127.0.0.1:8000/chat', {
+            const response = await axios.post(`${HOST}/chat`, {
                 question: question
             });
 

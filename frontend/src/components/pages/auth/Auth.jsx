@@ -114,7 +114,7 @@ export default function Auth() {
             cv: formData.cv,
           }),
         };
-        await axios.post('http://127.0.0.1:8000/signup', signupData);
+        await axios.post(`${HOST}/signup`, signupData);
         setSuccess('Registrazione avvenuta con successo! Effettua il login.');
         setSignupStep(1);
         setMode('login');
@@ -150,7 +150,7 @@ export default function Auth() {
           email: formData.email,
           password: formData.password,
         };
-        const response = await axios.post('http://127.0.0.1:8000/login', loginData);
+        const response = await axios.post(`${HOST}/login`, loginData);
         const { access_token } = response.data;
         localStorage.setItem('token', access_token);
         setTimeout(() => {
