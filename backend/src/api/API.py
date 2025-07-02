@@ -19,3 +19,10 @@ app.include_router(auth_router)
 app.include_router(search_router)
 app.include_router(profile_router)
 #app.include_router(chat_router)
+
+
+
+# just for testing purposes
+@app.get("/test")
+def test_endpoint():
+    return {"message": "Test successful!"}
