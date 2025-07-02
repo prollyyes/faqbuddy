@@ -1,7 +1,7 @@
 from uuid import uuid4
 from ..utils.db_utils import get_connection, MODE
 from ..utils.db_handler import DBHandler
-from fastapi import APIRouter, HTTPException, status, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, status, UploadFile, File, Form, Depends
 from .BaseModel import LoginRequest, SignupRequest
 from .utils import *
 from .drive_utils import *
@@ -10,15 +10,24 @@ from fastapi.responses import JSONResponse
 
 
 load_dotenv()
+# Database connection dependency for Render
+def get_db_handler():
+    conn = get_connection(mode=MODE)
+    db_handler = DBHandler(conn)
+    try:
+        yield db_handler
+    finally:
+        db_handler.close_connection()
 
-conn = get_connection(mode=MODE)
 
-db_handler = DBHandler(conn)
+# conn = get_connection(mode=MODE)
+
+# db_handler = DBHandler(conn)
 
 router = APIRouter()
 
 @router.post("/signup")
-def signup(data: SignupRequest):
+def signup(data: SignupRequest, db_handler: DBHandler = Depends(get_db_handler)):
     existing = db_handler.run_query(
         "SELECT id FROM Utente WHERE email = %s",
         params=(data.email,),
@@ -128,7 +137,7 @@ def signup(data: SignupRequest):
 
 # -- endpoint per ottenere tutti i corsi di laurea --
 @router.get("/corsi-di-laurea")
-def get_corsi_di_laurea():
+def get_corsi_di_laurea(db_handler: DBHandler = Depends(get_db_handler)):
     """
     Restituisce la lista dei corsi di laurea disponibili.
     """
@@ -176,7 +185,7 @@ async def upload_file(
 
 
 @router.get("/verify-email")
-def verify_email(token: str):
+def verify_email(token: str, db_handler: DBHandler = Depends(get_db_handler)):
     # Cerca il token nella tabella EmailVerification
     result = db_handler.run_query(
         "SELECT user_id FROM EmailVerification WHERE token = %s",
@@ -197,7 +206,7 @@ def verify_email(token: str):
     return {"message": "Email verificata con successo!"}
 
 @router.post("/login")
-def login(data: LoginRequest):
+def login(data: LoginRequest, db_handler: DBHandler = Depends(get_db_handler)):
     user = db_handler.run_query(
         "SELECT id, pwd_hash, email_verificata FROM Utente WHERE email = %s",
         params=(data.email,),
