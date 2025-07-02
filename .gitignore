@@ -18,6 +18,7 @@ backend/src/credentials.json
 # environment
 venv/
 .env
+frontend/.env.local
 
 # macOS
 **/.DS_Store
