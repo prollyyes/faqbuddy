@@ -9,9 +9,14 @@ from .drive_utils import *
 
 router = APIRouter()
 
-# Inizializza db_handler
-conn = get_connection(mode=MODE)
-db_handler = DBHandler(conn)
+# Database connection dependency for Render
+def get_db_handler():
+    conn = get_connection(mode=MODE)
+    db_handler = DBHandler(conn)
+    try:
+        yield db_handler
+    finally:
+        db_handler.close_connection()
 
 # Funzione per ottenere l'utente corrente dal JWT
 def get_current_user(request: Request):
@@ -27,7 +32,7 @@ def get_current_user(request: Request):
 
 # --- Endpoint: Ottieni tutti i corsi ---
 @router.get("/courses/all")
-def get_all_courses():
+def get_all_courses(db_handler: DBHandler = Depends(get_db_handler)):
     query = "SELECT id, nome FROM Corso ORDER BY nome"
     results = db_handler.run_query(query, fetch=True)
     return [{"id": row[0], "nome": row[1]} for row in results]
@@ -35,7 +40,7 @@ def get_all_courses():
 
 # --- Endpoint: Ottieni info profilo utente ---
 @router.get("/profile/me", response_model=UserProfileResponse)
-def get_profile(current_user=Depends(get_current_user)):
+def get_profile(current_user=Depends(get_current_user), db_handler: DBHandler = Depends(get_db_handler)):
     user_id = current_user["user_id"]
 
     query = """
@@ -86,7 +91,7 @@ def get_profile(current_user=Depends(get_current_user)):
 
 # # --- Endpoint: Modifica info profilo utente ---
 @router.put("/profile/me", response_model=UserProfileResponse)
-def update_profile(data: UserProfileUpdate, current_user=Depends(get_current_user)):
+def update_profile(data: UserProfileUpdate, current_user=Depends(get_current_user), db_handler: DBHandler = Depends(get_db_handler)):
     user_id = current_user["user_id"]
 
     # Aggiorna Utente
@@ -109,11 +114,11 @@ def update_profile(data: UserProfileUpdate, current_user=Depends(get_current_use
         )
 
     # Ritorna il nuovo profilo aggiornato
-    return get_profile(current_user)
+    return get_profile(current_user, db_handler)
 
 # Endpoint riutilizzabile per l'eliminazione di file
 @router.delete("/files/delete/{file_id}")
-def delete_file(file_id: str):
+def delete_file(file_id: str, db_handler: DBHandler = Depends(get_db_handler)):
     try:
         delete_drive_file(file_id)
         return {"detail": "CV eliminato"}
@@ -129,7 +134,7 @@ def delete_file(file_id: str):
 
 # --- Endpoint: Corsi Disponibili per un determinato studente ---
 @router.get("/courses/available", response_model=List[CourseBase])
-def get_available_courses(current_user=Depends(get_current_user)):
+def get_available_courses(current_user=Depends(get_current_user), db_handler: DBHandler = Depends(get_db_handler)):
     user_id = current_user["user_id"]
     # Recupera il corso di laurea dello studente
     query_cdl = "SELECT corso_laurea_id FROM Studenti WHERE id = %s"
@@ -156,7 +161,7 @@ def get_available_courses(current_user=Depends(get_current_user)):
 
 # --- Endpoint: EdizioneCorsi Disponibili per un determinato corso ---
 @router.get("/courses/{corso_id}/editions", response_model=List[CourseEditionResponse])
-def get_editions_for_course(corso_id: uuid.UUID):
+def get_editions_for_course(corso_id: uuid.UUID, db_handler: DBHandler = Depends(get_db_handler)):
     query = """
         SELECT e.id, e.data, ia.nome, ia.cognome
         FROM EdizioneCorso e
@@ -176,7 +181,7 @@ def get_editions_for_course(corso_id: uuid.UUID):
 
 # --- Endpoint: Dettagli di un EdizioneCorso specifico per uno studente ---
 @router.get("/courses/editions/{edition_id}/{edition_data:path}")
-def get_edition_detail(edition_id: str, edition_data: str, current_user=Depends(get_current_user)):
+def get_edition_detail(edition_id: str, edition_data: str, current_user=Depends(get_current_user), db_handler: DBHandler = Depends(get_db_handler)):
     user_id = current_user["user_id"]
     query = """
         SELECT e.id, e.data, e.orario, e.esonero, e.mod_Esame, cs.stato, c.nome, c.cfu,
@@ -208,7 +213,7 @@ def get_edition_detail(edition_id: str, edition_data: str, current_user=Depends(
 
 # --- Endpoint: Corsi seguiti dallo studente che è loggato ---
 @router.get("/profile/courses/current", response_model=list[CourseResponse])
-def get_current_courses(current_user=Depends(get_current_user)):
+def get_current_courses(current_user=Depends(get_current_user), db_handler: DBHandler = Depends(get_db_handler)):
     user_id = current_user["user_id"]
     query = """
         SELECT c.id, c.nome, c.cfu, ia.nome as docente_nome, ia.cognome as docente_cognome, 
@@ -236,7 +241,7 @@ def get_current_courses(current_user=Depends(get_current_user)):
 
 # --- Endpoint: Corsi completati dallo studente che è loggato---
 @router.get("/profile/courses/completed", response_model=list[CourseResponse])
-def get_completed_courses(current_user=Depends(get_current_user)):
+def get_completed_courses(current_user=Depends(get_current_user), db_handler: DBHandler = Depends(get_db_handler)):
     user_id = current_user["user_id"]
     query = """
         SELECT c.id, c.nome, c.cfu, ia.nome as docente_nome, ia.cognome as docente_cognome, 
@@ -268,7 +273,8 @@ def get_completed_courses(current_user=Depends(get_current_user)):
 def complete_course(
     edition_id: str,
     data: CompleteCourseRequest,
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    db_handler: DBHandler = Depends(get_db_handler)
 ):
     user_id = current_user["user_id"]
     query = """
@@ -286,7 +292,8 @@ def enroll_in_edition(
     corso_id: str,
     edition_id: str,
     stato: str = "attivo",
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    db_handler: DBHandler = Depends(get_db_handler)
 ):
     user_id = current_user["user_id"]
     # Recupera la data dell'edizione
@@ -309,7 +316,8 @@ def enroll_in_edition(
 def restore_course(
     edition_id: str,
     data: dict = Body(...),
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    db_handler: DBHandler = Depends(get_db_handler)
 ):
     user_id = current_user["user_id"]
     edition_data = data["edition_data"]
@@ -334,7 +342,7 @@ def restore_course(
 
 # --- Endpoint: per ottenere tutti gli insegnanti ---
 @router.get("/teachers")
-def get_teachers():
+def get_teachers(db_handler: DBHandler = Depends(get_db_handler)):
     query = """
         SELECT ia.id, ia.nome, ia.cognome
         FROM Insegnanti_Anagrafici ia
@@ -349,7 +357,8 @@ def get_teachers():
 def add_edizione_and_enroll(
     corso_id: str,
     edizione: EdizioneCorsoCreate,
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    db_handler: DBHandler = Depends(get_db_handler)
 ):
     # 1. Crea la nuova EdizioneCorso
     query = """
@@ -382,7 +391,7 @@ def add_edizione_and_enroll(
 
 # --- Endpoint: per ottenere i corsi dell'insegnante che è loggato ---
 @router.get("/teacher/courses/full")
-def get_teacher_courses_full(current_user=Depends(get_current_user)):
+def get_teacher_courses_full(current_user=Depends(get_current_user), db_handler: DBHandler = Depends(get_db_handler)):
     user_id = current_user["user_id"]
     query = """
         SELECT c.id, c.nome, c.cfu, 
@@ -420,7 +429,8 @@ def get_teacher_courses_full(current_user=Depends(get_current_user)):
 def update_edition(
     edition_id: str,
     payload: dict = Body(...),
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    db_handler: DBHandler = Depends(get_db_handler)
 ):
     user_id = current_user["user_id"]
     # Cambia "insegnante" in "insegnante_anagrafico"
@@ -452,7 +462,8 @@ def update_edition(
 def add_edition_teacher(
     corso_id: str,
     edizione: EdizioneCorsoCreate,
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    db_handler: DBHandler = Depends(get_db_handler)
 ):
     user_id = current_user["user_id"]
     # Inserisci la nuova EdizioneCorso
@@ -483,7 +494,7 @@ def add_edition_teacher(
 
 # --- Endpoint: Statistiche dello studente, voti conseguiti, media, cose del genere ---
 @router.get("/profile/stats", response_model=StatsResponse)
-def get_stats(current_user=Depends(get_current_user)):
+def get_stats(current_user=Depends(get_current_user), db_handler: DBHandler = Depends(get_db_handler)):
     user_id = current_user["user_id"]
     # Prendi tutti i corsi completati, aggiungi c.id
     query = """
@@ -537,7 +548,7 @@ def get_stats(current_user=Depends(get_current_user)):
 
 # --- Endpoint: Recensioni dello studente ---
 @router.get("/profile/reviews", response_model=list[ReviewResponse])
-def get_student_reviews(current_user=Depends(get_current_user)):
+def get_student_reviews(current_user=Depends(get_current_user), db_handler: DBHandler = Depends(get_db_handler)):
     user_id = current_user["user_id"]
     query = """
         SELECT id, student_id, edition_id, edition_data, descrizione, voto
@@ -561,7 +572,8 @@ def get_student_reviews(current_user=Depends(get_current_user)):
 @router.post("/profile/reviews", response_model=ReviewResponse)
 def add_review(
     data: ReviewCreate,
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    db_handler: DBHandler = Depends(get_db_handler)
 ):
     user_id = current_user["user_id"]
     # Verifica se già esiste una recensione per questa edizione
