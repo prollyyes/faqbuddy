@@ -9,7 +9,13 @@ app = FastAPI(title="api")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  
+    allow_origins=[
+        "https://www.faqbuddy.net",
+        "https://faqbuddy.net",
+        "https://faqbuddy.vercel.app",
+        "https://faqbuddy-frontend.vercel.app",
+        "http://localhost:3000"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
