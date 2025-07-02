@@ -89,25 +89,25 @@ class TextToSQLConverter:
 
     def from_sql_to_text(self, question: str, results: list) -> str:
         """
-        Convert the SQL query to a natural language response.
+        Convert the SQL query to a natural language response with enhanced markdown formatting.
         
         Args:
             question: The original question asked by the user
-            schema: The database schema used for the SQL query
+            results: The SQL query results
             
         Returns:
-            A natural language response based on the SQL query results
+            A well-formatted markdown response based on the SQL query results
         """
         risposta = self.sql_results_to_text_pattern(question, results)
         if risposta is not None:
             return risposta
         return self.sql_results_to_text_llm(question, results)
         
-    # da migliorare assolutamente, forse aggiungendo tanti pattern si riescono a coprire la maggior parte delle domande (?)
+    # Enhanced pattern-based response with better markdown formatting
     def sql_results_to_text_pattern(self, question: str, results: list) -> Optional[str]:
         import re
         if not results or not isinstance(results, list) or len(results) == 0:
-            return "Nessun risultato trovato per la tua richiesta. Prova a riformulare la domanda o a visitare la nostra sezione per la ricerca manuale di informazioni."
+            return "Non ho trovato informazioni che corrispondano alla tua richiesta. Prova a riformulare la domanda o visita la nostra sezione per la ricerca manuale di informazioni."
     
         match = re.search(
             r"(quali sono|dimmi|mostra|elenca)\s+(?:tutti i\s+|tutte le\s+)?([^\?]+)",
@@ -137,31 +137,78 @@ class TextToSQLConverter:
             # Ricostruisci l'oggetto senza doppio articolo
             oggetto_finale = oggetto if articolo == "" else articolo + oggetto
     
-            frasi = []
-            for row in results:
-                parti = [f"{k}: {v}" for k, v in row.items() if v is not None and 'id' not in k.lower()]
-                frase = ", ".join(parti)
-                if frase:
-                    frasi.append(frase)
-            if frasi:
-                return f"{oggetto_finale.capitalize()} sono:\n- " + "\n- ".join(frasi)
+            # Enhanced markdown formatting
+            response_parts = []
+            
+            if len(results) == 1:
+                response_parts.append(f"Ho trovato **1 {oggetto_finale.lower()}**:")
             else:
-                return f"Nessun risultato trovato per {oggetto}."
+                response_parts.append(f"Ho trovato **{len(results)} {oggetto_finale.lower()}**:")
+            
+            response_parts.append("")
+            
+            for i, row in enumerate(results, 1):
+                # Format each result as a structured list item
+                parti = []
+                for k, v in row.items():
+                    if v is not None and 'id' not in k.lower():
+                        # Clean up column names for better display
+                        clean_key = k.replace('_', ' ').title()
+                        parti.append(f"**{clean_key}**: {v}")
+                
+                if parti:
+                    response_parts.append(f"{i}. {', '.join(parti)}")
+            
+            return "\n".join(response_parts)
         return None
     
     def sql_results_to_text_llm(self, question: str, results: list) -> str:
         from ..utils.llm_gemma import llm_gemma
-        prompt = (
-            "Rispondi in italiano in modo sintetico e diretto alla seguente domanda, "
-            "usando SOLO i dati forniti qui sotto. Non aggiungere spiegazioni o ringraziamenti.\n\n"
-            f"Domanda: {question}\n"
-            f"Dati:\n{results}\n\n"
-            "Risposta breve:"
-        )
-        print("Fallback LLM")
-        output = llm_gemma(prompt, max_tokens=60, stop=["</s>"])
-        return output["choices"][0]["text"].strip()
+        
+        # Enhanced prompt for conversational responses
+        prompt = f"""Sei un assistente universitario amichevole. Rispondi alla domanda dell'utente usando SOLO i dati forniti.
 
+## Il tuo stile
+Parla in modo naturale e conversazionale, come se stessi chiacchierando con un amico. Sii diretto e chiaro.
+
+## Come rispondere
+- **Solo informazioni dai dati forniti** - non inventare nulla
+- **Parla normalmente** - come parleresti con qualcuno di persona
+- **Usa markdown minimo** - solo per enfatizzare cose importanti
+- **Sii conciso** - vai dritto al punto
+
+## Regole di formattazione
+- **Grassetto** per enfatizzare informazioni chiave
+- `Codice` per comandi o termini tecnici
+- - Elenchi semplici quando ci sono più punti
+- Numeri (1. 2. 3.) per procedure o passaggi
+
+## Non includere
+- La domanda dell'utente nella risposta
+- Testo "markdown" o riferimenti alla formattazione
+- Strutture formali come "Introduzione", "Corpo", "Conclusione"
+- Frasi di chiusura generiche
+
+## Esempi di stile
+✅ "Ho trovato **3 corsi** di Ingegneria Informatica:
+- **Fondamenti di Informatica** - corso base
+- **Programmazione** - corso avanzato
+- **Algoritmi** - corso specialistico"
+
+❌ "## Corsi di Ingegneria Informatica
+### Informazioni principali
+- **Nome corso**: Fondamenti di Informatica"
+
+**Domanda:** {question}
+
+**Dati disponibili:**
+{results}
+
+**Risposta:**"""
+        
+        print("Fallback LLM")
+        output = llm_gemma(prompt, max_tokens=200, stop=["</s>"])
+        return output["choices"][0]["text"].strip()
 
     def is_sql_safe(self, sql_query: str) -> bool:
         """

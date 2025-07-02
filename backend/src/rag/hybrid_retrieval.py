@@ -85,6 +85,14 @@ def get_cache_stats() -> Dict[str, int]:
         'hit_rate': _cache_hits / (_cache_hits + _cache_misses) if (_cache_hits + _cache_misses) > 0 else 0
     }
 
+def clear_embedding_cache():
+    """Clear the embedding cache and reset statistics."""
+    global _embedding_cache, _cache_hits, _cache_misses
+    _embedding_cache.clear()
+    _cache_hits = 0
+    _cache_misses = 0
+    print("🧹 Embedding cache cleared")
+
 # Utility to load all chunks (for BM25)
 def load_all_chunks(data_dir):
     all_chunks = []

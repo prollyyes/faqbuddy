@@ -4,8 +4,9 @@ from src.utils.db_handler import DBHandler
 from src.switcher.MLmodel import MLModel
 from src.text_2_SQL import TextToSQLConverter
 from src.rag.rag_adapter import RAGSystem
+from src.rag.hybrid_retrieval import clear_embedding_cache
 from src.utils.db_utils import get_connection, MODE
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Response
 from fastapi.responses import StreamingResponse
 import json
 from typing import Generator, Optional, Dict, Any
@@ -200,8 +201,14 @@ def unified_chat_endpoint(
                         t2sql_result = handle_t2sql_logic(question)
                         print(f"✅ T2SQL succeeded: {t2sql_result['chosen']}")
                         
-                        # Convert T2SQL result to streaming format
+                        # Check if the result contains an error message
                         response_text = t2sql_result.get('natural_response') or str(t2sql_result.get('result', ''))
+                        
+                        # Check if this is an error message
+                        if 'errore' in response_text.lower() or 'error' in response_text.lower():
+                            # This is an error, send it as an error type
+                            yield f"data: {json.dumps({'type': 'error', 'message': response_text})}\n\n"
+                            return
                         
                         # Stream the response token by token
                         words = response_text.split()
@@ -215,19 +222,24 @@ def unified_chat_endpoint(
                     except Exception as t2sql_error:
                         print(f"⚠️ T2SQL failed for streaming, falling back to RAG: {t2sql_error}")
                         # Fallback to RAG streaming
-                        rag_result = call_rag_system(question, streaming=True, include_metadata=include_metadata)
-                        
-                        if include_metadata:
-                            # Streaming with metadata
-                            for chunk in rag_result:
-                                yield f"data: {json.dumps(chunk)}\n\n"
-                        else:
-                            # Simple streaming
-                            for token in rag_result:
-                                yield f"data: {json.dumps({'token': token, 'type': 'token'})}\n\n"
+                        try:
+                            rag_result = call_rag_system(question, streaming=True, include_metadata=include_metadata)
                             
-                            # Send completion signal for simple streaming
-                            yield f"data: {json.dumps({'type': 'complete', 'chosen': 'RAG'})}\n\n"
+                            if include_metadata:
+                                # Streaming with metadata
+                                for chunk in rag_result:
+                                    yield f"data: {json.dumps(chunk)}\n\n"
+                            else:
+                                # Simple streaming - stream tokens directly from RAG
+                                for token in rag_result:
+                                    yield f"data: {json.dumps({'token': token, 'type': 'token'})}\n\n"
+                                
+                                # Send completion signal for simple streaming
+                                yield f"data: {json.dumps({'type': 'complete', 'chosen': 'RAG'})}\n\n"
+                        except Exception as rag_error:
+                            # If RAG also fails, send error message
+                            print(f"❌ RAG streaming also failed: {rag_error}")
+                            yield f"data: {json.dumps({'type': 'error', 'message': str(rag_error)})}\n\n"
                         
                 except Exception as e:
                     yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
@@ -286,3 +298,20 @@ def unified_chat_endpoint(
                 "chosen": "CHAT",
                 "result": "Si è verificato un errore durante la generazione della risposta."
             }
+
+@router.post("/reset_context")
+def reset_context():
+    """
+    Endpoint to reset/clear any server-side context for the chat.
+    Clears embedding cache and any other persistent data.
+    """
+    try:
+        # Clear embedding cache
+        clear_embedding_cache()
+        
+        # If you ever add session or user context, clear it here.
+        print("🔄 Context reset requested by frontend.")
+        return {"status": "ok", "message": "Context reset successfully."}
+    except Exception as e:
+        print(f"❌ Error during context reset: {e}")
+        return {"status": "error", "message": f"Error resetting context: {str(e)}"}

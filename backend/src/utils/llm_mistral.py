@@ -60,36 +60,46 @@ def get_language_instruction(question: str) -> str:
 
 def optimize_prompt(context: str, question: str) -> str:
     """
-    Optimize the prompt for better performance and accuracy.
-    Inspired by smallRag's prompt optimization techniques.
+    Optimize prompt for better response quality and markdown formatting.
+    Enhanced with better structure and formatting instructions.
     """
+    # Get language-specific instruction
     language_instruction = get_language_instruction(question)
     
-    # Enhanced prompt structure for better performance
-    optimized_prompt = f"""[INST] Sei FAQBuddy, un assistente intelligente per un portale universitario italiano.
+    # Enhanced prompt structure with better markdown instructions
+    optimized_prompt = f"""[INST] Sei FAQBuddy, un assistente universitario intelligente e professionale.
 
-COMPITI:
+## COMPITI
 - Rispondi a domande su università, corsi, professori, materiali didattici
 - Fornisci informazioni accurate basate SOLO sui documenti forniti
 - Mantieni un tono professionale ma amichevole
-- Usa sempre il formato Markdown per una migliore leggibilità
+- Usa SEMPRE il formato Markdown per strutturare le risposte
 
-REGOLE IMPORTANTI:
-- NON inventare informazioni
-- Se non hai informazioni sufficienti, dillo chiaramente
-- Rispondi SEMPRE in italiano
-- Sii conciso ma completo
-- Usa elenchi puntati per informazioni strutturate
+## REGOLE DI FORMATTAZIONE
+- **Titoli**: Usa `##` per sezioni principali, `###` per sottosezioni
+- **Elenchi**: Usa `-` per elenchi puntati, `1.` per elenchi numerati
+- **Enfasi**: Usa `**grassetto**` per termini importanti
+- **Termini tecnici**: Usa `*corsivo*` per termini tecnici
+- **Citazioni**: Usa `> ` per citazioni dirette
+- **Codice**: Usa `` `codice` `` per comandi o termini specifici
+
+## STRUTTURA RISPOSTA
+Organizza sempre la risposta con:
+1. **Titolo principale** con `##`
+2. **Contenuto strutturato** con sottosezioni
+3. **Elenchi** per informazioni multiple
+4. **Enfasi** su informazioni importanti
 
 {language_instruction}
 
-CONTESTO DISPONIBILE:
+### CONTESTO DISPONIBILE:
 {context}
 
-DOMANDA UTENTE:
+### DOMANDA UTENTE:
 {question}
 
-RISPOSTA: [/INST]"""
+### RISPOSTA FORMATTATA IN MARKDOWN:
+[/INST]"""
     
     return optimized_prompt
 
@@ -109,9 +119,9 @@ def generate_answer(context: str, question: str) -> str:
         # Generate response with optimized parameters
         output = llm_mistral(
             prompt, 
-            max_tokens=1024,  # Reduced for faster responses
+            max_tokens=1500,  # Increased for better markdown formatting
             stop=["</s>", "[INST]", "[/INST]"],  # Better stop tokens
-            temperature=0.1,  # Lower temperature for more consistent answers
+            temperature=0.2,  # Slightly higher for more creative formatting
             top_p=0.9,  # Nucleus sampling for better quality
             repeat_penalty=1.1,  # Light repetition penalty
             echo=False  # Don't echo the prompt
@@ -153,9 +163,9 @@ def generate_answer_streaming(context: str, question: str) -> Generator[str, Non
         # Use the streaming API with optimized parameters
         stream = llm_mistral(
             prompt, 
-            max_tokens=1024,
+            max_tokens=1500,  # Increased for better markdown formatting
             stop=["</s>", "[INST]", "[/INST]"],
-            temperature=0.1,
+            temperature=0.2,  # Slightly higher for more creative formatting
             top_p=0.9,
             repeat_penalty=1.1,
             echo=False,
@@ -191,7 +201,8 @@ def generate_answer_streaming(context: str, question: str) -> Generator[str, Non
     except Exception as e:
         print(f"❌ Error in streaming LLM generation: {e}")
         print(f"Traceback: {traceback.format_exc()}")
-        yield f"Mi dispiace, si è verificato un errore durante la generazione della risposta. Errore: {str(e)}"
+        # For streaming, we need to raise the error so it can be handled properly by the backend
+        raise e
 
 def generate_answer_streaming_with_metadata(context: str, question: str) -> Generator[Dict[str, Any], None, None]:
     """
@@ -215,9 +226,9 @@ def generate_answer_streaming_with_metadata(context: str, question: str) -> Gene
         # Use the streaming API with optimized parameters
         stream = llm_mistral(
             prompt, 
-            max_tokens=1024,
+            max_tokens=1500,  # Increased for better markdown formatting
             stop=["</s>", "[INST]", "[/INST]"],
-            temperature=0.1,
+            temperature=0.2,  # Slightly higher for more creative formatting
             top_p=0.9,
             repeat_penalty=1.1,
             echo=False,

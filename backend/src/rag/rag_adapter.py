@@ -125,7 +125,9 @@ class RAGSystem:
                 yield token
                 
         except Exception as e:
-            yield f"Mi dispiace, si è verificato un errore durante l'elaborazione della tua domanda. Errore: {str(e)}"
+            # For streaming, I need to yield an error object that the frontend can handle
+            # This will be caught by the Chat.py backend and converted to proper error format
+            raise e
 
     def generate_response_streaming_with_metadata(self, question: str) -> Generator[Dict[str, Any], None, None]:
         """

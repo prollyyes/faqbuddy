@@ -126,7 +126,17 @@ class RAGPipeline:
             prompt, prompt_metadata = build_prompt(merged, question)
             prompt_time = time.time() - prompt_start
             
-            print(f"📝 Prompt built in {prompt_time:.3f}s (context: {prompt_metadata['total_tokens']} tokens)")
+            # Log detailed token breakdown
+            total_prompt_tokens = len(prompt.split()) + len([c for c in prompt if c in ',.!?;:'])
+            print(f"📝 Prompt built in {prompt_time:.3f}s")
+            print(f"   - Context tokens: {prompt_metadata['total_tokens']}")
+            print(f"   - Total prompt tokens: {total_prompt_tokens}")
+            print(f"   - LLM max_tokens: 800")
+            print(f"   - Total estimated: {total_prompt_tokens + 800}")
+            print(f"   - Context window limit: 2048")
+            
+            if total_prompt_tokens + 800 > 2048:
+                print(f"⚠️ WARNING: Total tokens ({total_prompt_tokens + 800}) exceed context window (2048)!")
             
             # Step 4: Generate answer
             generation_start = time.time()
@@ -219,7 +229,8 @@ class RAGPipeline:
             total_time = time.time() - start_time
             self._update_stats(0, 0, total_time, success=False)
             
-            yield f"Mi dispiace, si è verificato un errore durante l'elaborazione della tua domanda. Errore: {str(e)}"
+            # For streaming, I need to raise the error so it can be handled properly by the backend
+            raise e
 
     def answer_streaming_with_metadata(self, question: str) -> Generator[Dict[str, Any], None, None]:
         """
