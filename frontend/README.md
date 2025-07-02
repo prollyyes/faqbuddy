@@ -1,1 +1,0 @@
-Neance lo sto a dire che è tutto da rifare
