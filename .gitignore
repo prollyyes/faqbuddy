@@ -4,7 +4,6 @@ frontend/node_modules
 
 # llm && ML models
 backend/models
-!backend/models/*.joblib
 
 # pytest
 **/.benchmarks

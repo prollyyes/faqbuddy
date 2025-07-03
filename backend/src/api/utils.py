@@ -8,6 +8,7 @@ import os
 
 load_dotenv()
 
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000") # read from .env file, or default to localhost for development
 
 ############# Login && Signup####################################################
 
@@ -22,7 +23,7 @@ def send_verification_email(email, token):
     msg["Subject"] = "Verifica la tua email"
     msg["From"] = os.getenv("EMAIL_FROM")
     msg["To"] = email
-    link = f"http://localhost:8000/verify-email?token={token}"
+    link = f"{API_BASE_URL}/verify-email?token={token}"
     msg.set_content(f"Clicca qui per verificare la tua email: {link}")
     # Configura il server SMTP (qui esempio con Gmail)
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:

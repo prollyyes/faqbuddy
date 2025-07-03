@@ -78,7 +78,7 @@ def signup(data: SignupRequest, db_handler: DBHandler = Depends(get_db_handler))
     hashed_pwd = hash_password(data.password)
     db_handler.execute_sql_insertion(
         "INSERT INTO Utente (id, email, pwd_hash, nome, cognome, email_verificata) VALUES (%s, %s, %s, %s, %s, %s)",
-        (user_id, data.email, hashed_pwd, data.nome, data.cognome, True)
+        (user_id, data.email, hashed_pwd, data.nome, data.cognome, False) # di default email non verificata per Production
     )
 
     if hasattr(data, "ruolo") and data.ruolo == "insegnante":

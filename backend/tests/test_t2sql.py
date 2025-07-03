@@ -1,7 +1,7 @@
 import pytest
-from ..src.text_2_SQL import TextToSQLConverter
-from ..src.utils.db_handler import DBHandler
-from ..src.utils.db_utils import get_connection, MODE
+from src.text_2_SQL import TextToSQLConverter
+from src.utils.db_handler import DBHandler
+from src.utils.db_utils import get_connection, MODE
 import time
 
 @pytest.fixture(scope="module")
@@ -34,6 +34,9 @@ def test_t2sql(t2sql, schema, question, expected_start, benchmark):
         return cleaned
 
     cleaned = benchmark(generate)
+    print(f"Tempo medio di generazione per domanda: {benchmark.stats['mean']} secondi")
+    print(f"Deviazione standard: {benchmark.stats['stddev']} secondi")
+    print(f"Throughput (OPS): {benchmark.stats['ops']}")
     print(f"\nDomanda: {question}\nSQL generata: {cleaned}")
     assert cleaned.strip().upper().startswith(expected_start), f"La query non inizia con {expected_start}"
     assert "INVALID_QUERY" not in cleaned
@@ -48,7 +51,7 @@ def test_t2sql(t2sql, schema, question, expected_start, benchmark):
     ),
     (
         "Elenca i professori che ricevono il lunedì",
-        "SELECT u.nome, u.cognome FROM Insegnanti i JOIN Utente u ON i.id = u.id WHERE i.ricevimento ILIKE '%lunedì%';"
+        "SELECT ia.nome, ia.cognome FROM Insegnanti_Anagrafici ia JOIN Insegnanti_Registrati ir ON ia.id = ir.anagrafico_id WHERE ir.ricevimento ILIKE '%lunedì%';"
     ),
     (
         "Quali sono le tesi disponibili nel dipartimento di Informatica?",
@@ -68,11 +71,11 @@ def test_t2sql(t2sql, schema, question, expected_start, benchmark):
     ),
     (
         "Mostra i materiali didattici verificati per il corso Fondamenti di Informatica",
-        "SELECT m.* FROM Materiale_Didattico m JOIN Corso c ON m.course_id = c.id WHERE c.nome = 'Fondamenti di Informatica' AND m.verificato = TRUE;"
+        "SELECT m.* FROM Materiale_Didattico m JOIN EdizioneCorso e ON m.edition_id = e.id AND m.edition_data = e.data JOIN Corso c ON e.id = c.id WHERE c.nome = 'Fondamenti di Informatica' AND m.verificato = TRUE;"
     ),
     (
         "Quali sono i corsi che utilizzano Moodle come piattaforma?",
-        "SELECT c.nome AS corso, p.nome AS piattaforma, ep.codice FROM EdizioneCorso e JOIN Corso c ON e.id = c.id JOIN EdizioneCorso_Piattaforme ep ON e.id = ep.edizione_id JOIN Piattaforme p ON ep.piattaforma_nome = p.nome WHERE p.nome = 'Moodle';"
+        "SELECT c.nome AS corso, p.nome AS piattaforma, ep.codice FROM EdizioneCorso e JOIN Corso c ON e.id = c.id JOIN EdizioneCorso_Piattaforme ep ON e.id = ep.edizione_id AND e.data = ep.edizione_data JOIN Piattaforme p ON ep.piattaforma_nome = p.nome WHERE p.nome = 'Moodle';"
     ),
     (
         "Qual è la valutazione media di ogni materiale didattico verificato?",
@@ -80,7 +83,7 @@ def test_t2sql(t2sql, schema, question, expected_start, benchmark):
     ),
     (
         "Mostra tutti i corsi tenuti dal professor Rossi",
-        "SELECT c.* FROM Corso c JOIN EdizioneCorso e ON c.id = e.id JOIN Insegnanti i ON e.insegnante = i.id JOIN Utente u ON i.id = u.id WHERE u.cognome = 'Rossi';"
+        "SELECT c.* FROM Corso c JOIN EdizioneCorso e ON c.id = e.id JOIN Insegnanti_Anagrafici ia ON e.insegnante_anagrafico = ia.id WHERE ia.cognome = 'Rossi';"
     ),
 ])
 def test_sql2t(t2sql, db, question, sql):

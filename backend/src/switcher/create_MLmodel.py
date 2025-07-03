@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
-from .ml_utils import extract_features
+from ml_utils import extract_features
 import numpy as np
 import os
 
@@ -32,6 +32,16 @@ y_pred = clf.predict(X_test)
 print("\n--- Risultati ---")
 print(f"Accuracy: {accuracy_score(y_test, y_pred):.3f}")
 print(classification_report(y_test, y_pred, digits=3))
+
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
+
+cm = confusion_matrix(y_test, y_pred, labels=clf.classes_)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=clf.classes_)
+disp.plot(cmap=plt.cm.Blues)
+plt.title("Confusion Matrix")
+plt.show()
+
 
 # Save model inside the models directory
 import joblib
