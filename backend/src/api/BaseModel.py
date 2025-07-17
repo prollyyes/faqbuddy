@@ -144,3 +144,21 @@ class T2SQLRequest(BaseModel):
 
 class ChatRequest(BaseModel):
     question: str
+
+
+#Search.py
+class SearchCorsi(BaseModel):
+    nomeCorso : str
+
+class SearchEdizione(BaseModel):
+    nomeCorso: str
+
+class SearchMaterials(BaseModel):
+    """
+    • edizioneCorso: 'all'  oppure UUID dell'edizione (string)
+    • nomeCorso:     richiesto solo se edizioneCorso == 'all'
+    • dataEdizione:  richiesto solo se edizioneCorso != 'all'
+    """
+    edizioneCorso: str
+    nomeCorso: Optional[str] = None
+    dataEdizione: Optional[str] = None
