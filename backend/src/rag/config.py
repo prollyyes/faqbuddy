@@ -1,6 +1,6 @@
 """
 RAGv2 Configuration and Feature Flags
-=====================================
+====================================
 
 This module contains all configuration settings and feature flags for the RAGv2 upgrade.
 Each objective is controlled by its own feature flag for independent deployment.
@@ -63,6 +63,22 @@ MAX_CHUNK_TOKENS = 400  # Maximum tokens per chunk
 NODE_TYPE_PREFIX = "node_type"
 
 # ============================================================================
+# NAMESPACE CONFIGURATION
+# ============================================================================
+
+# Existing namespaces (keep untouched)
+EXISTING_DOCS_NAMESPACE = "documents"
+EXISTING_DB_NAMESPACE = "db"
+
+# New RAGv2 namespaces (safe to upsert)
+RAGV2_DOCS_NAMESPACE = "documents_v2"
+RAGV2_DB_NAMESPACE = "db_v2"
+RAGV2_PDF_NAMESPACE = "pdf_v2"
+
+# Index configuration
+INDEX_NAME = "exams-index-enhanced"  # Same index, different namespaces
+
+# ============================================================================
 # GRAPH-RAG CONFIGURATION (Task 4)
 # ============================================================================
 
@@ -119,6 +135,21 @@ def get_embedding_instruction() -> str:
         return "Represent an education QA passage for retrieval: "
     return ""
 
+def get_ragv2_namespaces() -> Dict[str, str]:
+    """Get RAGv2 namespace configuration."""
+    return {
+        "docs": RAGV2_DOCS_NAMESPACE,
+        "db": RAGV2_DB_NAMESPACE,
+        "pdf": RAGV2_PDF_NAMESPACE
+    }
+
+def get_existing_namespaces() -> Dict[str, str]:
+    """Get existing namespace configuration (for fallback)."""
+    return {
+        "docs": EXISTING_DOCS_NAMESPACE,
+        "db": EXISTING_DB_NAMESPACE
+    }
+
 # ============================================================================
 # VALIDATION
 # ============================================================================
@@ -134,6 +165,14 @@ def validate_configuration() -> None:
     # CDC requires queue configuration
     if CDC_ENABLED and CDC_QUEUE_TYPE not in ["memory", "redis", "kafka"]:
         errors.append(f"CDC_QUEUE_TYPE must be 'memory', 'redis', or 'kafka', got '{CDC_QUEUE_TYPE}'")
+    
+    # Validate namespace uniqueness
+    all_namespaces = [
+        EXISTING_DOCS_NAMESPACE, EXISTING_DB_NAMESPACE,
+        RAGV2_DOCS_NAMESPACE, RAGV2_DB_NAMESPACE, RAGV2_PDF_NAMESPACE
+    ]
+    if len(all_namespaces) != len(set(all_namespaces)):
+        errors.append("All namespaces must be unique")
     
     if errors:
         raise ValueError(f"Configuration validation failed: {'; '.join(errors)}")
