@@ -2,11 +2,12 @@
 Enhanced Retrieval Pipeline for RAGv2
 =====================================
 
-This module implements the next task: Retrieval pipeline improvements.
+This module implements Task 3: Retrieval pipeline improvements.
 Features:
 - Dense top-50 → cross-encoder reranker (bge-reranker-large)
 - Keep any chunk score ≥ 0.2 until total context ≤ 4k tokens
 - Remove BM25 from hot path (leave behind feature flag BM25_FALLBACK)
+- Uses RAGv2 namespaces (documents_v2, db_v2, pdf_v2) for safe deployment
 """
 
 import time
@@ -20,9 +21,13 @@ from .config import (
     DENSE_TOP_K, 
     RERANKER_THRESHOLD, 
     MAX_CONTEXT_TOKENS,
-    CROSS_ENCODER_MODEL
+    CROSS_ENCODER_MODEL,
+    get_ragv2_namespaces,
+    get_existing_namespaces,
+    INDEX_NAME
 )
 from .utils.embeddings_v2 import EnhancedEmbeddings
+import os
 
 class EnhancedRetrieval:
     """
@@ -33,9 +38,10 @@ class EnhancedRetrieval:
     - Cross-encoder reranking with threshold filtering
     - Context token management
     - BM25 fallback option
+    - Uses RAGv2 namespaces for safe deployment
     """
     
-    def __init__(self, pinecone_client: Pinecone, index_name: str = "exams-index-enhanced"):
+    def __init__(self, pinecone_client: Pinecone, index_name: str = INDEX_NAME):
         """
         Initialize the enhanced retrieval system.
         
@@ -54,7 +60,13 @@ class EnhancedRetrieval:
             "total_time": 0
         }
         
+        # Get namespace configuration
+        self.ragv2_namespaces = get_ragv2_namespaces()
+        self.existing_namespaces = get_existing_namespaces()
+        
         print("🚀 Initializing Enhanced Retrieval System")
+        print(f"   Index: {index_name}")
+        print(f"   RAGv2 namespaces: {self.ragv2_namespaces}")
         print(f"   Dense top-k: {DENSE_TOP_K}")
         print(f"   Reranker enabled: {RERANKER_ENABLED}")
         print(f"   BM25 fallback: {BM25_FALLBACK}")
@@ -81,7 +93,7 @@ class EnhancedRetrieval:
     
     def dense_retrieval(self, query: str, top_k: int = DENSE_TOP_K) -> List[Dict[str, Any]]:
         """
-        Perform dense retrieval using Pinecone.
+        Perform dense retrieval using Pinecone with RAGv2 namespaces.
         
         Args:
             query: Search query
@@ -95,20 +107,26 @@ class EnhancedRetrieval:
         # Encode query
         query_embedding = self.embeddings.encode_single(query)
         
-        # Search Pinecone
+        # Search Pinecone using RAGv2 namespaces
         index = self.pc.Index(self.index_name)
         
-        # Search both namespaces
+        # Search RAGv2 namespaces
         docs_results = index.query(
             vector=query_embedding, 
             top_k=top_k, 
-            namespace="documents", 
+            namespace=self.ragv2_namespaces["docs"], 
             include_metadata=True
         )
         db_results = index.query(
             vector=query_embedding, 
             top_k=top_k, 
-            namespace="db", 
+            namespace=self.ragv2_namespaces["db"], 
+            include_metadata=True
+        )
+        pdf_results = index.query(
+            vector=query_embedding, 
+            top_k=top_k, 
+            namespace=self.ragv2_namespaces["pdf"], 
             include_metadata=True
         )
         
@@ -120,7 +138,7 @@ class EnhancedRetrieval:
                 'id': match['id'],
                 'score': match['score'],
                 'metadata': match['metadata'],
-                'namespace': 'documents'
+                'namespace': self.ragv2_namespaces["docs"]
             })
         
         for match in db_results.get('matches', []):
@@ -128,7 +146,15 @@ class EnhancedRetrieval:
                 'id': match['id'],
                 'score': match['score'],
                 'metadata': match['metadata'],
-                'namespace': 'db'
+                'namespace': self.ragv2_namespaces["db"]
+            })
+        
+        for match in pdf_results.get('matches', []):
+            all_results.append({
+                'id': match['id'],
+                'score': match['score'],
+                'metadata': match['metadata'],
+                'namespace': self.ragv2_namespaces["pdf"]
             })
         
         # Sort by score
@@ -140,8 +166,17 @@ class EnhancedRetrieval:
         self.retrieval_stats["dense_retrieval_time"] = time.time() - start_time
         
         print(f"🔍 Dense retrieval: {len(all_results)} results in {self.retrieval_stats['dense_retrieval_time']:.3f}s")
+        print(f"   Namespace breakdown: {self._get_namespace_breakdown(all_results)}")
         
         return all_results
+    
+    def _get_namespace_breakdown(self, results: List[Dict[str, Any]]) -> Dict[str, int]:
+        """Get breakdown of results by namespace."""
+        breakdown = {}
+        for result in results:
+            namespace = result.get('namespace', 'unknown')
+            breakdown[namespace] = breakdown.get(namespace, 0) + 1
+        return breakdown
     
     def cross_encoder_rerank(self, query: str, candidates: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
@@ -274,7 +309,7 @@ class EnhancedRetrieval:
         """
         start_time = time.time()
         
-        # Step 1: Dense retrieval
+        # Step 1: Dense retrieval from RAGv2 namespaces
         dense_results = self.dense_retrieval(query)
         
         # Step 2: Cross-encoder reranking
@@ -296,6 +331,7 @@ class EnhancedRetrieval:
         
         print(f"✅ Enhanced retrieval completed in {self.retrieval_stats['total_time']:.3f}s")
         print(f"📊 Final results: {len(final_results)}")
+        print(f"   Final namespace breakdown: {self._get_namespace_breakdown(final_results)}")
         
         return final_results
     
@@ -305,56 +341,54 @@ class EnhancedRetrieval:
 
 
 def test_enhanced_retrieval():
-    """Test the enhanced retrieval system."""
-    print("🧪 Testing Enhanced Retrieval...")
+    """Test the enhanced retrieval system with real Pinecone client."""
+    print("🧪 Testing Enhanced Retrieval with Real Pinecone...")
     
-    # Mock Pinecone client for testing
-    class MockPinecone:
-        def Index(self, name):
-            return MockIndex()
-    
-    class MockIndex:
-        def query(self, vector, top_k, namespace, include_metadata):
-            return {
-                'matches': [
-                    {
-                        'id': f'{namespace}_test_{i}',
-                        'score': 0.9 - i * 0.1,
-                        'metadata': {
-                            'text': f'Test document {i} from {namespace} namespace',
-                            'table_name': 'TestTable'
-                        }
-                    }
-                    for i in range(min(top_k, 5))
-                ]
-            }
-    
-    # Initialize retrieval system
-    retrieval = EnhancedRetrieval(MockPinecone())
-    
-    # Test retrieval
-    query = "Who teaches Operating Systems this semester?"
-    results = retrieval.retrieve(query)
-    
-    print(f"✅ Retrieval test completed")
-    print(f"📊 Results: {len(results)}")
-    
-    # Check results
-    if results:
-        first_result = results[0]
-        required_fields = ['id', 'score', 'metadata', 'namespace']
-        for field in required_fields:
-            if field not in first_result:
-                print(f"❌ Missing field: {field}")
-                return False
+    try:
+        # Initialize real Pinecone client
+        from dotenv import load_dotenv
+        load_dotenv()
         
-        print("✅ All required fields present")
-    
-    # Check stats
-    stats = retrieval.get_retrieval_stats()
-    print(f"📈 Retrieval stats: {stats}")
-    
-    return True
+        pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+        
+        # Initialize retrieval system
+        retrieval = EnhancedRetrieval(pc)
+        
+        # Test retrieval
+        query = "Who teaches Operating Systems this semester?"
+        results = retrieval.retrieve(query)
+        
+        print(f"✅ Retrieval test completed")
+        print(f"📊 Results: {len(results)}")
+        
+        # Check results
+        if results:
+            first_result = results[0]
+            required_fields = ['id', 'score', 'metadata', 'namespace']
+            for field in required_fields:
+                if field not in first_result:
+                    print(f"❌ Missing field: {field}")
+                    return False
+            
+            print("✅ All required fields present")
+            
+            # Check namespace
+            namespace = first_result.get('namespace', '')
+            if namespace.startswith('documents_v2') or namespace.startswith('db_v2') or namespace.startswith('pdf_v2'):
+                print(f"✅ Using RAGv2 namespace: {namespace}")
+            else:
+                print(f"⚠️ Using non-RAGv2 namespace: {namespace}")
+        
+        # Check stats
+        stats = retrieval.get_retrieval_stats()
+        print(f"📈 Retrieval stats: {stats}")
+        
+        return True
+        
+    except Exception as e:
+        print(f"❌ Retrieval test failed: {e}")
+        print("Make sure PINECONE_API_KEY is set and index exists")
+        return False
 
 
 if __name__ == "__main__":

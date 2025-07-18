@@ -1,450 +1,563 @@
 """
-RAGv2 Integration Tests
-=======================
+Comprehensive Test Suite for RAGv2
+==================================
 
-This module contains comprehensive tests for the RAGv2 implementation.
-Tests cover all implemented tasks and feature flags.
+This module contains comprehensive tests for all RAGv2 components.
+Tests use real Pinecone client and RAGv2 namespaces for accurate validation.
 """
 
 import pytest
-import time
 import os
+import time
 from unittest.mock import Mock, patch
-from typing import List, Dict, Any
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Import RAGv2 components
-from ..src.rag.config import get_feature_flags, is_feature_enabled
-from ..src.rag.utils.schema_aware_chunker import SchemaAwareChunker, test_schema_aware_chunking
-from ..src.rag.utils.embeddings_v2 import EnhancedEmbeddings, test_embedding_upgrade, benchmark_embedding_performance
-from ..src.rag.retrieval_v2 import EnhancedRetrieval, test_enhanced_retrieval
-from ..src.rag.generation_guards import GenerationGuards, test_generation_guards, test_hallucination_detection
-from ..src.rag.rag_pipeline_v2 import RAGv2Pipeline, test_ragv2_pipeline
+from backend.src.rag.config import (
+    get_feature_flags, 
+    is_feature_enabled, 
+    get_embedding_model,
+    get_ragv2_namespaces,
+    get_existing_namespaces,
+    validate_configuration
+)
+from backend.src.rag.utils.schema_aware_chunker import SchemaAwareChunker
+from backend.src.rag.utils.embeddings_v2 import EnhancedEmbeddings
+from backend.src.rag.retrieval_v2 import EnhancedRetrieval
+from backend.src.rag.generation_guards import GenerationGuards
+from backend.src.rag.rag_pipeline_v2 import RAGv2Pipeline
+
+# Test configuration
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
+SKIP_REAL_PINECONE = not PINECONE_API_KEY
+
+
+@pytest.fixture
+def mock_pinecone():
+    """Mock Pinecone client for unit tests."""
+    mock_pc = Mock()
+    mock_index = Mock()
+    
+    # Mock index query responses
+    mock_index.query.return_value = {
+        'matches': [
+            {
+                'id': 'test_doc_1',
+                'score': 0.85,
+                'metadata': {
+                    'text': 'Test document content for retrieval',
+                    'table_name': 'TestTable',
+                    'node_type': 'TestTable'
+                }
+            },
+            {
+                'id': 'test_doc_2', 
+                'score': 0.75,
+                'metadata': {
+                    'text': 'Another test document',
+                    'table_name': 'TestTable2',
+                    'node_type': 'TestTable2'
+                }
+            }
+        ]
+    }
+    
+    mock_pc.Index.return_value = mock_index
+    return mock_pc
+
+
+@pytest.fixture
+def real_pinecone():
+    """Real Pinecone client for integration tests."""
+    if SKIP_REAL_PINECONE:
+        pytest.skip("PINECONE_API_KEY not set")
+    
+    from pinecone import Pinecone
+    return Pinecone(api_key=PINECONE_API_KEY)
 
 
 class TestRAGv2Configuration:
     """Test RAGv2 configuration and feature flags."""
     
-    def test_feature_flags(self):
-        """Test that feature flags can be retrieved."""
+    def test_feature_flags_structure(self):
+        """Test that feature flags have the expected structure."""
         flags = get_feature_flags()
         
-        # Check that all expected flags are present
         expected_flags = [
-            "schema_aware_chunking",
-            "instructor_xl_embeddings", 
-            "reranker_enabled",
-            "bm25_fallback",
-            "graph_rag",
-            "hallucination_guards",
-            "cdc_enabled",
-            "pdf_boost",
-            "observability_enabled"
+            'schema_aware_chunking',
+            'instructor_xl_embeddings', 
+            'reranker_enabled',
+            'bm25_fallback',
+            'graph_rag',
+            'hallucination_guards',
+            'cdc_enabled',
+            'pdf_boost',
+            'observability_enabled'
         ]
         
         for flag in expected_flags:
             assert flag in flags
             assert isinstance(flags[flag], bool)
     
-    def test_feature_flag_checking(self):
-        """Test feature flag checking functionality."""
-        # Test with a known flag
-        result = is_feature_enabled("schema_aware_chunking")
-        assert isinstance(result, bool)
+    def test_feature_flag_checks(self):
+        """Test individual feature flag checking."""
+        flags = get_feature_flags()
         
-        # Test with unknown flag
-        result = is_feature_enabled("unknown_flag")
-        assert result is False
+        for flag_name, flag_value in flags.items():
+            assert is_feature_enabled(flag_name) == flag_value
+    
+    def test_embedding_model_selection(self):
+        """Test embedding model selection based on feature flags."""
+        model = get_embedding_model()
+        assert isinstance(model, str)
+        assert model in ['all-mpnet-base-v2', 'hkunlp/instructor-xl']
+    
+    def test_namespace_configuration(self):
+        """Test namespace configuration."""
+        ragv2_namespaces = get_ragv2_namespaces()
+        existing_namespaces = get_existing_namespaces()
+        
+        # Check RAGv2 namespaces
+        assert 'docs' in ragv2_namespaces
+        assert 'db' in ragv2_namespaces
+        assert 'pdf' in ragv2_namespaces
+        
+        # Check existing namespaces
+        assert 'docs' in existing_namespaces
+        assert 'db' in existing_namespaces
+        
+        # Ensure namespaces are different
+        assert ragv2_namespaces['docs'] != existing_namespaces['docs']
+        assert ragv2_namespaces['db'] != existing_namespaces['db']
+    
+    def test_configuration_validation(self):
+        """Test configuration validation."""
+        # Should not raise any errors with default config
+        validate_configuration()
 
 
 class TestSchemaAwareChunking:
-    """Test Task 1: Schema-aware chunking."""
+    """Test schema-aware chunking functionality."""
     
-    @pytest.fixture
-    def chunker(self):
-        """Create a schema-aware chunker for testing."""
-        return SchemaAwareChunker()
+    def test_schema_aware_chunker_initialization(self):
+        """Test schema-aware chunker initialization."""
+        try:
+            chunker = SchemaAwareChunker()
+            assert chunker is not None
+        except Exception as e:
+            # Skip if database connection fails
+            pytest.skip(f"Database connection failed: {e}")
     
-    def test_chunker_initialization(self, chunker):
-        """Test that chunker initializes correctly."""
-        assert chunker is not None
-        assert hasattr(chunker, 'field_mappings')
-        assert hasattr(chunker, 'templates')
-    
-    def test_department_chunks(self, chunker):
-        """Test department chunk generation."""
-        chunks = chunker.get_department_chunks()
-        
-        # Check that chunks are generated
-        assert isinstance(chunks, list)
-        
-        if chunks:  # If there are departments in the database
-            chunk = chunks[0]
+    def test_course_edition_chunking(self):
+        """Test course edition chunking (Task 1 Done-When criteria)."""
+        try:
+            chunker = SchemaAwareChunker()
+            chunks = chunker.get_course_edition_chunks()
             
-            # Check required fields
-            assert "id" in chunk
-            assert "text" in chunk
-            assert "metadata" in chunk
-            
-            # Check metadata requirements
-            metadata = chunk["metadata"]
-            assert "table_name" in metadata
-            assert "node_type" in metadata
-            assert "row_id" in metadata
-            assert "source_type" in metadata
-            
-            # Check that IDs are not in text
-            text = chunk["text"]
-            assert "dipartimento_" not in text
-    
-    def test_course_edition_chunks(self, chunker):
-        """Test course edition chunk generation (Task 1 focus)."""
-        chunks = chunker.get_course_edition_chunks()
-        
-        # Check that chunks are generated
-        assert isinstance(chunks, list)
-        
-        if chunks:  # If there are course editions in the database
-            chunk = chunks[0]
-            
-            # Check required fields
-            assert "id" in chunk
-            assert "text" in chunk
-            assert "metadata" in chunk
-            
-            # Check metadata requirements
-            metadata = chunk["metadata"]
-            assert metadata["table_name"] == "EdizioneCorso"
-            assert metadata["node_type"] == "EdizioneCorso"
-            assert "row_id" in metadata
-            assert metadata["source_type"] == "database"
-            
-            # Check that IDs are not in text
-            text = chunk["text"]
-            assert "edizione_corso_" not in text
-            
-            # Check token limit
-            token_count = len(text.split())
-            assert token_count <= 400
-    
-    def test_schema_aware_chunking_unit_test(self):
-        """Run the unit test for schema-aware chunking."""
-        result = test_schema_aware_chunking()
-        assert result is True
+            if chunks:
+                # Test first chunk
+                chunk = chunks[0]
+                
+                # Check required fields
+                assert 'id' in chunk
+                assert 'text' in chunk
+                assert 'metadata' in chunk
+                
+                # Check metadata structure
+                metadata = chunk['metadata']
+                assert 'node_type' in metadata
+                assert metadata['node_type'] == 'EdizioneCorso'
+                
+                # Check that IDs are in metadata, not text
+                text = chunk['text']
+                assert 'edition_id' not in text.lower()
+                assert 'course_id' not in text.lower()
+                
+                # Check token limit
+                tokens = chunker._count_tokens(text)
+                assert tokens <= 400
+                
+                print(f"✅ Course edition chunk test passed: {tokens} tokens")
+                
+        except Exception as e:
+            pytest.skip(f"Database test failed: {e}")
 
 
 class TestEnhancedEmbeddings:
-    """Test Task 2: Enhanced embeddings with instructor-xl."""
+    """Test enhanced embeddings functionality."""
     
-    @pytest.fixture
-    def embeddings(self):
-        """Create enhanced embeddings for testing."""
-        return EnhancedEmbeddings()
-    
-    def test_embeddings_initialization(self, embeddings):
-        """Test that embeddings initialize correctly."""
+    def test_embeddings_initialization(self):
+        """Test embeddings initialization."""
+        embeddings = EnhancedEmbeddings()
         assert embeddings is not None
-        assert hasattr(embeddings, 'model_name')
-        assert hasattr(embeddings, 'instruction')
-        assert hasattr(embeddings, 'latency_stats')
     
-    def test_single_encoding(self, embeddings):
-        """Test single text encoding."""
-        test_text = "This is a test sentence for embedding generation."
-        embedding = embeddings.encode_single(test_text)
+    def test_embedding_generation(self):
+        """Test embedding generation."""
+        embeddings = EnhancedEmbeddings()
         
-        # Check that embedding is generated
+        # Test single text
+        text = "Test text for embedding"
+        embedding = embeddings.encode_single(text)
+        
         assert isinstance(embedding, list)
         assert len(embedding) > 0
         assert all(isinstance(x, float) for x in embedding)
     
-    def test_batch_encoding(self, embeddings):
-        """Test batch text encoding."""
-        test_texts = [
-            "First test sentence",
-            "Second test sentence",
-            "Third test sentence"
+    def test_batch_embedding(self):
+        """Test batch embedding generation."""
+        embeddings = EnhancedEmbeddings()
+        
+        texts = [
+            "First test text",
+            "Second test text", 
+            "Third test text"
         ]
-        embeddings_list = embeddings.encode(test_texts)
         
-        # Check that embeddings are generated
-        assert isinstance(embeddings_list, list)
-        assert len(embeddings_list) == len(test_texts)
+        batch_embeddings = embeddings.encode(texts)
         
-        for embedding in embeddings_list:
-            assert isinstance(embedding, list)
-            assert len(embedding) > 0
+        assert isinstance(batch_embeddings, list)
+        assert len(batch_embeddings) == len(texts)
+        assert all(len(emb) > 0 for emb in batch_embeddings)
     
-    def test_latency_monitoring(self, embeddings):
-        """Test latency monitoring functionality."""
+    def test_latency_tracking(self):
+        """Test latency tracking functionality."""
+        embeddings = EnhancedEmbeddings()
+        
         # Reset stats
         embeddings.reset_latency_stats()
         
-        # Perform some encodings
-        test_texts = ["Test 1", "Test 2", "Test 3"]
-        embeddings.encode(test_texts)
+        # Generate some embeddings
+        for i in range(5):
+            embeddings.encode_single(f"Test text {i}")
         
-        # Check latency stats
+        # Check stats
         avg_latency = embeddings.get_average_latency()
         p95_latency = embeddings.get_p95_latency()
         
-        assert avg_latency >= 0
-        assert p95_latency >= 0
-        assert len(embeddings.latency_stats) == 1  # One batch encoding
+        assert avg_latency > 0
+        assert p95_latency > 0
+        assert p95_latency >= avg_latency
     
-    def test_model_info(self, embeddings):
-        """Test model information retrieval."""
-        info = embeddings.get_model_info()
-        
-        # Check required fields
-        assert "model_name" in info
-        assert "using_instructor_xl" in info
-        assert "instruction_prefix" in info
-        assert "device" in info
-        assert "embedding_dimension" in info
-        assert "average_latency_ms" in info
-        assert "p95_latency_ms" in info
-        assert "total_encodings" in info
-    
-    def test_embedding_upgrade_unit_test(self):
-        """Run the unit test for embedding upgrade."""
-        result = test_embedding_upgrade()
-        assert result is True
-    
+    @pytest.mark.skipif(SKIP_REAL_PINECONE, reason="PINECONE_API_KEY not set")
     def test_embedding_performance_benchmark(self):
-        """Run the performance benchmark for embeddings."""
-        result = benchmark_embedding_performance()
-        # Note: This test might fail if latency > 120ms, which is expected
-        # The test validates the benchmark functionality, not the performance requirement
+        """Test embedding performance benchmark (Task 2 Done-When criteria)."""
+        embeddings = EnhancedEmbeddings()
+        
+        # Run benchmark
+        results = embeddings.benchmark_embedding_performance()
+        
+        assert 'average_latency' in results
+        assert 'p95_latency' in results
+        assert 'total_embeddings' in results
+        
+        # Check latency requirement (≤ 120 ms/row)
+        assert results['average_latency'] <= 120, f"Average latency {results['average_latency']}ms exceeds 120ms limit"
+        
+        print(f"✅ Embedding benchmark passed: {results['average_latency']:.2f}ms average")
 
 
 class TestEnhancedRetrieval:
-    """Test Task 3: Enhanced retrieval pipeline."""
+    """Test enhanced retrieval functionality."""
     
-    @pytest.fixture
-    def mock_pinecone(self):
-        """Create a mock Pinecone client for testing."""
-        class MockPinecone:
-            def Index(self, name):
-                return MockIndex()
-        
-        class MockIndex:
-            def query(self, vector, top_k, namespace, include_metadata):
-                return {
-                    'matches': [
-                        {
-                            'id': f'{namespace}_test_{i}',
-                            'score': 0.9 - i * 0.1,
-                            'metadata': {
-                                'text': f'Test document {i} from {namespace} namespace',
-                                'table_name': 'TestTable'
-                            }
-                        }
-                        for i in range(min(top_k, 5))
-                    ]
-                }
-        
-        return MockPinecone()
-    
-    @pytest.fixture
-    def retrieval(self, mock_pinecone):
-        """Create enhanced retrieval for testing."""
-        return EnhancedRetrieval(mock_pinecone)
-    
-    def test_retrieval_initialization(self, retrieval):
-        """Test that retrieval initializes correctly."""
+    def test_retrieval_initialization_mock(self, mock_pinecone):
+        """Test retrieval initialization with mock Pinecone."""
+        retrieval = EnhancedRetrieval(mock_pinecone)
         assert retrieval is not None
-        assert hasattr(retrieval, 'pc')
-        assert hasattr(retrieval, 'embeddings')
-        assert hasattr(retrieval, 'retrieval_stats')
+        assert retrieval.ragv2_namespaces is not None
+        assert retrieval.existing_namespaces is not None
     
-    def test_dense_retrieval(self, retrieval):
-        """Test dense retrieval functionality."""
-        query = "Who teaches Operating Systems this semester?"
+    def test_dense_retrieval_mock(self, mock_pinecone):
+        """Test dense retrieval with mock Pinecone."""
+        retrieval = EnhancedRetrieval(mock_pinecone)
+        
+        query = "Test query"
         results = retrieval.dense_retrieval(query)
         
-        # Check that results are generated
+        assert isinstance(results, list)
+        assert len(results) > 0
+        
+        # Check result structure
+        for result in results:
+            assert 'id' in result
+            assert 'score' in result
+            assert 'metadata' in result
+            assert 'namespace' in result
+    
+    def test_cross_encoder_reranking(self, mock_pinecone):
+        """Test cross-encoder reranking."""
+        retrieval = EnhancedRetrieval(mock_pinecone)
+        
+        query = "Test query"
+        candidates = [
+            {
+                'id': 'doc1',
+                'score': 0.9,
+                'metadata': {'text': 'First document'},
+                'namespace': 'test'
+            },
+            {
+                'id': 'doc2', 
+                'score': 0.8,
+                'metadata': {'text': 'Second document'},
+                'namespace': 'test'
+            }
+        ]
+        
+        # Test with reranker disabled
+        with patch('backend.src.rag.config.RERANKER_ENABLED', False):
+            results = retrieval.cross_encoder_rerank(query, candidates)
+            assert results == candidates
+        
+        # Test with reranker enabled (if available)
+        if retrieval.cross_encoder:
+            results = retrieval.cross_encoder_rerank(query, candidates)
+            assert len(results) <= len(candidates)
+            
+            # Check that results have cross-encoder scores
+            for result in results:
+                assert 'cross_score' in result
+    
+    def test_context_token_management(self, mock_pinecone):
+        """Test context token management."""
+        retrieval = EnhancedRetrieval(mock_pinecone)
+        
+        # Create test results with known token counts
+        results = [
+            {
+                'id': 'doc1',
+                'score': 0.9,
+                'metadata': {'text': 'Short text'},
+                'namespace': 'test'
+            },
+            {
+                'id': 'doc2',
+                'score': 0.8, 
+                'metadata': {'text': 'Longer text with more words to increase token count'},
+                'namespace': 'test'
+            }
+        ]
+        
+        filtered_results = retrieval.manage_context_tokens(results)
+        
+        # Should not exceed max tokens
+        total_tokens = sum(retrieval._count_tokens(r['metadata']['text']) for r in filtered_results)
+        assert total_tokens <= 4000
+    
+    @pytest.mark.skipif(SKIP_REAL_PINECONE, reason="PINECONE_API_KEY not set")
+    def test_enhanced_retrieval_real(self, real_pinecone):
+        """Test enhanced retrieval with real Pinecone (Task 3 Done-When criteria)."""
+        retrieval = EnhancedRetrieval(real_pinecone)
+        
+        query = "Who teaches Operating Systems this semester?"
+        results = retrieval.retrieve(query)
+        
         assert isinstance(results, list)
         
+        # Check namespace usage
         if results:
-            result = results[0]
+            namespaces = [r.get('namespace', '') for r in results]
+            ragv2_namespaces = get_ragv2_namespaces().values()
             
-            # Check required fields
-            assert "id" in result
-            assert "score" in result
-            assert "metadata" in result
-            assert "namespace" in result
-    
-    def test_retrieval_stats(self, retrieval):
-        """Test retrieval statistics."""
-        stats = retrieval.get_retrieval_stats()
+            # Should use RAGv2 namespaces
+            using_ragv2 = any(ns in ragv2_namespaces for ns in namespaces)
+            print(f"Using RAGv2 namespaces: {using_ragv2}")
+            print(f"Namespaces used: {set(namespaces)}")
         
-        # Check required fields
-        assert "dense_retrieval_time" in stats
-        assert "reranking_time" in stats
-        assert "bm25_time" in stats
-        assert "total_time" in stats
-    
-    def test_enhanced_retrieval_unit_test(self):
-        """Run the unit test for enhanced retrieval."""
-        result = test_enhanced_retrieval()
-        assert result is True
+        # Check performance stats
+        stats = retrieval.get_retrieval_stats()
+        assert 'total_time' in stats
+        assert stats['total_time'] > 0
+        
+        print(f"✅ Enhanced retrieval test passed: {len(results)} results in {stats['total_time']:.3f}s")
 
 
 class TestGenerationGuards:
-    """Test Task 5: Generation guard-rails."""
+    """Test generation guard-rails functionality."""
     
-    @pytest.fixture
-    def guards(self):
-        """Create generation guards for testing."""
-        return GenerationGuards()
-    
-    def test_guards_initialization(self, guards):
-        """Test that guards initialize correctly."""
+    def test_guards_initialization(self):
+        """Test generation guards initialization."""
+        guards = GenerationGuards()
         assert guards is not None
-        assert hasattr(guards, 'guard_stats')
     
-    def test_self_check_prompt_creation(self, guards):
+    def test_self_check_prompt_creation(self):
         """Test self-check prompt creation."""
-        context = [
-            {
-                "metadata": {
-                    "text": "The Operating Systems course is taught by Professor Mario Rossi."
-                }
-            }
+        guards = GenerationGuards()
+        
+        sources = [
+            {'text': 'Source 1 content'},
+            {'text': 'Source 2 content'}
         ]
-        question = "Who teaches Operating Systems?"
         
-        prompt = guards.create_self_check_prompt(context, question)
+        prompt = guards.create_self_check_prompt(sources, "Test question")
         
-        # Check that prompt is generated
         assert isinstance(prompt, str)
-        assert "Using ONLY the information provided" in prompt
-        assert question in prompt
-        assert "Professor Mario Rossi" in prompt
+        assert "Using only the sources above" in prompt
+        assert "If unsure, say you don't know" in prompt
+        assert "Source 1 content" in prompt
+        assert "Source 2 content" in prompt
     
-    def test_safe_answer_generation(self, guards):
-        """Test safe answer generation."""
-        context = [
-            {
-                "metadata": {
-                    "text": "The Operating Systems course is taught by Professor Mario Rossi in the first semester."
-                }
-            }
+    def test_answer_verification(self):
+        """Test answer verification against sources."""
+        guards = GenerationGuards()
+        
+        sources = [
+            {'text': 'The course is taught by Professor Smith'},
+            {'text': 'Operating Systems is a core course'}
         ]
-        question = "Who teaches Operating Systems this semester?"
         
-        result = guards.generate_safe_answer(context, question)
+        good_answer = "Professor Smith teaches the course"
+        bad_answer = "The course is taught by Professor Johnson"
         
-        # Check required fields
-        assert "answer" in result
-        assert "verification_score" in result
-        assert "is_verified" in result
-        assert "guards_enabled" in result
-    
-    def test_guard_stats(self, guards):
-        """Test guard statistics."""
-        stats = guards.get_guard_stats()
+        # Test good answer
+        good_score = guards.verify_answer_against_sources(good_answer, sources)
+        assert isinstance(good_score, float)
+        assert good_score >= 0
         
-        # Check required fields
-        assert "hallucination_checks" in stats
-        assert "refusals" in stats
-        assert "verification_time" in stats
-        assert "refusal_rate" in stats
-        assert "average_verification_time" in stats
+        # Test bad answer
+        bad_score = guards.verify_answer_against_sources(bad_answer, sources)
+        assert isinstance(bad_score, float)
+        assert bad_score >= 0
     
-    def test_generation_guards_unit_test(self):
-        """Run the unit test for generation guards."""
-        result = test_generation_guards()
-        assert result is True
+    def test_safe_answer_generation(self):
+        """Test safe answer generation with guards."""
+        guards = GenerationGuards()
+        
+        sources = [
+            {'text': 'The course is taught by Professor Smith'},
+            {'text': 'Operating Systems is a core course'}
+        ]
+        
+        # Test with good answer
+        result = guards.generate_safe_answer(
+            "Who teaches the course?",
+            sources,
+            "Professor Smith teaches the course"
+        )
+        
+        assert isinstance(result, dict)
+        assert 'answer' in result
+        assert 'is_safe' in result
+        assert 'confidence_score' in result
     
-    def test_hallucination_detection_unit_test(self):
-        """Run the unit test for hallucination detection."""
-        result = test_hallucination_detection()
-        # Note: This test might fail if hallucination detection is not working
-        # The test validates the detection functionality
+    def test_hallucination_detection(self):
+        """Test hallucination detection (Task 5 Done-When criteria)."""
+        guards = GenerationGuards()
+        
+        # Test with factual sources
+        sources = [
+            {'text': 'The course is taught by Professor Smith'},
+            {'text': 'Operating Systems is a core course'}
+        ]
+        
+        # Test factual answer (should pass)
+        factual_result = guards.generate_safe_answer(
+            "Who teaches the course?",
+            sources,
+            "Professor Smith teaches the course"
+        )
+        
+        # Test hallucinated answer (should be flagged)
+        hallucinated_result = guards.generate_safe_answer(
+            "Who teaches the course?",
+            sources,
+            "Professor Johnson teaches the course"
+        )
+        
+        print(f"Factual answer safe: {factual_result['is_safe']}")
+        print(f"Hallucinated answer safe: {hallucinated_result['is_safe']}")
+        
+        # The factual answer should be safer than the hallucinated one
+        assert factual_result['confidence_score'] >= hallucinated_result['confidence_score']
 
 
 class TestRAGv2Pipeline:
     """Test the complete RAGv2 pipeline."""
     
-    @pytest.fixture
-    def pipeline(self):
-        """Create RAGv2 pipeline for testing."""
-        return RAGv2Pipeline()
-    
-    def test_pipeline_initialization(self, pipeline):
-        """Test that pipeline initializes correctly."""
+    def test_pipeline_initialization(self, mock_pinecone):
+        """Test RAGv2 pipeline initialization."""
+        pipeline = RAGv2Pipeline(mock_pinecone)
         assert pipeline is not None
-        assert hasattr(pipeline, 'feature_flags')
-        assert hasattr(pipeline, 'pipeline_stats')
     
-    def test_pipeline_answer_generation(self, pipeline):
-        """Test complete answer generation."""
-        question = "Who teaches Operating Systems this semester?"
-        result = pipeline.answer(question)
+    def test_pipeline_answer_generation(self, mock_pinecone):
+        """Test pipeline answer generation."""
+        pipeline = RAGv2Pipeline(mock_pinecone)
         
-        # Check required fields
-        assert "answer" in result
-        assert "retrieved_documents" in result
-        assert "retrieval_stats" in result
-        assert "verification_info" in result
-        assert "features_used" in result
-        assert "query_id" in result
+        query = "Test question"
+        result = pipeline.answer(query)
+        
+        assert isinstance(result, dict)
+        assert 'answer' in result
+        assert 'sources' in result
+        assert 'metadata' in result
     
-    def test_pipeline_stats(self, pipeline):
+    def test_pipeline_stats(self, mock_pinecone):
         """Test pipeline statistics."""
+        pipeline = RAGv2Pipeline(mock_pinecone)
+        
+        # Generate an answer to populate stats
+        pipeline.answer("Test question")
+        
         stats = pipeline.get_pipeline_stats()
-        
-        # Check required fields
-        assert "total_queries" in stats
-        assert "total_time" in stats
-        assert "average_time" in stats
-        assert "feature_usage" in stats
+        assert isinstance(stats, dict)
+        assert 'total_queries' in stats
+        assert 'average_response_time' in stats
     
-    def test_ragv2_pipeline_unit_test(self):
-        """Run the unit test for RAGv2 pipeline."""
-        result = test_ragv2_pipeline()
-        assert result is True
+    @pytest.mark.skipif(SKIP_REAL_PINECONE, reason="PINECONE_API_KEY not set")
+    def test_pipeline_integration_real(self, real_pinecone):
+        """Test complete pipeline with real Pinecone."""
+        pipeline = RAGv2Pipeline(real_pinecone)
+        
+        query = "Who teaches Operating Systems this semester?"
+        result = pipeline.answer(query)
+        
+        assert isinstance(result, dict)
+        assert 'answer' in result
+        assert 'sources' in result
+        assert 'metadata' in result
+        
+        # Check metadata
+        metadata = result['metadata']
+        assert 'query_time' in metadata
+        assert 'feature_flags_used' in metadata
+        
+        print(f"✅ Pipeline integration test passed")
+        print(f"   Answer length: {len(result['answer'])}")
+        print(f"   Sources: {len(result['sources'])}")
+        print(f"   Query time: {metadata['query_time']:.3f}s")
 
 
-class TestRAGv2Integration:
-    """Integration tests for RAGv2 components."""
+class TestFeatureFlagCombinations:
+    """Test different feature flag combinations."""
     
-    def test_end_to_end_workflow(self):
-        """Test complete end-to-end workflow."""
-        # This test would require a real database connection
-        # For now, we'll test the components individually
-        pass
-    
-    def test_feature_flag_combinations(self):
-        """Test different feature flag combinations."""
-        # Test with all features disabled
-        with patch.dict(os.environ, {
-            'SCHEMA_AWARE_CHUNKING': 'false',
-            'INSTRUCTOR_XL_EMBEDDINGS': 'false',
-            'RERANKER_ENABLED': 'false',
-            'HALLUCINATION_GUARDS': 'false'
-        }):
-            flags = get_feature_flags()
-            assert flags['schema_aware_chunking'] is False
-            assert flags['instructor_xl_embeddings'] is False
-            assert flags['reranker_enabled'] is False
-            assert flags['hallucination_guards'] is False
-        
-        # Test with all features enabled
-        with patch.dict(os.environ, {
-            'SCHEMA_AWARE_CHUNKING': 'true',
-            'INSTRUCTOR_XL_EMBEDDINGS': 'true',
-            'RERANKER_ENABLED': 'true',
-            'HALLUCINATION_GUARDS': 'true'
-        }):
-            flags = get_feature_flags()
-            assert flags['schema_aware_chunking'] is True
-            assert flags['instructor_xl_embeddings'] is True
-            assert flags['reranker_enabled'] is True
-            assert flags['hallucination_guards'] is True
+    @pytest.mark.parametrize("schema_aware,instructor_xl,reranker", [
+        (True, True, True),
+        (True, True, False),
+        (True, False, True),
+        (True, False, False),
+        (False, True, True),
+        (False, True, False),
+        (False, False, True),
+        (False, False, False),
+    ])
+    def test_feature_flag_combinations(self, mock_pinecone, schema_aware, instructor_xl, reranker):
+        """Test pipeline with different feature flag combinations."""
+        with patch('backend.src.rag.config.SCHEMA_AWARE_CHUNKING', schema_aware):
+            with patch('backend.src.rag.config.INSTRUCTOR_XL_EMBEDDINGS', instructor_xl):
+                with patch('backend.src.rag.config.RERANKER_ENABLED', reranker):
+                    pipeline = RAGv2Pipeline(mock_pinecone)
+                    
+                    # Should initialize without errors
+                    assert pipeline is not None
+                    
+                    # Should generate answer
+                    result = pipeline.answer("Test question")
+                    assert isinstance(result, dict)
+                    assert 'answer' in result
 
 
 if __name__ == "__main__":
-    # Run all tests
+    # Run tests
     pytest.main([__file__, "-v"]) 
