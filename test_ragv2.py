@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
 """
-Real RAGv2 Test Script
-======================
+RAGv2 Test Script (Root Level)
+==============================
 
 This script tests the RAGv2 system with real Pinecone client.
-Run this to validate that the system works with actual infrastructure.
+Run this from the project root directory.
 """
 
 import os
 import sys
 from dotenv import load_dotenv
-
-# Add the backend directory to the path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 def test_ragv2_with_real_pinecone():
     """Test RAGv2 system with real Pinecone client."""
@@ -30,7 +27,7 @@ def test_ragv2_with_real_pinecone():
         return False
     
     try:
-        # Import RAGv2 components with correct relative paths
+        # Import RAGv2 components
         from backend.src.rag.config import get_feature_flags, get_ragv2_namespaces
         from backend.src.rag.utils.embeddings_v2 import EnhancedEmbeddings
         from backend.src.rag.retrieval_v2 import EnhancedRetrieval
@@ -126,6 +123,7 @@ def test_ragv2_with_real_pinecone():
     except ImportError as e:
         print(f"❌ Import error: {e}")
         print("   Make sure all dependencies are installed")
+        print("   Run: pip install -r backend/src/requirements.txt")
         return False
     except Exception as e:
         print(f"❌ Test failed: {e}")
