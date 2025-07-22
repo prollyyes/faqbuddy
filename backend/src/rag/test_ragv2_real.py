@@ -31,11 +31,11 @@ def test_ragv2_with_real_pinecone():
     
     try:
         # Import RAGv2 components with correct relative paths
-        from backend.src.rag.config import get_feature_flags, get_ragv2_namespaces
-        from backend.src.rag.utils.embeddings_v2 import EnhancedEmbeddings
-        from backend.src.rag.retrieval_v2 import EnhancedRetrieval
-        from backend.src.rag.generation_guards import GenerationGuards
-        from backend.src.rag.rag_pipeline_v2 import RAGv2Pipeline
+        from .config import get_feature_flags, get_ragv2_namespaces
+        from .utils.embeddings_v2 import EnhancedEmbeddings
+        from .retrieval_v2 import EnhancedRetrieval
+        from .generation_guards import GenerationGuards
+        from .rag_pipeline_v2 import RAGv2Pipeline
         from pinecone import Pinecone
         
         print("✅ All imports successful")
@@ -139,7 +139,7 @@ def test_namespace_verification():
     print("\n🔍 Testing Namespace Verification...")
     
     try:
-        from backend.src.rag.update_pinecone_ragv2 import SafePineconeUpsert
+        from .update_pinecone_ragv2 import SafePineconeUpsert
         
         upsert = SafePineconeUpsert()
         verification = upsert.verify_namespaces()

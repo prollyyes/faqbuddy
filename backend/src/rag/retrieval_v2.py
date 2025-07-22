@@ -138,7 +138,8 @@ class EnhancedRetrieval:
                 'id': match['id'],
                 'score': match['score'],
                 'metadata': match['metadata'],
-                'namespace': self.ragv2_namespaces["docs"]
+                'namespace': self.ragv2_namespaces["docs"],
+                'text': match['metadata'].get('text', '')
             })
         
         for match in db_results.get('matches', []):
@@ -146,7 +147,8 @@ class EnhancedRetrieval:
                 'id': match['id'],
                 'score': match['score'],
                 'metadata': match['metadata'],
-                'namespace': self.ragv2_namespaces["db"]
+                'namespace': self.ragv2_namespaces["db"],
+                'text': match['metadata'].get('text', '')
             })
         
         for match in pdf_results.get('matches', []):
@@ -154,7 +156,8 @@ class EnhancedRetrieval:
                 'id': match['id'],
                 'score': match['score'],
                 'metadata': match['metadata'],
-                'namespace': self.ragv2_namespaces["pdf"]
+                'namespace': self.ragv2_namespaces["pdf"],
+                'text': match['metadata'].get('text', '')
             })
         
         # Sort by score
@@ -207,6 +210,9 @@ class EnhancedRetrieval:
         # Add scores to candidates
         for i, candidate in enumerate(candidates):
             candidate['cross_score'] = float(scores[i])
+            # Ensure text field is present
+            if 'text' not in candidate:
+                candidate['text'] = candidate['metadata'].get('text', '')
         
         # Filter by threshold and sort
         filtered_candidates = [
@@ -260,7 +266,8 @@ class EnhancedRetrieval:
                 'id': all_chunks[i]['id'],
                 'score': float(scores[i]),
                 'metadata': all_chunks[i]['metadata'],
-                'namespace': 'bm25_fallback'
+                'namespace': 'bm25_fallback',
+                'text': all_chunks[i]['text']
             })
         
         self.retrieval_stats["bm25_time"] = time.time() - start_time

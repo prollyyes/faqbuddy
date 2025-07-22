@@ -6,12 +6,15 @@ from typing import List, Dict
 MAX_CHUNKS = 5
 MAX_TOKENS = 1200  # Adjust for your LLM context window (e.g., 4096 for GPT-3.5, but leave room for question/answer)
 SYSTEM_PROMPT = (
-    "You are FAQBuddy, a helpful university FAQ assistant. "
-    "You will be given a user question and a set of context snippets from various sources (PDFs, database, etc). "
-    "Each snippet includes metadata (source, page, section, etc). "
-    "Use only the provided context to answer, and cite sources inline using the metadata. "
-    "If you don't know the answer, say so honestly."
-    "Don't hallucinate, don't make up information."
+    "Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. "
+    "Ti verranno forniti una domanda dell'utente e un insieme di frammenti di contesto da varie fonti (PDF, database, ecc.). "
+    "Ogni frammento include metadati (fonte, pagina, sezione, ecc.). "
+    "Usa SOLO il contesto fornito per rispondere e cita le fonti inline usando i metadati. "
+    "Se non conosci la risposta, dillo onestamente. "
+    "Non inventare informazioni, non fare allucinazioni. "
+    "IMPORTANTE: Rispondi SEMPRE in italiano, a meno che l'utente non chieda esplicitamente in inglese. "
+    "Mantieni un tono professionale ma amichevole. "
+    "Usa sempre il formato Markdown per una migliore leggibilità."
 )
 
 # Simple token count (approximate, by whitespace)
@@ -30,9 +33,10 @@ def deduplicate_chunks(chunks: List[Dict]) -> List[Dict]:
     return deduped
 
 def format_chunk(chunk: Dict, idx: int) -> str:
-    meta = chunk['meta']
-    meta_str = f"[Source: {meta.get('source', 'N/A')}, Page: {meta.get('page', 'N/A')}, Section: {meta.get('section_title', 'N/A')}]"
-    return f"Snippet {idx} {meta_str}:\n{chunk['text']}\n"
+    # Handle both 'meta' and 'metadata' keys for compatibility
+    meta = chunk.get('meta', chunk.get('metadata', {}))
+    meta_str = f"[Fonte: {meta.get('source', 'N/A')}, Pagina: {meta.get('page', 'N/A')}, Sezione: {meta.get('section_title', 'N/A')}]"
+    return f"Frammento {idx} {meta_str}:\n{chunk['text']}\n"
 
 def build_prompt(merged_results: List[Dict], user_question: str) -> str:
     # Deduplicate
@@ -51,9 +55,9 @@ def build_prompt(merged_results: List[Dict], user_question: str) -> str:
     context = "\n".join([format_chunk(chunk, i+1) for i, chunk in enumerate(selected)])
     prompt = (
         f"{SYSTEM_PROMPT}\n\n"
-        f"User question: {user_question}\n\n"
-        f"Context snippets:\n{context}\n\n"
-        f"Answer:"
+        f"Domanda dell'utente: {user_question}\n\n"
+        f"Frammenti di contesto:\n{context}\n\n"
+        f"Risposta:"
     )
     return prompt
 

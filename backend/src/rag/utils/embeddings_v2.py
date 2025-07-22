@@ -28,7 +28,7 @@ class EnhancedEmbeddings:
     - Fallback to current model
     """
     
-    def __init__(self, device: str = 'auto'):
+    def __init__(self, device: str = 'cpu'):
         """
         Initialize the enhanced embeddings system.
         

@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Import RAGv2 components
-from backend.src.rag.config import (
+from src.rag.config import (
     get_feature_flags, 
     is_feature_enabled, 
     get_embedding_model,
@@ -24,11 +24,11 @@ from backend.src.rag.config import (
     get_existing_namespaces,
     validate_configuration
 )
-from backend.src.rag.utils.schema_aware_chunker import SchemaAwareChunker
-from backend.src.rag.utils.embeddings_v2 import EnhancedEmbeddings
-from backend.src.rag.retrieval_v2 import EnhancedRetrieval
-from backend.src.rag.generation_guards import GenerationGuards
-from backend.src.rag.rag_pipeline_v2 import RAGv2Pipeline
+from src.rag.utils.schema_aware_chunker import SchemaAwareChunker
+from src.rag.utils.embeddings_v2 import EnhancedEmbeddings
+from src.rag.retrieval_v2 import EnhancedRetrieval
+from src.rag.generation_guards import GenerationGuards
+from src.rag.rag_pipeline_v2 import RAGv2Pipeline
 
 # Test configuration
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")

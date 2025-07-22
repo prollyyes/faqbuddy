@@ -12,6 +12,7 @@ This module implements the main RAGv2 pipeline that integrates all the new compo
 All features are controlled by feature flags for independent deployment.
 """
 
+import os
 import time
 import logging
 from typing import Dict, Any, List, Optional, Generator
@@ -25,8 +26,9 @@ from .config import (
 )
 from .utils.schema_aware_chunker import SchemaAwareChunker
 from .utils.embeddings_v2 import EnhancedEmbeddings
-from .retrieval_v2 import EnhancedRetrieval
+from .retrieval_v2_enhanced import EnhancedRetrievalV2 as EnhancedRetrieval
 from .generation_guards import GenerationGuards
+from .web_search_enhancer import WebSearchEnhancer
 from .utils.generate_chunks import ChunkGenerator  # Legacy chunker for fallback
 
 # Setup logging for observability
@@ -115,6 +117,14 @@ class RAGv2Pipeline:
         else:
             self.generation_guards = None
             print("❌ Generation guards disabled")
+        
+        # Initialize web search enhancer
+        if is_feature_enabled("web_search_enhancement"):
+            self.web_search = WebSearchEnhancer()
+            print("✅ Web search enhancer initialized")
+        else:
+            self.web_search = None
+            print("❌ Web search enhancement disabled")
     
     def _get_chunks(self) -> List[Dict[str, Any]]:
         """Get chunks using appropriate chunker based on feature flags."""
@@ -187,6 +197,20 @@ class RAGv2Pipeline:
             # Step 2: Retrieve relevant documents
             retrieval_results = self.retrieval.retrieve(question, chunks)
             
+            # Step 2.5: Web search enhancement (if enabled)
+            if is_feature_enabled("web_search_enhancement") and self.web_search:
+                print("🌐 Performing web search enhancement...")
+                web_results = self.web_search.search(question, max_results=3)
+                web_formatted = self.web_search.format_results_for_rag(web_results)
+                
+                # Combine with retrieval results
+                retrieval_results.extend(web_formatted)
+                
+                # Re-sort by score
+                retrieval_results.sort(key=lambda x: x.get('score', 0), reverse=True)
+                
+                print(f"📊 Combined results: {len(retrieval_results)} (local: {len(retrieval_results) - len(web_formatted)}, web: {len(web_formatted)})")
+            
             # Step 3: Generate answer with guards
             if is_feature_enabled("hallucination_guards") and self.generation_guards:
                 generation_result = self.generation_guards.generate_safe_answer(
@@ -201,7 +225,7 @@ class RAGv2Pipeline:
             else:
                 # Fallback to simple generation
                 from .build_prompt import build_prompt
-                from ..utils.llm_mistral import generate_answer
+                from src.utils.llm_mistral import generate_answer
                 
                 prompt = build_prompt(retrieval_results, question)
                 answer = generate_answer(prompt, question)
@@ -211,13 +235,15 @@ class RAGv2Pipeline:
             result = {
                 "answer": answer,
                 "retrieved_documents": len(retrieval_results),
+                "retrieval_results": retrieval_results,  # Add the actual retrieval results
                 "retrieval_stats": self.retrieval.get_retrieval_stats(),
                 "verification_info": verification_info,
                 "features_used": {
                     "schema_aware_chunking": is_feature_enabled("schema_aware_chunking"),
                     "instructor_xl_embeddings": is_feature_enabled("instructor_xl_embeddings"),
                     "reranker_enabled": is_feature_enabled("reranker_enabled"),
-                    "hallucination_guards": is_feature_enabled("hallucination_guards")
+                    "hallucination_guards": is_feature_enabled("hallucination_guards"),
+                    "web_search_enhancement": is_feature_enabled("web_search_enhancement")
                 },
                 "query_id": query_info["query_id"]
             }

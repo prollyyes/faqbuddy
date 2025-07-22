@@ -12,8 +12,8 @@ Features:
 import time
 from typing import Dict, Any, List, Optional, Tuple
 from sentence_transformers import CrossEncoder
-from ..config import HALLUCINATION_GUARDS, RERANKER_THRESHOLD, CROSS_ENCODER_MODEL
-from ..utils.llm_mistral import generate_answer
+from .config import HALLUCINATION_GUARDS, RERANKER_THRESHOLD, CROSS_ENCODER_MODEL
+from src.utils.llm_mistral import generate_answer
 
 class GenerationGuards:
     """
@@ -66,20 +66,27 @@ class GenerationGuards:
         # Build context text
         context_text = ""
         for i, doc in enumerate(context, 1):
-            text = doc.get('metadata', {}).get('text', '')
-            context_text += f"Document {i}: {text}\n\n"
+            # Try to get text from different possible locations
+            text = ""
+            if 'text' in doc:
+                text = doc['text']
+            elif 'metadata' in doc and 'text' in doc['metadata']:
+                text = doc['metadata']['text']
+            
+            if text.strip():
+                context_text += f"Document {i}: {text}\n\n"
         
         # Create self-check prompt
-        prompt = f"""You are a helpful assistant. Answer the following question using ONLY the information provided in the documents below.
+        prompt = f"""Sei un assistente utile. Rispondi alla seguente domanda usando SOLO le informazioni fornite nei documenti qui sotto.
 
-IMPORTANT: If the answer cannot be found in the provided documents, say "Non lo so" or "In base alle informazioni disponibili, non posso rispondere a questa domanda." Do not make up information.
+IMPORTANTE: Se la risposta non può essere trovata nei documenti forniti, di' "Non lo so" o "In base alle informazioni disponibili, non posso rispondere a questa domanda." Non inventare informazioni.
 
-Documents:
+Documenti:
 {context_text}
 
-Question: {question}
+Domanda: {question}
 
-Answer using only the sources above:"""
+Rispondi usando solo le fonti sopra indicate:"""
         
         return prompt
     
@@ -102,8 +109,16 @@ Answer using only the sources above:"""
         # Prepare pairs for cross-encoder
         pairs = []
         for source in sources:
-            source_text = source.get('metadata', {}).get('text', '')
-            pairs.append([answer, source_text])
+            # Try to get text from different possible locations
+            source_text = ""
+            if 'text' in source:
+                source_text = source['text']
+            elif 'metadata' in source and 'text' in source['metadata']:
+                source_text = source['metadata']['text']
+            
+            # Only add non-empty source texts
+            if source_text.strip():
+                pairs.append([answer, source_text])
         
         if not pairs:
             return 0.0, False
@@ -154,10 +169,11 @@ Answer using only the sources above:"""
         prompt = self.create_self_check_prompt(context, question)
         answer = generate_answer(prompt, question)
         
-        # Check for explicit uncertainty indicators
+        # Check for explicit uncertainty indicators (Italian first, then English)
         uncertainty_indicators = [
-            "i don't know", "i cannot answer", "non so", "non posso rispondere",
-            "non ho informazioni", "non ci sono informazioni", "non disponibile"
+            "non so", "non posso rispondere", "non ho informazioni", 
+            "non ci sono informazioni", "non disponibile", "non lo so",
+            "i don't know", "i cannot answer"
         ]
         
         answer_lower = answer.lower()
