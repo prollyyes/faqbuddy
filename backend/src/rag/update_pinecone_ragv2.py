@@ -143,7 +143,10 @@ class SafePineconeUpsert:
                 vector = {
                     'id': chunk['id'],
                     'values': embedding,
-                    'metadata': chunk['metadata']
+                    'metadata': {
+                        **chunk['metadata'],
+                        'text': chunk['text']  # Add text to metadata for retrieval
+                    }
                 }
                 vectors.append(vector)
                 
@@ -231,7 +234,10 @@ class SafePineconeUpsert:
                         vector = {
                             'id': f"{os.path.splitext(pdf_file)[0]}_chunk_{i+1}",
                             'values': embedding,
-                            'metadata': chunk['metadata']
+                            'metadata': {
+                                **chunk['metadata'],
+                                'text': chunk['text']  # Ensure text is in metadata
+                            }
                         }
                         vectors.append(vector)
                         total_chunks += 1

@@ -27,6 +27,9 @@ def test_ragv2_with_real_pinecone():
         return False
     
     try:
+        # Add backend/src to path
+        sys.path.append(os.path.join(os.path.dirname(__file__), 'backend', 'src'))
+        
         # Import RAGv2 components
         from backend.src.rag.config import get_feature_flags, get_ragv2_namespaces
         from backend.src.rag.utils.embeddings_v2 import EnhancedEmbeddings
@@ -82,8 +85,7 @@ def test_ragv2_with_real_pinecone():
             {'text': 'Operating Systems is a core course'}
         ]
         
-        test_answer = "Professor Smith teaches the course"
-        result = guards.generate_safe_answer("Who teaches the course?", test_sources, test_answer)
+        result = guards.generate_safe_answer(test_sources, "Who teaches the course?")
         
         print(f"   ✅ Guard test completed")
         print(f"   Answer safe: {result.get('is_safe', False)}")
@@ -124,6 +126,7 @@ def test_ragv2_with_real_pinecone():
         print(f"❌ Import error: {e}")
         print("   Make sure all dependencies are installed")
         print("   Run: pip install -r backend/src/requirements.txt")
+        print("   Also ensure you're running from the project root directory")
         return False
     except Exception as e:
         print(f"❌ Test failed: {e}")

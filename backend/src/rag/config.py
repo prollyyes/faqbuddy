@@ -17,26 +17,29 @@ from typing import Dict, Any
 SCHEMA_AWARE_CHUNKING = os.getenv("SCHEMA_AWARE_CHUNKING", "true").lower() == "true"
 
 # Task 2: Embedding upgrade
-INSTRUCTOR_XL_EMBEDDINGS = os.getenv("INSTRUCTOR_XL_EMBEDDINGS", "false").lower() == "true"
+INSTRUCTOR_XL_EMBEDDINGS = os.getenv("INSTRUCTOR_XL_EMBEDDINGS", "true").lower() == "true"
 
 # Task 3: Retrieval pipeline improvements
-RERANKER_ENABLED = os.getenv("RERANKER_ENABLED", "false").lower() == "true"
+RERANKER_ENABLED = os.getenv("RERANKER_ENABLED", "true").lower() == "true"
 BM25_FALLBACK = os.getenv("BM25_FALLBACK", "true").lower() == "true"  # Keep BM25 as fallback
 
 # Task 4: Graph-RAG
-GRAPH_RAG = os.getenv("GRAPH_RAG", "false").lower() == "true"
+GRAPH_RAG = os.getenv("GRAPH_RAG", "true").lower() == "true"
 
 # Task 5: Generation guard-rails
 HALLUCINATION_GUARDS = os.getenv("HALLUCINATION_GUARDS", "false").lower() == "true"
 
+# Task 6: Web search enhancement
+WEB_SEARCH_ENHANCEMENT = os.getenv("WEB_SEARCH_ENHANCEMENT", "true").lower() == "true"
+
 # Task 6: CDC-based incremental embeddings
-CDC_ENABLED = os.getenv("CDC_ENABLED", "false").lower() == "true"
+CDC_ENABLED = os.getenv("CDC_ENABLED", "true").lower() == "true"
 
 # Task 7: PDF ingestion
-PDF_BOOST = os.getenv("PDF_BOOST", "false").lower() == "true"
+PDF_BOOST = os.getenv("PDF_BOOST", "true").lower() == "true"
 
 # Task 8: Observability
-OBSERVABILITY_ENABLED = os.getenv("OBSERVABILITY_ENABLED", "false").lower() == "true"
+OBSERVABILITY_ENABLED = os.getenv("OBSERVABILITY_ENABLED", "true").lower() == "true"
 
 # ============================================================================
 # MODEL CONFIGURATIONS
@@ -47,15 +50,15 @@ CURRENT_EMBEDDING_MODEL = "all-mpnet-base-v2"
 NEW_EMBEDDING_MODEL = "hkunlp/instructor-xl"
 
 # Cross-encoder model (Task 3)
-CROSS_ENCODER_MODEL = "BAAI/bge-reranker-large"
+CROSS_ENCODER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"  # Better for multilingual text
 
 # ============================================================================
 # RETRIEVAL PARAMETERS
 # ============================================================================
 
 # Task 3: Retrieval pipeline
-DENSE_TOP_K = 50  # Increased from 20
-RERANKER_THRESHOLD = 0.2  # Minimum score to keep chunk
+DENSE_TOP_K = 75  # Increased from 50 for better coverage
+RERANKER_THRESHOLD = 0.05  # Lowered threshold for Italian text (was 0.1)
 MAX_CONTEXT_TOKENS = 4000  # Maximum context tokens
 
 # Task 1: Schema-aware chunking
@@ -79,7 +82,7 @@ RAGV2_PDF_NAMESPACE = "pdf_v2"
 INDEX_NAME = "exams-index-enhanced"  # Same index, different namespaces
 
 # ============================================================================
-# GRAPH-RAG CONFIGURATION (Task 4)
+# GRAPH-RAG CONFIGURATION (Task 4) NOT IMPLEMENTED FOR NOW
 # ============================================================================
 
 GRAPH_DB_TYPE = os.getenv("GRAPH_DB_TYPE", "neo4j")  # "neo4j" or "age"
@@ -115,6 +118,7 @@ def get_feature_flags() -> Dict[str, bool]:
         "bm25_fallback": BM25_FALLBACK,
         "graph_rag": GRAPH_RAG,
         "hallucination_guards": HALLUCINATION_GUARDS,
+        "web_search_enhancement": WEB_SEARCH_ENHANCEMENT,
         "cdc_enabled": CDC_ENABLED,
         "pdf_boost": PDF_BOOST,
         "observability_enabled": OBSERVABILITY_ENABLED,

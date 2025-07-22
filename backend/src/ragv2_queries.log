@@ -1,0 +1,35 @@
+2025-07-19 17:33:49,918 - __main__ - INFO - Starting query: query_1752939229917 - Quali sono tutti i corsi che conosci?
+2025-07-19 17:33:50,042 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-mpnet-base-v2
+2025-07-19 17:33:55,051 - __main__ - INFO - Query completed: query_1752939229917 - 5.133s
+2025-07-19 17:34:25,822 - __main__ - INFO - Starting query: query_1752939265822 - Quale professore insegna Artificial Intelligence?
+2025-07-19 17:34:26,942 - __main__ - INFO - Query completed: query_1752939265822 - 1.119s
+2025-07-19 17:35:07,221 - __main__ - INFO - Starting query: query_1752939307221 - Conosci il corso di Sistemi Operativi? PoPotrrebbe essere in Inglese.
+2025-07-19 17:35:08,300 - __main__ - INFO - Query completed: query_1752939307221 - 1.078s
+2025-07-19 17:44:00,839 - __main__ - INFO - Starting query: query_1752939840839 - Chi insegna sistemi operativi?
+2025-07-19 17:44:00,975 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-mpnet-base-v2
+2025-07-19 17:44:08,131 - __main__ - INFO - Query completed: query_1752939840839 - 7.292s
+2025-07-19 17:49:24,115 - __main__ - INFO - Starting query: query_1752940164115 - chi insegna sistemi operativi?
+2025-07-19 17:49:24,251 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-mpnet-base-v2
+2025-07-19 17:49:40,895 - __main__ - INFO - Query completed: query_1752940164115 - 16.780s
+2025-07-19 17:50:19,361 - __main__ - INFO - Starting query: query_1752940219361 - Quali corsi conosci?
+2025-07-19 17:50:27,784 - __main__ - INFO - Query completed: query_1752940219361 - 8.423s
+2025-07-19 17:51:07,914 - __main__ - INFO - Starting query: query_1752940267914 - Chi insegna linguaggi di programmazione? rispondi solo in Italiano.
+2025-07-19 17:51:14,303 - __main__ - INFO - Query completed: query_1752940267914 - 6.389s
+2025-07-19 17:51:50,794 - __main__ - INFO - Starting query: query_1752940310794 - Mi riferisco al corso di Ingegneria Informatica e Automatica, quale professore in questo corso di laurea insegna Linguaggi di Programmazione?
+2025-07-19 17:52:10,394 - __main__ - INFO - Query completed: query_1752940310794 - 19.600s
+2025-07-19 17:53:21,345 - __main__ - INFO - Starting query: query_1752940401345 - Quali professori insegnano corsi nella facolta di ingegneria informatica e automatica? Elencali tutti.
+2025-07-19 17:53:33,716 - __main__ - INFO - Query completed: query_1752940401345 - 12.371s
+2025-07-19 17:54:08,074 - __main__ - INFO - Starting query: query_1752940448074 - Conosci il professor Lenzerini?
+2025-07-19 17:54:15,197 - __main__ - INFO - Query completed: query_1752940448074 - 7.123s
+2025-07-19 17:54:41,147 - __main__ - INFO - Starting query: query_1752940481147 - quale corso insegna Lenzerini? Ci sono appunti  dei suoi corsi?
+2025-07-19 17:54:51,042 - __main__ - INFO - Query completed: query_1752940481147 - 9.896s
+2025-07-19 17:55:29,649 - __main__ - INFO - Starting query: query_1752940529649 - Hai qualche appunto caricato da altri studdenti per il corso di Sistemi Operativi, insegnato da Paolo Ottolino?
+2025-07-19 17:55:35,258 - __main__ - INFO - Query completed: query_1752940529649 - 5.608s
+2025-07-19 17:55:56,924 - __main__ - INFO - Starting query: query_1752940556924 - Dammi gli appunti del corso di Ottolino
+2025-07-19 17:56:05,111 - __main__ - INFO - Query completed: query_1752940556924 - 8.188s
+2025-07-19 17:56:19,267 - __main__ - INFO - Starting query: query_1752940579267 - Ciao chi sei?
+2025-07-19 17:56:24,117 - __main__ - INFO - Query completed: query_1752940579267 - 4.850s
+2025-07-19 17:56:55,267 - __main__ - INFO - Starting query: query_1752940615267 - Come faccio ad iscrivermi al corso di ingegneria informatica e automatica venendo da un altro ateneo Italiano?
+2025-07-19 17:57:14,051 - __main__ - INFO - Query completed: query_1752940615267 - 18.784s
+2025-07-19 17:57:51,459 - __main__ - INFO - Starting query: query_1752940671459 - Devo sostenere un esame tipo CISIA TOLC?
+2025-07-19 17:57:58,165 - __main__ - INFO - Query completed: query_1752940671459 - 6.706s
