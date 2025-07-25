@@ -1,0 +1,10 @@
+{"question": "Quali corsi insegna il prof Lenzerini?", "ground_truth": "Basi di Dati"}
+{"question": "Come si chiama di nome il prof Lenzerini?", "ground_truth": "Maurizio"}
+{"question": "Quali sono i corsi insegnati da Ottolino?", "ground_truth": "Sistemi Operativi"}
+{"question": "Quale corso insegna Califano?", "ground_truth": "Sistemi Dinamici"}
+{"question": "Chi è il professore che insegna Sistemi Operativi?", "ground_truth": "Ottolino"}
+{"question": "Ci sono corsi insegnati da più di un professore?", "ground_truth": "No"}
+{"question": "Da quanti crediti è il corso di Basi di Dati?", "ground_truth": "6"}
+{"question": "Da quanti crediti è il corso di Sistemi Operativi?", "ground_truth": "9"}
+{"question": "Da quanti crediti è il corso di Sistemi Dinamici?", "ground_truth": "9"}
+{"question": "Cosa insegna Gabriele Proietti Mattia?", "ground_truth": "Complementi di Programmazione"}
