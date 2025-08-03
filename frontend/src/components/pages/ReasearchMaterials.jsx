@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import Button from "../utils/Button";
 import axios from "axios";
 
+const HOST = process.env.NEXT_PUBLIC_HOST;
+
 export default function ReasearchMaterials() {
   const [laureaOptions, setLaureaOptions] = useState([]);
   const [courseOptions, setCourseOptions] = useState([]);
@@ -24,7 +26,7 @@ export default function ReasearchMaterials() {
   const handleLaureaFocus = async () => {
     if (laureaOptions.length === 0) {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/getCorsoLaurea');
+        const response = await axios.get(`${HOST}/getCorsoLaurea`);
         const nomi = response.data.nomi.map((entry) =>
           Array.isArray(entry) ? entry[0] : entry
         );
@@ -37,7 +39,7 @@ export default function ReasearchMaterials() {
 
   const getEdizioni = async (corso) => {
     try {
-      const response = await axios.post('http://127.0.0.1:8000/getEdizione', { nomeCorso: corso });
+      const response = await axios.post(`${HOST}/getEdizione`, { nomeCorso: corso });
       setEditionOptions(
         response.data.edizioni.map((e) =>
           Array.isArray(e)
@@ -52,7 +54,7 @@ export default function ReasearchMaterials() {
 
   const getCorsi = async (nomeCorso) => {
     try {
-      const response = await axios.post('http://127.0.0.1:8000/getCorso', { nomeCorso });
+      const response = await axios.post(`${HOST}/getCorso`, { nomeCorso });
       setCourseOptions(response.data.nomi);
       setSelectedCourse('');
       setEditionOptions([]);
@@ -111,13 +113,13 @@ export default function ReasearchMaterials() {
 
       const requests = [];
       if (includeMaterials) {
-        requests.push(axios.post('http://127.0.0.1:8000/getMaterials', payload));
+        requests.push(axios.post(`${HOST}/getMaterials`, payload));
       }
       if (includeInfo) {
-        requests.push(axios.post('http://127.0.0.1:8000/getInfoCorso', payload));
+        requests.push(axios.post(`${HOST}/getInfoCorso`, payload));
       }
       if (includeReviews) {
-        requests.push(axios.post('http://127.0.0.1:8000/getReview', payload));
+        requests.push(axios.post(`${HOST}/getReview`, payload));
       }
 
       const responses = await Promise.all(requests);
