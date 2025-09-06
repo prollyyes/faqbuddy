@@ -298,10 +298,19 @@ def main():
     log_debug("main", f"Loading embedding model: {EMBEDDING_MODEL}")
     
     try:
-        model = SentenceTransformer(EMBEDDING_MODEL, device='mps')
-        log_debug("main", "Embedding model loaded.")
+        # Auto-detect device for Ubuntu/Linux
+        import torch
+        if torch.cuda.is_available():
+            device = 'cuda'
+            print(f"🚀 Using CUDA device")
+        else:
+            device = 'cpu'
+            print(f"🖥️ Using CPU device")
+        
+        model = SentenceTransformer(EMBEDDING_MODEL, device=device)
+        log_debug("main", f"Embedding model loaded on {device}.")
     except Exception as e:
-        print(f"⚠️  Could not use MPS device, falling back to CPU: {e}")
+        print(f"⚠️  Could not use auto-detected device, falling back to CPU: {e}")
         model = SentenceTransformer(EMBEDDING_MODEL)
         log_debug("main", "Embedding model loaded on CPU.")
     

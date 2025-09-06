@@ -27,7 +27,14 @@ from .config import (
 from .utils.schema_aware_chunker import SchemaAwareChunker
 from .utils.embeddings_v2 import EnhancedEmbeddings
 from .retrieval_v2_enhanced import EnhancedRetrievalV2 as EnhancedRetrieval
-from .generation_guards import GenerationGuards
+# Conditional import for generation guards, it messes with llama-cpp-python so I will explicitly disable it if disabled (env variable)
+GenerationGuards = None
+if is_feature_enabled("hallucination_guards"):
+    try:
+        from .generation_guards import GenerationGuards
+    except ImportError:
+        print("⚠️ Warning: Could not import GenerationGuards, feature will be disabled")
+        GenerationGuards = None
 from .web_search_enhancer import WebSearchEnhancer
 from .utils.generate_chunks import ChunkGenerator  # Legacy chunker for fallback
 
@@ -225,7 +232,7 @@ class RAGv2Pipeline:
             else:
                 # Fallback to simple generation
                 from .build_prompt import build_prompt
-                from src.utils.llm_mistral import generate_answer
+                from ..utils.llm_mistral import generate_answer
                 
                 prompt = build_prompt(retrieval_results, question)
                 answer = generate_answer(prompt, question)
