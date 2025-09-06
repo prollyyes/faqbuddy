@@ -14,7 +14,7 @@ from typing import Dict, Any
 # ============================================================================
 
 # Task 1: Schema-aware extraction & chunking
-SCHEMA_AWARE_CHUNKING = os.getenv("SCHEMA_AWARE_CHUNKING", "true").lower() == "true"
+SCHEMA_AWARE_CHUNKING = os.getenv("SCHEMA_AWARE_CHUNKING", "false").lower() == "true"
 
 # Task 2: Embedding upgrade
 INSTRUCTOR_XL_EMBEDDINGS = os.getenv("INSTRUCTOR_XL_EMBEDDINGS", "true").lower() == "true"
@@ -27,7 +27,7 @@ BM25_FALLBACK = os.getenv("BM25_FALLBACK", "true").lower() == "true"  # Keep BM2
 GRAPH_RAG = os.getenv("GRAPH_RAG", "true").lower() == "true"
 
 # Task 5: Generation guard-rails
-HALLUCINATION_GUARDS = os.getenv("HALLUCINATION_GUARDS", "false").lower() == "true"
+HALLUCINATION_GUARDS = os.getenv("HALLUCINATION_GUARDS", "true").lower() == "true"
 
 # Task 6: Web search enhancement
 WEB_SEARCH_ENHANCEMENT = os.getenv("WEB_SEARCH_ENHANCEMENT", "true").lower() == "true"
@@ -47,7 +47,7 @@ OBSERVABILITY_ENABLED = os.getenv("OBSERVABILITY_ENABLED", "true").lower() == "t
 
 # Current embedding model (Task 2)
 CURRENT_EMBEDDING_MODEL = "all-mpnet-base-v2"
-NEW_EMBEDDING_MODEL = "hkunlp/instructor-xl"
+NEW_EMBEDDING_MODEL = "all-mpnet-base-v2"  # Using all-mpnet-base-v2 as primary model
 
 # Cross-encoder model (Task 3)
 CROSS_ENCODER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"  # Better for multilingual text
@@ -58,7 +58,7 @@ CROSS_ENCODER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"  # Better for multi
 
 # Task 3: Retrieval pipeline
 DENSE_TOP_K = 75  # Increased from 50 for better coverage
-RERANKER_THRESHOLD = 0.05  # Lowered threshold for Italian text (was 0.1)
+RERANKER_THRESHOLD = -2.0  # Lower threshold to include more relevant results
 MAX_CONTEXT_TOKENS = 4000  # Maximum context tokens
 
 # Task 1: Schema-aware chunking
@@ -77,6 +77,9 @@ EXISTING_DB_NAMESPACE = "db"
 RAGV2_DOCS_NAMESPACE = "documents_v2"
 RAGV2_DB_NAMESPACE = "db_v2"
 RAGV2_PDF_NAMESPACE = "pdf_v2"
+
+# Per-row namespace (new approach)
+PER_ROW_NAMESPACE = "per_row"
 
 # Index configuration
 INDEX_NAME = "exams-index-enhanced"  # Same index, different namespaces
@@ -143,9 +146,13 @@ def get_ragv2_namespaces() -> Dict[str, str]:
     """Get RAGv2 namespace configuration."""
     return {
         "docs": RAGV2_DOCS_NAMESPACE,
-        "db": RAGV2_DB_NAMESPACE,
+        "db": PER_ROW_NAMESPACE,  # Use per-row namespace instead of db_v2 (old one was RAGV2_DB_NAMESPACE) 
         "pdf": RAGV2_PDF_NAMESPACE
     }
+
+def get_per_row_namespace() -> str:
+    """Get per-row namespace configuration."""
+    return PER_ROW_NAMESPACE
 
 def get_existing_namespaces() -> Dict[str, str]:
     """Get existing namespace configuration (for fallback)."""

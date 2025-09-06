@@ -28,22 +28,37 @@ class EnhancedEmbeddings:
     - Fallback to current model
     """
     
-    def __init__(self, device: str = 'cpu'):
+    def __init__(self, device: str = 'auto'):
         """
         Initialize the enhanced embeddings system.
         
         Args:
-            device: Device to use ('auto', 'cpu', 'cuda', 'mps')
+            device: Device to use ('auto', 'cpu', 'cuda'). 'auto' will detect CUDA or fallback to CPU
         """
         self.model_name = get_embedding_model()
         self.instruction = get_embedding_instruction()
-        self.device = device
+        
+        # Auto-detect device for Ubuntu/Linux
+        if device == 'auto':
+            try:
+                import torch
+                if torch.cuda.is_available():
+                    self.device = 'cuda'
+                    print(f"🚀 Auto-detected CUDA device")
+                else:
+                    self.device = 'cpu'
+                    print(f"🖥️ Auto-detected CPU device")
+            except ImportError:
+                self.device = 'cpu'
+                print(f"🖥️ PyTorch not available, using CPU")
+        else:
+            self.device = device
+        
         self._model = None
         self.latency_stats = []
         
         print(f"🚀 Initializing EnhancedEmbeddings with model: {self.model_name}")
-        if INSTRUCTOR_XL_EMBEDDINGS:
-            print(f"📝 Using instruction prefix: '{self.instruction}'")
+        print(f"📝 Using all-mpnet-base-v2 (no instruction prefix needed)")
     
     @property
     def model(self) -> SentenceTransformer:
@@ -52,15 +67,10 @@ class EnhancedEmbeddings:
             print(f"🔄 Loading embedding model: {self.model_name}")
             start_time = time.time()
             
-            try:
-                self._model = SentenceTransformer(self.model_name, device=self.device)
-                load_time = time.time() - start_time
-                print(f"✅ Model loaded successfully in {load_time:.2f}s")
-            except Exception as e:
-                print(f"❌ Failed to load {self.model_name}: {e}")
-                print(f"🔄 Falling back to {CURRENT_EMBEDDING_MODEL}")
-                self._model = SentenceTransformer(CURRENT_EMBEDDING_MODEL, device=self.device)
-                self.instruction = ""  # No instruction for fallback model
+            # Use the primary model directly (all-mpnet-base-v2)
+            self._model = SentenceTransformer(self.model_name, device=self.device)
+            load_time = time.time() - start_time
+            print(f"✅ Model loaded successfully in {load_time:.2f}s")
         
         return self._model
     
@@ -69,16 +79,8 @@ class EnhancedEmbeddings:
         if isinstance(texts, str):
             texts = [texts]
         
-        if not INSTRUCTOR_XL_EMBEDDINGS or not self.instruction:
-            return texts
-        
-        # Add instruction prefix to each text
-        prepared_texts = []
-        for text in texts:
-            prepared_text = f"{self.instruction}{text}"
-            prepared_texts.append(prepared_text)
-        
-        return prepared_texts
+        # Since we're using all-mpnet-base-v2, no instruction prefix needed
+        return texts
     
     def encode(self, texts: Union[str, List[str]], **kwargs) -> List[List[float]]:
         """
