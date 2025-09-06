@@ -124,10 +124,10 @@ python populate_ragv2.py
 
 ### Test Scripts
 
-1. **Quick System Test**: `quick_system_test.py`
-2. **Comprehensive Test**: `final_system_test.py`
-3. **Approach Comparison**: `compare_approaches.py`
-4. **Thesis Evaluation**: `thesis_evaluation_framework.py`
+1. **Simple Benchmark**: `backend/src/simple_benchmark.py`
+2. **Comprehensive Benchmark**: `backend/src/run_comprehensive_benchmark.py`
+3. **Official Test Suite**: `backend/tests/` directory
+4. **RAGAS Benchmark**: `benchmark/eval/run_ragas.py`
 
 ### Benchmarking
 
@@ -241,17 +241,20 @@ python rag/run_advanced_rag_cli.py
 
 ### Test System
 ```bash
-python quick_system_test.py
+cd backend/src
+python simple_benchmark.py
 ```
 
 ### Populate Data
 ```bash
-python populate_per_row.py
+cd backend/src
+python rag/update_pinecone_per_row.py
 ```
 
-### Compare Approaches
+### Run Comprehensive Benchmark
 ```bash
-python compare_approaches.py
+cd backend/src
+python run_comprehensive_benchmark.py
 ```
 
 ## Troubleshooting Checklist
