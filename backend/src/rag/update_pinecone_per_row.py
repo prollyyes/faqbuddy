@@ -14,17 +14,21 @@ Features:
 """
 
 import os
+import sys
 from typing import List, Dict, Any
 from dotenv import load_dotenv
 from pinecone import Pinecone
 from tqdm import tqdm
 
-from .config import (
+# Add the src directory to the path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from rag.config import (
     INDEX_NAME,
     get_per_row_namespace
 )
-from .utils.per_row_chunker import PerRowChunker
-from .utils.embeddings_v2 import EnhancedEmbeddings
+from rag.utils.per_row_chunker import PerRowChunker
+from rag.utils.embeddings_v2 import EnhancedEmbeddings
 
 class PerRowPineconeUpsert:
     """
