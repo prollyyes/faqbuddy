@@ -1,5 +1,5 @@
-from ..utils.db_utils import get_connection, MODE
-from ..utils.db_handler import DBHandler
+from utils.db_utils import get_connection, MODE
+from utils.db_handler import DBHandler
 from fastapi import APIRouter
 
 

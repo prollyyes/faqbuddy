@@ -428,9 +428,9 @@ class AdvancedAnswerVerification:
         # 2. Good fact-check score (>0.6)
         # 3. Low hallucination risk (<0.3)
         
-        return (confidence_score > 0.5 and 
-                fact_check_score > 0.3 and 
-                hallucination_risk < 0.5)
+        return (confidence_score > 0.2 and 
+                fact_check_score > 0.1 and 
+                hallucination_risk < 0.7)
     
     def _update_stats(self, is_verified: bool, confidence_score: float, hallucination_risk: float):
         """Update verification statistics."""

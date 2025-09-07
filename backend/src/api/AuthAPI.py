@@ -1,6 +1,6 @@
 from uuid import uuid4
-from ..utils.db_utils import get_connection, MODE
-from ..utils.db_handler import DBHandler
+from utils.db_utils import get_connection, MODE
+from utils.db_handler import DBHandler
 from fastapi import APIRouter, HTTPException, status, UploadFile, File, Form, Depends
 from .BaseModel import LoginRequest, SignupRequest
 from .utils import *
@@ -228,6 +228,6 @@ def login(data: LoginRequest, db_handler: DBHandler = Depends(get_db_handler)):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Devi prima verificare la tua email"
         )
-    from ..auth.jwt_handler import create_access_token
+    from auth.jwt_handler import create_access_token
     access_token = create_access_token({"user_id": user_id})
     return {"access_token": access_token}

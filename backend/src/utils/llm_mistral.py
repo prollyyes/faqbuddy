@@ -18,7 +18,7 @@ try:
             model_path=mistral_model_path,
             n_ctx=2048,
             n_threads=6,
-            n_gpu_layers=-1,
+            n_gpu_layers=20,
             verbose=True
         )
     else:

@@ -1,10 +1,10 @@
 from .BaseModel import *
 from .utils import *
-from ..utils.db_handler import DBHandler
-from ..switcher.MLmodel import MLModel
-from ..text_2_SQL import TextToSQLConverter
-from ..rag.rag_adapter import RAGSystem
-from ..utils.db_utils import get_connection, MODE
+from utils.db_handler import DBHandler
+from switcher.MLmodel import MLModel
+from text_2_SQL import TextToSQLConverter
+from rag.rag_adapter import RAGSystem
+from utils.db_utils import get_connection, MODE
 from fastapi import APIRouter, Query
 from fastapi.responses import StreamingResponse
 import json
@@ -97,7 +97,7 @@ def handle_t2sql_logic(question: str) -> Dict[str, Any]:
     
     # Initialize DBHandler
     db = DBHandler(get_connection(mode=MODE))
-    schema = db.get_schema()
+    schema = db.get_schema()  
     print("📊 Database schema loaded")
 
     # 1. Switcher ML
