@@ -1,4 +1,4 @@
-from src.utils.db_utils import get_connection, MODE
+from utils.db_utils import get_connection, MODE
 from dotenv import load_dotenv
 from typing import List, Dict, Any
 

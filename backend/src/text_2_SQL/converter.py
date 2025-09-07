@@ -1,4 +1,4 @@
-from ..utils.llm_mistral import llm_mistral
+from utils.llm_mistral import llm_mistral
 from typing import Optional
 
 
