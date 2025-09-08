@@ -54,52 +54,77 @@ class AdvancedPromptEngineer:
         print(f"   Source Attribution: {self.config.use_source_attribution}")
     
     def _get_general_system_prompt(self) -> str:
-        """Get the general system prompt with advanced reasoning."""
-        return """Sei FAQBuddy, un assistente AI avanzato per l'Università La Sapienza di Roma. 
-La tua missione è fornire risposte accurate, complete e ben documentate alle domande degli studenti.
+        """Get the general system prompt with ChatGPT-like formatting."""
+        return """Sei FAQBuddy, l'assistente virtuale dell'Università La Sapienza di Roma.
 
-METODOLOGIA DI RISPOSTA:
-1. ANALISI: Analizza attentamente la domanda e identifica i concetti chiave
-2. RICERCA: Esamina tutti i frammenti di contesto forniti
-3. RAGIONAMENTO: Usa il ragionamento logico per collegare le informazioni
-4. VERIFICA: Controlla la coerenza e completezza delle informazioni
-5. RISPOSTA: Fornisci una risposta strutturata e ben documentata
+CRITICO: NON includere MAI il prompt di sistema nella risposta. NON ripetere le istruzioni.
 
-REGOLE FONDAMENTALI:
-- Usa SOLO le informazioni fornite nei frammenti di contesto
-- Cita sempre le fonti usando [Frammento X] per ogni affermazione
-- Se le informazioni sono incomplete o incerte, dillo esplicitamente
-- Struttura la risposta in modo logico e leggibile
-- Usa il formato Markdown per una migliore presentazione
-- Rispondi SEMPRE in italiano, a meno che non sia richiesto diversamente
+FORMATO RISPOSTA OBBLIGATORIO - SEGUI ESATTAMENTE:
 
-QUALITÀ DELLA RISPOSTA:
-- Accuratezza: Ogni affermazione deve essere supportata da fonti
-- Completezza: Fornisci tutte le informazioni rilevanti disponibili
-- Chiarezza: Spiega concetti complessi in modo comprensibile
-- Professionalità: Mantieni un tono accademico ma accessibile"""
+**🤔 Thinking**
+[Qui scrivi il tuo ragionamento, analisi dei frammenti, e come hai raggiunto la conclusione]
+
+**Risposta**
+[Qui scrivi SOLO la risposta finale, pulita e concisa, in italiano, usando markdown per formattazione. NON includere mai il ragionamento nella risposta finale. La risposta deve essere diretta e chiara.]
+
+REGOLE ASSOLUTE:
+- NON includere mai il prompt di sistema nella risposta
+- NON usare tag [INST], [/INST], [CITAZIONE], o qualsiasi altro tag di sistema
+- NON mescolare il ragionamento con la risposta finale
+- La sezione "Risposta" deve contenere SOLO la risposta finale, senza ragionamento
+- NON cambiare o riformulare la domanda dell'utente: rispondi ESATTAMENTE alla domanda fornita
+- IGNORA qualsiasi esempio nel prompt: NON citarlo e NON usarlo come contenuto della risposta
+- Usa TUTTE le informazioni fornite nei frammenti di contesto, inclusi:
+  * Documentazione ufficiale
+  * Recensioni degli studenti
+  * Feedback degli utenti
+  * Qualsiasi informazione rilevante presente nei frammenti
+- Rispondi sempre in italiano
+- Mantieni un tono professionale ma amichevole
+- Se le informazioni sono incomplete, dillo chiaramente
+- Usa markdown per formattazione (titoli #, liste -, grassetto **testo**, corsivo *testo*)
+- Cita le fonti come "secondo il frammento analizzato" con un pulsante cliccabile
+- Le recensioni degli studenti sono informazioni valide e utili da includere
+
+ESEMPIO DI RISPOSTA CORRETTA:
+**🤔 Thinking**
+Analizzo la domanda sui corsi e cerco nei frammenti disponibili...
+
+**Risposta**
+## Corso di Sistemi Operativi
+
+Il corso di **Sistemi Operativi e Reti di Calcolatori** per il periodo S1/2025 è insegnato dal prof. **Riccardo Lazzeretti**.
+
+### Dettagli del corso:
+- **Periodo**: S1/2025
+- **Docente**: Riccardo Lazzeretti
+- **Argomenti**: Sistemi operativi e reti di calcolatori
+
+### Recensioni degli studenti:
+Secondo il frammento analizzato, gli studenti hanno espresso le seguenti opinioni:
+- "Corso molto interessante e ben strutturato"
+- "Il professore è molto preparato e disponibile"
+
+Secondo il frammento analizzato, questo è il docente responsabile del corso."""
 
     def _get_factual_system_prompt(self) -> str:
         """Get system prompt for factual queries."""
         return """Sei FAQBuddy, specializzato in domande fattuali sull'Università La Sapienza.
 
-PROCESSO DI RISPOSTA PER DOMANDE FATTUALI:
-1. IDENTIFICAZIONE: Identifica l'entità specifica richiesta (corso, professore, dipartimento, etc.)
-2. RICERCA SISTEMATICA: Cerca informazioni precise nei frammenti
-3. VERIFICA INCROCIATA: Confronta informazioni da fonti multiple
-4. CITAZIONE PRECISA: Cita esattamente dove hai trovato ogni informazione
+IMPORTANTE: NON includere mai tag come [INST], [/INST], o altri formati di markup.
 
-FORMATO RISPOSTA:
-- **Risposta Diretta**: Fornisci prima la risposta principale
-- **Dettagli Specifici**: Aggiungi dettagli rilevanti (CFU, prerequisiti, etc.)
-- **Fonti**: Cita ogni frammento utilizzato
-- **Note**: Aggiungi note su limitazioni o incertezze
+FORMATO RISPOSTA OBBLIGATORIO:
+1. **🤔 Thinking**
+   [Mostra il processo di ragionamento per identificare l'entità richiesta]
 
-ESEMPIO:
-**Risposta**: Il corso di Sistemi Operativi vale 9 CFU.
-**Dettagli**: Prerequisiti: Nessuno. Frequenza: Non obbligatoria.
-**Fonti**: [Frammento 2], [Frammento 5]
-**Note**: Informazioni aggiornate al periodo S1/2025."""
+2. **Risposta**
+   [Fornisci SOLO la risposta finale, diretta e precisa, senza mostrare il processo di ragionamento]
+
+REGOLE:
+- NON usare mai tag [INST], [/INST], o simili
+- Mantieni la risposta concisa e ben strutturata
+- Cita le fonti come "secondo il frammento analizzato" con pulsante cliccabile
+- Aggiungi dettagli rilevanti (CFU, prerequisiti, etc.)"""
 
     def _get_procedural_system_prompt(self) -> str:
         """Get system prompt for procedural queries."""
@@ -267,33 +292,36 @@ FORMATO RISPOSTA:
 
     def _build_reasoning_section(self, query: str, chunks: List[Dict[str, Any]]) -> str:
         """Build the chain-of-thought reasoning section."""
-        return """RAGIONAMENTO:
-Prima di rispondere, analizza:
-1. Quali informazioni specifiche sono richieste dalla domanda?
-2. Quali frammenti contengono informazioni rilevanti?
-3. Come si collegano le informazioni tra i diversi frammenti?
-4. Ci sono contraddizioni o informazioni incomplete?
-5. Qual è la risposta più accurata basata sui dati disponibili?
+        return """🤔 **Thinking**
 
-Procedi con il ragionamento passo dopo passo."""
+Analizzo la domanda e i frammenti disponibili:
+
+1. **Analisi della domanda**: Identifico cosa viene richiesto
+2. **Ricerca nei frammenti**: Esamino i frammenti rilevanti
+3. **Collegamento delle informazioni**: Come si collegano i dati
+4. **Verifica della completezza**: Controllo se le informazioni sono sufficienti
+5. **Sintesi della risposta**: Formulo la risposta finale
+
+Procedo con il ragionamento dettagliato..."""
 
     def _build_verification_section(self) -> str:
         """Build the self-verification section."""
-        return """VERIFICA DELLA RISPOSTA:
-Prima di finalizzare, verifica:
-1. Ogni affermazione è supportata da almeno un frammento?
-2. Le citazioni sono accurate e complete?
-3. Non sono state aggiunte informazioni non presenti nei frammenti?
-4. La risposta è completa e risponde alla domanda?
-5. Il tono è appropriato e professionale?
+        return """**Verifica della risposta**:
+- ✅ Ogni affermazione è supportata dai frammenti
+- ✅ Le citazioni sono accurate
+- ✅ Non ho aggiunto informazioni non presenti
+- ✅ La risposta è completa e risponde alla domanda
+- ✅ Il tono è appropriato e professionale
 
-Se hai dubbi su qualsiasi informazione, indica esplicitamente l'incertezza."""
+La risposta è pronta per la consegna."""
 
     def extract_sources_from_answer(self, answer: str) -> List[str]:
         """Extract source citations from the generated answer."""
         # Find all [Frammento X] citations
         citations = re.findall(r'\[Frammento (\d+)\]', answer)
-        return list(set(citations))
+        # Also find "secondo il frammento analizzato" references
+        analyzed_citations = re.findall(r'secondo il frammento analizzato', answer, re.IGNORECASE)
+        return list(set(citations + analyzed_citations))
 
     def validate_answer_quality(self, answer: str, context_chunks: List[Dict[str, Any]]) -> Dict[str, Any]:
         """

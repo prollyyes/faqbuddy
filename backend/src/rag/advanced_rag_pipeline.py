@@ -13,6 +13,7 @@ This module implements a state-of-the-art RAG pipeline that integrates:
 import time
 import sys
 import os
+from typing import Generator
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 
@@ -235,6 +236,103 @@ class AdvancedRAGPipeline:
         stats["verification_stats"] = self.answer_verifier.get_verification_stats()
         
         return stats
+    
+    def answer_streaming(self, question: str) -> Generator[str, None, None]:
+        """
+        Generate a streaming answer using the advanced RAG pipeline.
+        
+        Args:
+            question: User question
+            
+        Yields:
+            Answer tokens as they are generated
+        """
+        # For now, we'll generate the full answer and then stream it
+        # In a real implementation, this would stream from the LLM directly
+        result = self.answer(question)
+        answer = result.answer
+        
+        # Parse the response to separate thinking from main answer
+        # Simple parsing to avoid circular imports
+        import re
+        
+        # Look for the thinking section
+        thinking_pattern = r'\*\*🤔\s*Thinking\*\*(.*?)(?=\n\n\*\*Risposta\*\*)'
+        thinking_match = re.search(thinking_pattern, answer, re.DOTALL | re.IGNORECASE)
+        
+        if thinking_match:
+            thinking_content = thinking_match.group(1).strip()
+            # Remove the thinking section from the main answer
+            main_answer = re.sub(thinking_pattern, '', answer, flags=re.DOTALL | re.IGNORECASE).strip()
+        else:
+            main_answer = answer
+        
+        # Clean up the main answer
+        main_answer = re.sub(r'^\*\*Risposta\*\*\s*', '', main_answer, flags=re.IGNORECASE)
+        main_answer = re.sub(r'^Risposta:\s*', '', main_answer, flags=re.IGNORECASE)
+        main_answer = main_answer.strip()
+        
+        # Stream while preserving whitespace and newlines
+        import re as _re
+        tokens = _re.findall(r'\S+|\s+', main_answer)
+        print(f"🔄 Streaming {len(tokens)} tokens (whitespace-preserving)...")
+        for i, token in enumerate(tokens):
+            yield token
+        print(f"🔄 Finished streaming {len(tokens)} tokens")
+    
+    def answer_streaming_with_metadata(self, question: str) -> Generator[Dict[str, Any], None, None]:
+        """
+        Generate a streaming answer with metadata using the advanced RAG pipeline.
+        
+        Args:
+            question: User question
+            
+        Yields:
+            Dictionaries with tokens and metadata
+        """
+        # Generate the full answer first
+        result = self.answer(question)
+        
+        # Parse the response
+        import re
+        
+        # Look for the thinking section
+        thinking_pattern = r'\*\*🤔\s*Thinking\*\*(.*?)(?=\n\n\*\*Risposta\*\*)'
+        thinking_match = re.search(thinking_pattern, result.answer, re.DOTALL | re.IGNORECASE)
+        
+        if thinking_match:
+            thinking = thinking_match.group(1).strip()
+            # Remove the thinking section from the main answer
+            main_answer = re.sub(thinking_pattern, '', result.answer, flags=re.DOTALL | re.IGNORECASE).strip()
+        else:
+            thinking = ""
+            main_answer = result.answer
+        
+        # Clean up the main answer
+        main_answer = re.sub(r'^\*\*Risposta\*\*\s*', '', main_answer, flags=re.IGNORECASE)
+        main_answer = re.sub(r'^Risposta:\s*', '', main_answer, flags=re.IGNORECASE)
+        main_answer = main_answer.strip()
+        
+        # Stream the main answer with metadata
+        import re as _re
+        tokens = _re.findall(r'\S+|\s+', main_answer)
+        for token in tokens:
+            yield {
+                "type": "token",
+                "token": token,
+                "confidence": result.confidence_score,
+                "verified": result.verification_result.is_verified
+            }
+        
+        # Send final metadata
+        yield {
+            "type": "metadata",
+            "thinking": thinking,
+            "confidence": result.confidence_score,
+            "verified": result.verification_result.is_verified,
+            "processing_time": result.processing_time,
+            "features_used": result.features_used
+        }
     
     def test_pipeline(self, test_queries: List[str]) -> Dict[str, Any]:
         """Test the pipeline with a set of queries."""

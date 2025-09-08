@@ -144,3 +144,4 @@ class T2SQLRequest(BaseModel):
 
 class ChatRequest(BaseModel):
     question: str
+    conversation_id: Optional[str] = None
