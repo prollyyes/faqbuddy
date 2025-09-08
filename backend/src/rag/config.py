@@ -56,10 +56,11 @@ CROSS_ENCODER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"  # Better for multi
 # RETRIEVAL PARAMETERS
 # ============================================================================
 
-# Task 3: Retrieval pipeline
-DENSE_TOP_K = 75  # Increased from 50 for better coverage
+# Task 3: Retrieval pipeline - OPTIMIZED FOR SPEED
+DENSE_TOP_K = 12  # Reduced from 75 for faster retrieval
 RERANKER_THRESHOLD = -10.0  # Much lower threshold to allow more answers
-MAX_CONTEXT_TOKENS = 4000  # Maximum context tokens
+MAX_CONTEXT_TOKENS = 3000  # Reduced from 4000 for faster processing
+RERANKER_CANDIDATES = 12  # Limit reranker candidates for speed
 
 # Task 1: Schema-aware chunking
 MAX_CHUNK_TOKENS = 400  # Maximum tokens per chunk
