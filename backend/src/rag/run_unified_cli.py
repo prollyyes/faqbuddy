@@ -15,11 +15,11 @@ from dotenv import load_dotenv
 # Add the src directory to the path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from switcher.MLmodel import MLModel
-from text_2_SQL.converter import TextToSQLConverter
-from utils.db_utils import get_connection, MODE
-from utils.db_handler import DBHandler
-from rag.advanced_rag_pipeline import AdvancedRAGPipeline
+from ..switcher.MLmodel import MLModel
+from ..text_2_SQL.converter import TextToSQLConverter
+from ..utils.db_utils import get_connection, MODE
+from ..utils.db_handler import DBHandler
+from .advanced_rag_pipeline import AdvancedRAGPipeline
 
 def print_banner():
     print("""
@@ -136,7 +136,7 @@ def handle_rag_logic(question: str) -> dict:
         "chosen": "RAG",
         "success": True,
         "confidence": result.confidence_score,
-        "verified": result.is_verified,
+        "verified": getattr(result.verification_result, "is_verified", False),
         "query_analysis": result.query_analysis
     }
 

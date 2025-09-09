@@ -16,7 +16,7 @@ try:
     if os.path.exists(mistral_model_path):
         llm_mistral = Llama(
             model_path=mistral_model_path,
-            n_ctx=2048, 
+            n_ctx=4096, 
             n_threads=6,
             n_gpu_layers=20,
             verbose=True

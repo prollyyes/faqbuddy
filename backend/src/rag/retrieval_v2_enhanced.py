@@ -28,17 +28,17 @@ DEFAULT_PDF_BOOST = 1.2   # 20% boost for PDF namespace (regulatory content)
 # Strong boost when document keywords are detected
 STRONG_DOCS_BOOST = 1.3   # 30% boost for documents
 STRONG_PDF_BOOST = 1.5    # 50% boost for PDF (increased from 1.4)
-STRONG_DB_BOOST = 1.0     # No boost for database
+STRONG_DB_BOOST = 1.4     # 40% boost for database
 
 # Keywords that suggest PDF/document content (regulations, procedures, etc.)
 PDF_DOCUMENT_KEYWORDS = [
     'regolamento', 'norme', 'procedure', 'requisiti', 'criteri', 'modalità',
     'scadenze', 'termini', 'documentazione', 'certificati', 'attestati',
-    'esami', 'lauree', 'tesi', 'stage', 'tirocinio', 'erasmus', 'borsa',
-    'contributo', 'tassa', 'pagamento', 'iscrizione', 'immatricolazione',
-    'graduatoria', 'concorso', 'ammissione', 'trasferimento', 'rinuncia',
-    'sospensione', 'riattivazione', 'cambio', 'opzione', 'curriculum',
-    'come', 'quando', 'dove', 'perché', 'quanto', 'quale', 'chi'  # Procedural questions
+    'stage', 'tirocinio', 'erasmus', 'borsa', 'contributo', 'tassa', 
+    'pagamento', 'iscrizione', 'immatricolazione', 'graduatoria', 'concorso', 
+    'ammissione', 'trasferimento', 'rinuncia', 'sospensione', 'riattivazione', 
+    'cambio', 'opzione', 'curriculum', 'come', 'quando', 'dove', 'perché', 
+    'quanto', 'quale'  # Removed 'chi' - it's too general
 ]
 
 # Keywords that suggest database/structured content (lists, contacts, etc.)
@@ -47,7 +47,9 @@ DATABASE_KEYWORDS = [
     'studenti', 'anno', 'matricola', 'insegnante', 'corso', 'email',
     'contatti', 'dipartimento', 'facoltà', 'review', 'recensioni',
     'materiale', 'edizione', 'orario', 'aula', 'sede', 'telefono',
-    'indirizzo', 'sito', 'web', 'pagina', 'link', 'numero', 'codice'
+    'indirizzo', 'sito', 'web', 'pagina', 'link', 'numero', 'codice',
+    'chi', 'insegnante', 'docente', 'prof', 'cfu', 'crediti', 'semestre',
+    'laurea', 'triennale', 'magistrale', 'specialistica', 'master'
 ]
 
 # Minimum number of keyword matches to trigger strong boost
@@ -130,29 +132,38 @@ class EnhancedRetrievalV2:
         
         print(f"🔍 Keyword analysis: {pdf_matches} PDF keywords, {db_matches} database keywords")
         
+        # Get actual namespace names from configuration
+        pdf_ns = self.ragv2_namespaces["pdf"]
+        docs_ns = self.ragv2_namespaces["docs"]
+        db_ns = self.ragv2_namespaces["db"]
+        
         # Determine boosts based on keyword analysis
-        if pdf_matches >= MIN_KEYWORD_MATCHES and pdf_matches > db_matches:
-            # Strong PDF boost for regulatory/procedural questions
+        # Check for specific procedural keywords that should override course keywords
+        procedural_keywords = ['iscrizione', 'immatricolazione', 'ammissione', 'come', 'quando', 'dove', 'perché', 'quanto', 'quale']
+        has_procedural = any(kw in query_lower for kw in procedural_keywords)
+        
+        if has_procedural and pdf_matches >= MIN_KEYWORD_MATCHES:
+            # Strong PDF boost for procedural questions (even if course keywords exist)
             boosts = {
-                'pdf_v2': STRONG_PDF_BOOST,
-                'documents_v2': STRONG_DOCS_BOOST,
-                'db_v2': DEFAULT_DB_BOOST
+                pdf_ns: STRONG_PDF_BOOST,
+                docs_ns: STRONG_DOCS_BOOST,
+                db_ns: DEFAULT_DB_BOOST
             }
-            print(f"📄 Boosting PDF/Documents namespaces (strong) - PDF: {STRONG_PDF_BOOST}, Docs: {STRONG_DOCS_BOOST}")
-        elif db_matches >= MIN_KEYWORD_MATCHES and db_matches > pdf_matches:
+            print(f"📄 Boosting PDF/Documents namespaces (procedural) - PDF: {STRONG_PDF_BOOST}, Docs: {STRONG_DOCS_BOOST}")
+        elif db_matches >= MIN_KEYWORD_MATCHES:
             # Strong database boost for factual/list questions
             boosts = {
-                'pdf_v2': DEFAULT_PDF_BOOST,
-                'documents_v2': DEFAULT_DOCS_BOOST,
-                'db_v2': STRONG_DB_BOOST
+                pdf_ns: DEFAULT_PDF_BOOST,
+                docs_ns: DEFAULT_DOCS_BOOST,
+                db_ns: STRONG_DB_BOOST
             }
             print(f"🗄️ Boosting database namespace (strong) - DB: {STRONG_DB_BOOST}")
         else:
             # Default boosts
             boosts = {
-                'pdf_v2': DEFAULT_PDF_BOOST,
-                'documents_v2': DEFAULT_DOCS_BOOST,
-                'db_v2': DEFAULT_DB_BOOST
+                pdf_ns: DEFAULT_PDF_BOOST,
+                docs_ns: DEFAULT_DOCS_BOOST,
+                db_ns: DEFAULT_DB_BOOST
             }
             print(f"⚖️ Using default namespace boosts")
         
@@ -280,9 +291,10 @@ class EnhancedRetrievalV2:
         if not pairs:
             return results
         
-        # Get cross-encoder scores
-        scores = self.cross_encoder.predict(pairs)
-        scores = [float(s) for s in scores]
+        # Get cross-encoder scores with sigmoid activation
+        import numpy as np
+        raw_scores = self.cross_encoder.predict(pairs)
+        scores = [float(1 / (1 + np.exp(-s))) for s in raw_scores]  # Sigmoid activation
         
         # Apply scores to results
         for i, result in enumerate(results):
@@ -295,6 +307,14 @@ class EnhancedRetrievalV2:
             result for result in results 
             if result.get('cross_encoder_score', 0) >= RERANKER_THRESHOLD
         ]
+        
+        # Enforce minimum results (keep at least 5 even if threshold filters everything)
+        MIN_RESULTS = 5
+        if len(filtered_results) < MIN_RESULTS:
+            print(f"⚠️ Threshold filtered to {len(filtered_results)} results, keeping top {MIN_RESULTS}")
+            # Take top MIN_RESULTS by cross-encoder score regardless of threshold
+            all_results_sorted = sorted(results, key=lambda x: x.get('cross_encoder_score', 0), reverse=True)
+            filtered_results = all_results_sorted[:MIN_RESULTS]
         
         # Sort by cross-encoder score
         filtered_results.sort(key=lambda x: x.get('cross_encoder_score', 0), reverse=True)

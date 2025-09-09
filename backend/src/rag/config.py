@@ -57,9 +57,9 @@ CROSS_ENCODER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"  # Better for multi
 # ============================================================================
 
 # Task 3: Retrieval pipeline - OPTIMIZED FOR SPEED
-DENSE_TOP_K = 12  # Reduced from 75 for faster retrieval
-RERANKER_THRESHOLD = -10.0  # Much lower threshold to allow more answers
-MAX_CONTEXT_TOKENS = 3000  # Reduced from 4000 for faster processing
+DENSE_TOP_K = 75  # Reduced from 75 for faster retrieval
+RERANKER_THRESHOLD = 0.3  # Moderate threshold for sigmoid-activated scores (0.0-1.0 range)
+MAX_CONTEXT_TOKENS = 1500  # Reduced to fit within 2048 token context window
 RERANKER_CANDIDATES = 12  # Limit reranker candidates for speed
 
 # Task 1: Schema-aware chunking
@@ -81,6 +81,10 @@ RAGV2_PDF_NAMESPACE = "pdf_v2"
 
 # Per-row namespace (new approach)
 PER_ROW_NAMESPACE = "per_row"
+
+# Advanced DB contextual-chunks namespace (used in place of current one when enabled)
+ADVANCED_DB_ENABLED = os.getenv("ADVANCED_DB_ENABLED", "true").lower() == "true"
+ADVANCED_DB_NAMESPACE = os.getenv("ADVANCED_DB_NAMESPACE", "contextual_db")
 
 # Index configuration
 INDEX_NAME = "exams-index-enhanced"  # Same index, different namespaces
@@ -145,9 +149,10 @@ def get_embedding_instruction() -> str:
 
 def get_ragv2_namespaces() -> Dict[str, str]:
     """Get RAGv2 namespace configuration."""
+    db_ns = ADVANCED_DB_NAMESPACE if ADVANCED_DB_ENABLED else PER_ROW_NAMESPACE
     return {
         "docs": RAGV2_DOCS_NAMESPACE,
-        "db": PER_ROW_NAMESPACE,  # Use per-row namespace instead of db_v2 (old one was RAGV2_DB_NAMESPACE) 
+        "db": db_ns,
         "pdf": RAGV2_PDF_NAMESPACE
     }
 
