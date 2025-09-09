@@ -19,11 +19,13 @@ from .config import (
     get_existing_namespaces,
     INDEX_NAME,
     SCHEMA_AWARE_CHUNKING,
-    INSTRUCTOR_XL_EMBEDDINGS
+    INSTRUCTOR_XL_EMBEDDINGS,
+    ADVANCED_DB_ENABLED
 )
 from .utils.schema_aware_chunker import SchemaAwareChunker
 from .utils.embeddings_v2 import EnhancedEmbeddings
 from .utils.generate_chunks import ChunkGenerator
+from .utils.contextual_course_chunker import ContextualCourseChunker
 from .utils.pdf_chunker import chunk_pdf
 
 class SafePineconeUpsert:
@@ -51,6 +53,7 @@ class SafePineconeUpsert:
         self.embeddings = EnhancedEmbeddings()
         self.schema_chunker = SchemaAwareChunker() if SCHEMA_AWARE_CHUNKING else None
         self.legacy_chunker = ChunkGenerator()
+        self.contextual_chunker = ContextualCourseChunker() if ADVANCED_DB_ENABLED else None
         
         print("🚀 Initializing Safe Pinecone Upsert for RAGv2")
         print(f"   Index: {self.index_name}")
@@ -116,7 +119,10 @@ class SafePineconeUpsert:
         print(f"\n📊 Upserting database chunks to {self.ragv2_namespaces['db']}...")
         
         # Get chunks based on feature flag
-        if SCHEMA_AWARE_CHUNKING and self.schema_chunker:
+        if ADVANCED_DB_ENABLED and self.contextual_chunker:
+            print("   Using contextual course profiles (rich, human-readable)...")
+            chunks = self.contextual_chunker.get_all_contextual_chunks()
+        elif SCHEMA_AWARE_CHUNKING and self.schema_chunker:
             print("   Using schema-aware chunking...")
             chunks = self.schema_chunker.get_all_chunks()
         else:
