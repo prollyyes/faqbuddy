@@ -15,11 +15,11 @@ from dotenv import load_dotenv
 # Add the src directory to the path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from ..switcher.MLmodel import MLModel
-from ..text_2_SQL.converter import TextToSQLConverter
-from ..utils.db_utils import get_connection, MODE
-from ..utils.db_handler import DBHandler
-from .advanced_rag_pipeline import AdvancedRAGPipeline
+from switcher.MLmodel import MLModel
+from text_2_SQL.converter import TextToSQLConverter
+from utils.db_utils import get_connection, MODE
+from utils.db_handler import DBHandler
+from rag.advanced_rag_pipeline import AdvancedRAGPipeline
 
 def print_banner():
     print("""
@@ -45,14 +45,14 @@ def print_help():
 • 'help' - Show this help message
 • 'quit' or 'exit' - Exit the program
 
-🎯 Example Queries:
+Example Queries:
 ------------------
 • "Mostra tutti i corsi del primo semestre" (→ T2SQL)
 • "Chi insegna il corso di Programmazione?" (→ T2SQL)
 • "Come posso organizzare il mio piano di studi?" (→ RAG)
 • "Spiega cos'è un sistema operativo" (→ RAG)
 
-🔬 Smart Routing Features:
+Smart Routing Features:
 -------------------------
 • ML-based question classification (simple vs complex)
 • Automatic T2SQL for database queries
@@ -66,29 +66,29 @@ def handle_t2sql_logic(question: str) -> dict:
     Handle the T2SQL logic (SQL generation and execution).
     Returns T2SQL result or raises exception for fallback.
     """
-    print(f"🎯 Starting T2SQL logic for question: {question}")
+    print(f"-> Starting T2SQL logic for question: {question}")
     
     # Initialize DBHandler
     db = DBHandler(get_connection(mode=MODE))
     schema = db.get_schema()
-    print("📊 Database schema loaded")
+    print("->Database schema loaded")
 
     # Initialize converter
     converter = TextToSQLConverter()
-    print("✅ Text-to-SQL converter initialized")
+    print("->Text-to-SQL converter initialized")
     
     # Try SQL generation
     max_attempts = 2
     attempt = 0
     while attempt < max_attempts:
-        print(f"🔄 SQL generation attempt {attempt + 1}")
+        print(f"======= SQL generation attempt {attempt + 1}")
         prompt = converter.create_prompt(question, schema)
         raw_response = converter.query_llm(prompt)
         sql_query = converter.clean_sql_response(raw_response)
         print(f"💾 Generated SQL Query: {sql_query}")
         
         if not converter.is_sql_safe(sql_query) or sql_query == "INVALID_QUERY":
-            print(f"❌ Attempt {attempt+1}: Invalid SQL query, retrying...")
+            print(f"====== Attempt {attempt+1}: Invalid SQL query, retrying...")
             attempt += 1
             continue
         
@@ -107,15 +107,15 @@ def handle_t2sql_logic(question: str) -> dict:
                     "success": True
                 }
             else:
-                print(f"⚠️ Attempt {attempt+1}: Query returned no results, retrying...")
+                print(f"====== Attempt {attempt+1}: Query returned no results, retrying...")
                 attempt += 1
         except Exception as e:
             db.connection_rollback()
-            print(f"❌ Attempt {attempt+1}: Error executing SQL query: {e}")
+            print(f"====== Attempt {attempt+1}: Error executing SQL query: {e}")
             attempt += 1
 
     # If we get here, T2SQL failed
-    print("🔄 All SQL attempts failed, falling back to RAG")
+    print("====== All SQL attempts failed, falling back to RAG")
     db.close_connection()
     raise Exception("T2SQL failed after all attempts")
 
@@ -123,7 +123,7 @@ def handle_rag_logic(question: str) -> dict:
     """
     Handle the RAG logic using Advanced RAG Pipeline.
     """
-    print("🔍 Starting Advanced RAG processing...")
+    print("-> Starting Advanced RAG processing...")
     
     # Initialize Advanced RAG Pipeline
     pipeline = AdvancedRAGPipeline()
@@ -144,7 +144,7 @@ def process_question_with_switcher(question: str) -> dict:
     """
     Process a question using the switcher logic.
     """
-    print(f"\n🔍 Processing question: {question}")
+    print(f"\n ======== Processing question: {question}")
     print("-" * 60)
     
     try:
@@ -154,7 +154,7 @@ def process_question_with_switcher(question: str) -> dict:
         
         # 2. ML Prediction
         ml_pred, proba = ml_model.inference(question)
-        print(f"🤖 ML prediction: '{ml_pred}' (confidence: {proba:.3f})")
+        print(f"===> ML prediction: '{ml_pred}' (confidence: {proba:.3f})")
         
         # 3. Threshold check
         threshold = 0.7
@@ -169,7 +169,7 @@ def process_question_with_switcher(question: str) -> dict:
         
         # 4. Routing decision
         if final_pred == "simple":
-            print("🎯 DECISION: Using T2SQL for simple question")
+            print("======== DECISION: Using T2SQL for simple question")
             try:
                 result = handle_t2sql_logic(question)
                 result.update({
@@ -179,8 +179,8 @@ def process_question_with_switcher(question: str) -> dict:
                 })
                 return result
             except Exception as e:
-                print(f"⚠️ T2SQL failed: {e}")
-                print("🔄 Falling back to RAG...")
+                print(f"======= T2SQL failed: {e}")
+                print("======= Falling back to RAG...")
                 result = handle_rag_logic(question)
                 result.update({
                     "ml_model": ml_pred,
@@ -190,7 +190,7 @@ def process_question_with_switcher(question: str) -> dict:
                 })
                 return result
         else:
-            print(f"🎯 DECISION: Using RAG for complex question ({final_pred})")
+            print(f"======== DECISION: Using RAG for complex question ({final_pred})")
             result = handle_rag_logic(question)
             result.update({
                 "ml_model": ml_pred,
@@ -200,8 +200,8 @@ def process_question_with_switcher(question: str) -> dict:
             return result
             
     except Exception as e:
-        print(f"❌ Error in switcher logic: {e}")
-        print("🔄 Emergency fallback to RAG...")
+        print(f"======= Error in switcher logic: {e}")
+        print("======= Emergency fallback to RAG...")
         result = handle_rag_logic(question)
         result.update({
             "ml_model": "error",
@@ -247,10 +247,13 @@ def main():
             processing_time = time.time() - start_time
             
             # Display results
-            print(f"\n🤖 Answer:")
-            print(f"{result['result']}")
+            print(f"\n ======= Answer:")
+            if result['chosen'] == 'T2SQL' and 'natural_response' in result:
+                print(f"{result['natural_response']}")
+            else:
+                print(f"{result['result']}")
             
-            print(f"\n📊 Analysis:")
+            print(f"\n ======= Analysis:")
             print(f"   Method: {result['chosen']}")
             print(f"   ML Prediction: {result.get('ml_model', 'N/A')}")
             print(f"   ML Confidence: {result.get('ml_confidence', 0):.3f}")
