@@ -24,6 +24,7 @@ from .query_understanding import AdvancedQueryUnderstanding, QueryAnalysis
 from .advanced_prompt_engineering import AdvancedPromptEngineer, PromptConfig
 from .answer_verification import AdvancedAnswerVerification, VerificationResult
 from .retrieval_v2_enhanced import EnhancedRetrievalV2
+from .web_search_enhancer import WebSearchEnhancer
 from .config import *
 from utils.llm_mistral import generate_answer
 
@@ -71,6 +72,18 @@ class AdvancedRAGPipeline:
         from pinecone import Pinecone
         pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
         self.retrieval = EnhancedRetrievalV2(pc, INDEX_NAME)
+        
+        # Initialize web search enhancer (if enabled)
+        self.web_search = None
+        if WEB_SEARCH_ENHANCEMENT:
+            try:
+                self.web_search = WebSearchEnhancer()
+                print("   Web search enhancement: OK")
+            except Exception as e:
+                print(f"   Web search enhancement: FAILED (Error: {e})")
+                self.web_search = None
+        else:
+            print("   Web search enhancement: FAILED (Disabled)")
         
         # Pipeline statistics
         self.pipeline_stats = {
@@ -130,8 +143,26 @@ class AdvancedRAGPipeline:
         
         print(f"   Retrieved {len(best_results)} documents")
         
+        # Step 2.5: Web Search Enhancement (if enabled)
+        if self.web_search:
+            print("======= Step 2.5: Web search enhancement...")
+            try:
+                web_results = self.web_search.search(question, max_results=3)
+                web_formatted = self.web_search.format_results_for_rag(web_results)
+                
+                # Combine with retrieval results
+                best_results.extend(web_formatted)
+                
+                # Re-sort by score
+                best_results.sort(key=lambda x: x.get('score', 0), reverse=True)
+                
+                print(f"   Combined results: {len(best_results)} (local: {len(best_results) - len(web_formatted)}, web: {len(web_formatted)})")
+            except Exception as e:
+                print(f"   Web search failed: {e}")
+                print("   Continuing with local results only...")
+        
         # Step 3: Advanced Prompt Engineering
-        print("🔍 Step 3: Building advanced prompt...")
+        print("======= Step 3: Building advanced prompt...")
         query_type = query_analysis.intent.value
         prompt = self.prompt_engineer.build_advanced_prompt(
             best_results, question, query_type
@@ -141,13 +172,13 @@ class AdvancedRAGPipeline:
         print(f"   Query type: {query_type}")
         
         # Step 4: Answer Generation
-        print("🔍 Step 4: Generating answer...")
+        print("======= Step 4: Generating answer...")
         answer = generate_answer(prompt, question)
         
         print(f"   Answer length: {len(answer)} characters")
         
         # Step 5: Answer Verification
-        print("🔍 Step 5: Verifying answer...")
+        print("======= Step 5: Verifying answer...")
         verification_result = self.answer_verifier.verify_answer(
             answer, best_results, question
         )
@@ -176,6 +207,7 @@ class AdvancedRAGPipeline:
                 "advanced_prompt_engineering": True,
                 "answer_verification": True,
                 "query_expansion": retrieval_strategy.get("query_expansion", False),
+                "web_search_enhancement": self.web_search is not None,
                 "chain_of_thought": True,
                 "hallucination_prevention": True
             }

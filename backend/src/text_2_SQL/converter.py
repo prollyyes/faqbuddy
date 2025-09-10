@@ -137,26 +137,33 @@ class TextToSQLConverter:
             # Ricostruisci l'oggetto senza doppio articolo
             oggetto_finale = oggetto if articolo == "" else articolo + oggetto
     
-            frasi = []
+            # Extract values and format with markdown
+            valori = []
             for row in results:
-                parti = [f"{k}: {v}" for k, v in row.items() if v is not None and 'id' not in k.lower()]
-                frase = ", ".join(parti)
-                if frase:
-                    frasi.append(frase)
-            if frasi:
-                return f"{oggetto_finale.capitalize()} sono:\n- " + "\n- ".join(frasi)
+                for k, v in row.items():
+                    if v is not None and 'id' not in k.lower():
+                        valori.append(f"**{v}**")
+                        break  # Take only the first non-ID field
+            
+            if valori:
+                return f"{oggetto_finale.capitalize()} sono:\n" + "\n".join(valori)
             else:
                 return f"Nessun risultato trovato per {oggetto}."
         return None
     
     def sql_results_to_text_llm(self, question: str, results: list) -> str:
-        from ..utils.llm_gemma import llm_gemma
+        from utils.llm_gemma import llm_gemma
         prompt = (
             "Rispondi in italiano in modo sintetico e diretto alla seguente domanda, "
             "usando SOLO i dati forniti qui sotto. Non aggiungere spiegazioni o ringraziamenti.\n\n"
+            "FORMATTAZIONE RICHIESTA:\n"
+            "- Se la risposta contiene una lista di elementi, usa markdown con **grassetto** per ogni elemento\n"
+            "- NON includere 'nome:' o altri prefissi di campo\n"
+            "- Usa solo il valore dell'elemento in grassetto\n"
+            "- Esempio: **Nome Corso 1**, **Nome Corso 2**, etc.\n\n"
             f"Domanda: {question}\n"
             f"Dati:\n{results}\n\n"
-            "Risposta breve:"
+            "Risposta formattata:"
         )
         print("Fallback LLM")
         output = llm_gemma(prompt, max_tokens=60, stop=["</s>"])
