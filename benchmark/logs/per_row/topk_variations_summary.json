@@ -1,0 +1,110 @@
+{
+  "topk_10_chunks_3": {
+    "output_file": "benchmark/logs/topk_10_chunks_3.jsonl",
+    "total_questions": 10,
+    "successful_questions": 10,
+    "success_rate": 1.0,
+    "top_k": 10,
+    "max_chunks": 3,
+    "max_context_tokens": 1200
+  },
+  "topk_10_chunks_5": {
+    "output_file": "benchmark/logs/topk_10_chunks_5.jsonl",
+    "total_questions": 10,
+    "successful_questions": 10,
+    "success_rate": 1.0,
+    "top_k": 10,
+    "max_chunks": 5,
+    "max_context_tokens": 2000
+  },
+  "topk_10_chunks_7": {
+    "output_file": "benchmark/logs/topk_10_chunks_7.jsonl",
+    "total_questions": 10,
+    "successful_questions": 10,
+    "success_rate": 1.0,
+    "top_k": 10,
+    "max_chunks": 7,
+    "max_context_tokens": 2800
+  },
+  "topk_20_chunks_3": {
+    "output_file": "benchmark/logs/topk_20_chunks_3.jsonl",
+    "total_questions": 10,
+    "successful_questions": 10,
+    "success_rate": 1.0,
+    "top_k": 20,
+    "max_chunks": 3,
+    "max_context_tokens": 1200
+  },
+  "topk_20_chunks_5": {
+    "output_file": "benchmark/logs/topk_20_chunks_5.jsonl",
+    "total_questions": 10,
+    "successful_questions": 10,
+    "success_rate": 1.0,
+    "top_k": 20,
+    "max_chunks": 5,
+    "max_context_tokens": 2000
+  },
+  "topk_20_chunks_7": {
+    "output_file": "benchmark/logs/topk_20_chunks_7.jsonl",
+    "total_questions": 10,
+    "successful_questions": 10,
+    "success_rate": 1.0,
+    "top_k": 20,
+    "max_chunks": 7,
+    "max_context_tokens": 2800
+  },
+  "topk_50_chunks_3": {
+    "output_file": "benchmark/logs/topk_50_chunks_3.jsonl",
+    "total_questions": 10,
+    "successful_questions": 10,
+    "success_rate": 1.0,
+    "top_k": 50,
+    "max_chunks": 3,
+    "max_context_tokens": 1200
+  },
+  "topk_50_chunks_5": {
+    "output_file": "benchmark/logs/topk_50_chunks_5.jsonl",
+    "total_questions": 10,
+    "successful_questions": 10,
+    "success_rate": 1.0,
+    "top_k": 50,
+    "max_chunks": 5,
+    "max_context_tokens": 2000
+  },
+  "topk_50_chunks_7": {
+    "output_file": "benchmark/logs/topk_50_chunks_7.jsonl",
+    "total_questions": 10,
+    "successful_questions": 10,
+    "success_rate": 1.0,
+    "top_k": 50,
+    "max_chunks": 7,
+    "max_context_tokens": 2800
+  },
+  "topk_75_chunks_3": {
+    "output_file": "benchmark/logs/topk_75_chunks_3.jsonl",
+    "total_questions": 10,
+    "successful_questions": 10,
+    "success_rate": 1.0,
+    "top_k": 75,
+    "max_chunks": 3,
+    "max_context_tokens": 1200
+  },
+  "topk_75_chunks_5": {
+    "output_file": "benchmark/logs/topk_75_chunks_5.jsonl",
+    "total_questions": 10,
+    "successful_questions": 10,
+    "success_rate": 1.0,
+    "top_k": 75,
+    "max_chunks": 5,
+    "max_context_tokens": 2000
+  },
+  "topk_75_chunks_7": {
+    "output_file": "benchmark/logs/topk_75_chunks_7.jsonl",
+    "total_questions": 10,
+    "successful_questions": 10,
+    "success_rate": 1.0,
+    "top_k": 75,
+    "max_chunks": 7,
+    "max_context_tokens": 2800
+  }
+}

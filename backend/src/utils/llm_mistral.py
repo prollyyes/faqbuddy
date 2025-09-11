@@ -28,6 +28,29 @@ except ImportError:
     print("⚠️ Warning: llama_cpp not available, LLM generation will be disabled")
     llm_mistral = None
 
+def clean_response(response: str) -> str:
+    """Clean system tokens and unwanted prefixes from LLM response."""
+    import re
+    
+    # Remove system tokens
+    response = re.sub(r'<\|im_start\|>.*?<\|im_end\|>', '', response, flags=re.DOTALL)
+    response = re.sub(r'<\|im_start\|>', '', response)
+    response = re.sub(r'<\|im_end\|>', '', response)
+    response = re.sub(r'\[/INST\]', '', response)
+    response = re.sub(r'\[INST\]', '', response)
+    
+    # Remove custom response tokens
+    response = re.sub(r'\[/risposta\]', '', response, flags=re.IGNORECASE)
+    response = re.sub(r'\[risposta\]', '', response, flags=re.IGNORECASE)
+    response = re.sub(r'\[/answer\]', '', response, flags=re.IGNORECASE)
+    response = re.sub(r'\[answer\]', '', response, flags=re.IGNORECASE)
+    
+    # Remove common unwanted prefixes
+    response = re.sub(r'^Risposta:\s*', '', response, flags=re.IGNORECASE)
+    response = re.sub(r'^Assistant:\s*', '', response, flags=re.IGNORECASE)
+    
+    return response.strip()
+
 def get_language_instruction(question: str) -> str:
     """Detects the language of the question and returns a strong instruction for the LLM."""
     try:
@@ -49,10 +72,11 @@ def generate_answer(context: str, question: str) -> str:
     
     language_instruction = get_language_instruction(question)
     prompt = (
-        f"[INST] Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. Anche i professori usano la piattaforma, quindi mantieni un tono professionale ma amichevole. Non rispondere a domande generali non legate all'università. {language_instruction} IMPORTANTE: Rispondi sempre in formato Markdown per una migliore leggibilità. Usa titoli (# ##), elenchi puntati (-), grassetto (**testo**), corsivo (*testo*) e link quando appropriato. Contesto:\n{context}\n\nDomanda:\n{question} [/INST]"
+        f"[INST] Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. Anche i professori usano la piattaforma, quindi mantieni un tono professionale ma amichevole. Non rispondere a domande generali non legate all'università. {language_instruction} \n\nIMPORTANTE: \n- Rispondi SEMPRE in formato Markdown pulito\n- Usa titoli (# ##), elenchi puntati (-), grassetto (**testo**), corsivo (*testo*) e link quando appropriato\n- NON includere MAI token di sistema come <|im_start|>, <|im_end|>, [/INST], o simili\n- Inizia direttamente con la risposta, senza prefissi o tag\n- Termina con la risposta completa senza token aggiuntivi\n\nContesto:\n{context}\n\nDomanda:\n{question} [/INST]"
     )
     output = llm_mistral(prompt, max_tokens=1024, stop=["</s>"])
-    return output["choices"][0]["text"].strip()
+    raw_response = output["choices"][0]["text"].strip()
+    return clean_response(raw_response)
 
 def generate_answer_streaming(context: str, question: str) -> Generator[str, None, None]:
     """
@@ -64,7 +88,12 @@ def generate_answer_streaming(context: str, question: str) -> Generator[str, Non
         return
     
     language_instruction = get_language_instruction(question)
-    prompt = f"[INST] Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. Anche i professori usano la piattaforma, quindi mantieni un tono professionale ma amichevole. Non rispondere a domande generali non legate all'università. {language_instruction} IMPORTANTE: Rispondi sempre in formato Markdown per una migliore leggibilità. Usa titoli (# ##), elenchi puntati (-), grassetto (**testo**), corsivo (*testo*) e link quando appropriato. Contesto:\n{context}\n\nDomanda:\n{question} [/INST]"
+    prompt = f"[INST] Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. Anche i professori usano la piattaforma, quindi mantieni un tono professionale ma amichevole. Non rispondere a domande generali non legate all'università. {language_instruction} IMPORTANTE: \
+                - Rispondi SEMPRE in formato Markdown pulito \
+                - Usa titoli (# ##), elenchi puntati (-), grassetto (**testo**), corsivo (*testo*) e link quando appropriato \
+                 - NON includere MAI token di sistema come <|im_start|>, <|im_end|>, [/INST], [/risposta], [risposta], o simili \
+                - Inizia direttamente con la risposta, senza prefissi o tag \
+                - Termina con la risposta completa senza token aggiuntivi Contesto:\n{context}\n\nDomanda:\n{question} [/INST]"
     
     # Use the streaming API
     stream = llm_mistral(prompt, max_tokens=1024, stop=["</s>"], stream=True)
@@ -88,7 +117,10 @@ def generate_answer_streaming(context: str, question: str) -> Generator[str, Non
                 text_content = choice["content"]
             
             if text_content:
-                yield text_content
+                # Clean system tokens from streaming content
+                cleaned_content = clean_response(text_content)
+                if cleaned_content:  # Only yield if there's content after cleaning
+                    yield cleaned_content
 
 def generate_answer_streaming_with_metadata(context: str, question: str) -> Generator[dict, None, None]:
     """
@@ -108,7 +140,13 @@ def generate_answer_streaming_with_metadata(context: str, question: str) -> Gene
         return
     
     language_instruction = get_language_instruction(question)
-    prompt = f"[INST] Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. Anche i professori usano la piattaforma, quindi mantieni un tono professionale ma amichevole. Non rispondere a domande generali non legate all'università. {language_instruction} IMPORTANTE: Rispondi sempre in formato Markdown per una migliore leggibilità. Usa titoli (# ##), elenchi puntati (-), grassetto (**testo**), corsivo (*testo*) e link quando appropriato. Contesto:\n{context}\n\nDomanda:\n{question} [/INST]"
+    prompt = f"[INST] Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. Anche i professori usano la piattaforma, quindi mantieni un tono professionale ma amichevole. Non rispondere a domande generali non legate all'università. {language_instruction} IMPORTANTE: \
+                - Rispondi SEMPRE in formato Markdown pulito \
+                - Usa titoli (# ##), elenchi puntati (-), grassetto (**testo**), corsivo (*testo*) e link quando appropriato \
+                 - NON includere MAI token di sistema come <|im_start|>, <|im_end|>, [/INST], [/risposta], [risposta], o simili \
+                - Inizia direttamente con la risposta, senza prefissi o tag \
+                - Termina con la risposta completa senza token aggiuntivi Contesto:\n{context}\n\nDomanda:\n{question} [/INST]"
+    
     
     # Use the streaming API
     stream = llm_mistral(prompt, max_tokens=1024, stop=["</s>"], stream=True)
@@ -139,9 +177,12 @@ def generate_answer_streaming_with_metadata(context: str, question: str) -> Gene
                 text_content = choice["content"]
             
             if text_content:
-                token_count += 1
-                yield {
-                    "type": "token",
-                    "content": text_content,
-                    "token_count": token_count
-                }
+                # Clean system tokens from streaming content
+                cleaned_content = clean_response(text_content)
+                if cleaned_content:  # Only yield if there's content after cleaning
+                    token_count += 1
+                    yield {
+                        "type": "token",
+                        "content": cleaned_content,
+                        "token_count": token_count
+                    }
