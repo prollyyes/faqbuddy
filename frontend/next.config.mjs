@@ -1,8 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   env: {
-    NEXT_PUBLIC_HOST: 'http://localhost:8000' // for local testing
-    // NEXT_PUBLIC_HOST: 'https://api.faqbuddy.net'
+    NEXT_PUBLIC_HOST: process.env.NODE_ENV === 'production' 
+      ? 'https://api.faqbuddy.net' 
+      : 'http://localhost:8000'
   }
 };
 
