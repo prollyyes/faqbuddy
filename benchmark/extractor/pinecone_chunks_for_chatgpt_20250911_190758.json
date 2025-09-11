@@ -1,0 +1,1361 @@
+{
+  "source": "Pinecone RAG Pipeline",
+  "extracted_at": "2025-09-11T19:07:58.254860",
+  "index": "exams-index-enhanced",
+  "total_documents": 91,
+  "documents": [
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_6",
+      "text": "{'chunk_index': 5.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 2.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': 'VISTA', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 5.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 2.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "VISTA",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_20",
+      "text": "{'chunk_index': 19.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 4.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '10. Informazioni e contatti', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 19.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 4.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "10. Informazioni e contatti",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_3",
+      "text": "{'chunk_index': 2.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 2.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': 'VISTO', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 2.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 2.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "VISTO",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_45",
+      "text": "{'chunk_index': 44.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 22.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '22 Allegato 3 - Modalità di assolvimento degli OFA Gli obblighi formativi aggiuntivi (OFA) si intendono soddisfatti: - con il...', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 44.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 22.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "22 Allegato 3 - Modalità di assolvimento degli OFA Gli obblighi formativi aggiuntivi (OFA) si intendono soddisfatti: - con il...",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_41",
+      "text": "{'chunk_index': 40.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 18.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '18 Scienze 10 quesiti 20 minuti Comprensione verbale 10 quesiti 20 minuti Totale 50 quesiti 1 ora e 50 (110...', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 40.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 18.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "18 Scienze 10 quesiti 20 minuti Comprensione verbale 10 quesiti 20 minuti Totale 50 quesiti 1 ora e 50 (110...",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_5",
+      "text": "{'chunk_index': 4.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 2.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': 'VISTO', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 4.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 2.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "VISTO",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_15",
+      "text": "{'chunk_index': 14.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 4.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '5. \\nGraduatorie', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 14.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 4.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "5. \nGraduatorie",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_22",
+      "text": "{'chunk_index': 21.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 5.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '1. Accesso ai corsi', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 21.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 5.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "1. Accesso ai corsi",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_32",
+      "text": "{'chunk_index': 31.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 13.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '13 È estremamente importante in questa fase aver ottenuto il calcolo dell’Isee 2025 per il diritto allo studio universitario per...', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 31.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 13.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "13 È estremamente importante in questa fase aver ottenuto il calcolo dell’Isee 2025 per il diritto allo studio universitario per...",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_29",
+      "text": "{'chunk_index': 28.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 11.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '11 Terza selezione - con scorrimenti di graduatoria Partecipazione alla selezione dal 31 luglio all’8 settembre 2025 Comunicazione del numero...', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 28.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 11.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "11 Terza selezione - con scorrimenti di graduatoria Partecipazione alla selezione dal 31 luglio all’8 settembre 2025 Comunicazione del numero...",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_7",
+      "text": "{'chunk_index': 6.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 2.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': 'VISTA', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 6.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 2.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "VISTA",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_12",
+      "text": "{'chunk_index': 11.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 4.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '2. \\nRequisiti per partecipare alle selezioni ................................................................................................. 5', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 11.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 4.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "2. \nRequisiti per partecipare alle selezioni ................................................................................................. 5",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_24",
+      "text": "{'chunk_index': 23.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 6.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '3. Selezioni', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 23.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 6.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "3. Selezioni",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_30",
+      "text": "{'chunk_index': 29.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 12.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '6. Pre-immatricolazione', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 29.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 12.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "6. Pre-immatricolazione",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_8",
+      "text": "{'chunk_index': 7.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 2.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': 'VISTA', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 7.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 2.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "VISTA",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_14",
+      "text": "{'chunk_index': 13.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 4.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '4. \\nPosti disponibili', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 13.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 4.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "4. \nPosti disponibili",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_17",
+      "text": "{'chunk_index': 16.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 4.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '7. \\nImmatricolazione', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 16.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 4.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "7. \nImmatricolazione",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_23",
+      "text": "{'chunk_index': 22.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 5.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '2. Requisiti per partecipare alle selezioni', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 22.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 5.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "2. Requisiti per partecipare alle selezioni",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_10",
+      "text": "{'chunk_index': 9.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 3.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': 'RICORDA QUESTI PASSAGGI', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 9.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 3.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "RICORDA QUESTI PASSAGGI",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_33",
+      "text": "{'chunk_index': 32.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 13.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '13 È estremamente importante in questa fase aver ottenuto il calcolo dell’Isee 2025 per il diritto allo studio universitario per...', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 32.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 13.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "13 È estremamente importante in questa fase aver ottenuto il calcolo dell’Isee 2025 per il diritto allo studio universitario per...",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_50",
+      "text": "{'chunk_index': 49.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 25.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '25 Allegato 5. - Disabilità o DSA A5.1 - Disabilità/invalidità riconosciuta Se hai una disabilità riconosciuta ai sensi dell’art. 3,...', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 49.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 25.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "25 Allegato 5. - Disabilità o DSA A5.1 - Disabilità/invalidità riconosciuta Se hai una disabilità riconosciuta ai sensi dell’art. 3,...",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_51",
+      "text": "{'chunk_index': 50.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 26.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '26 Allegato 6 - Isee per il diritto allo studio universitario L’Isee (Indicatore della situazione economica equivalente) per il diritto...', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 50.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 26.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "26 Allegato 6 - Isee per il diritto allo studio universitario L’Isee (Indicatore della situazione economica equivalente) per il diritto...",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_1",
+      "text": "{'chunk_index': 0.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 1.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': 'Facoltà di Ingegneria dell’informazione, Informatica e Statistica ANNO ACCADEMICO 2025-2026 Ingegneria Gestionale Ingegneria Informatica e Automatica Ingegneria Elettronica Classe: L-8...', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 0.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 1.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "Facoltà di Ingegneria dell’informazione, Informatica e Statistica ANNO ACCADEMICO 2025-2026 Ingegneria Gestionale Ingegneria Informatica e Automatica Ingegneria Elettronica Classe: L-8...",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_13",
+      "text": "{'chunk_index': 12.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 4.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '3. \\nSelezioni', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 12.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 4.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "3. \nSelezioni",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_47",
+      "text": "{'chunk_index': 46.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 23.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '23 Allegato 4 – Cittadinanza di Paesi esteri e/o titolo di studio conseguito in un sistema di istruzione estero A4.1...', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 46.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 23.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "23 Allegato 4 – Cittadinanza di Paesi esteri e/o titolo di studio conseguito in un sistema di istruzione estero A4.1...",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_19",
+      "text": "{'chunk_index': 18.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 4.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '9. Obblighi formativi aggiuntivi (OFA) .............................................................................................................. 14', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 18.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 4.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "9. Obblighi formativi aggiuntivi (OFA) .............................................................................................................. 14",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_39",
+      "text": "{'chunk_index': 38.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 17.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '17 Allegato 1 - TOLC-I o ENGLISH TOLC-I (anche in modalità TOLC@CASA) Possono sostenere il TOLC-I o l’ENGLISH TOLC-I (anche...', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 38.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 17.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "17 Allegato 1 - TOLC-I o ENGLISH TOLC-I (anche in modalità TOLC@CASA) Possono sostenere il TOLC-I o l’ENGLISH TOLC-I (anche...",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_44",
+      "text": "{'chunk_index': 43.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 21.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': \"21 Per presentare la domanda dovrai inviare entro il 31 ottobre 2025 all'indirizzo di posta elettronica del corso di studio...\", 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 43.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 21.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "21 Per presentare la domanda dovrai inviare entro il 31 ottobre 2025 all'indirizzo di posta elettronica del corso di studio...",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_18",
+      "text": "{'chunk_index': 17.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 4.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '8. Rinuncia all’iscrizione', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 17.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 4.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "8. Rinuncia all’iscrizione",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_21",
+      "text": "{'chunk_index': 20.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 4.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '11. Responsabile del procedimento amministrativo e foro competente .......................................................... 16', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 20.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 4.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "11. Responsabile del procedimento amministrativo e foro competente .......................................................... 16",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_11",
+      "text": "{'chunk_index': 10.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 4.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '1. \\nAccesso ai corsi', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 10.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 4.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "1. \nAccesso ai corsi",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_2",
+      "text": "{'chunk_index': 1.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 2.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': 'LA RETTRICE \\n \\nVISTA', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 1.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 2.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "LA RETTRICE \n \nVISTA",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_27",
+      "text": "{'chunk_index': 26.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 9.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '5. Graduatorie', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 26.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 9.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "5. Graduatorie",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_28",
+      "text": "{'chunk_index': 27.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 10.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '10 - posizionarti in graduatoria entro il limite dei posti disponibili; - pagare la prima rata dei contributi di iscrizione...', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 27.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 10.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "10 - posizionarti in graduatoria entro il limite dei posti disponibili; - pagare la prima rata dei contributi di iscrizione...",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_34",
+      "text": "{'chunk_index': 33.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 14.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '8. Rinuncia all’iscrizione', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 33.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 14.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "8. Rinuncia all’iscrizione",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_4",
+      "text": "{'chunk_index': 3.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 2.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': 'VISTO', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 3.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 2.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "VISTO",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_42",
+      "text": "{'chunk_index': 41.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 19.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '19 Allegato 2 - Esonero dalla prova di ammissione Non devi sostenere la prova di ammissione se: - hai una...', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 41.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 19.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "19 Allegato 2 - Esonero dalla prova di ammissione Non devi sostenere la prova di ammissione se: - hai una...",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_25",
+      "text": "{'chunk_index': 24.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 7.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '7 3.1 - Iscrizione al TOLC Per iscriverti al TOLC (Test On Line Cisia) devi seguire le indicazioni riportate sul...', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 24.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 7.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "7 3.1 - Iscrizione al TOLC Per iscriverti al TOLC (Test On Line Cisia) devi seguire le indicazioni riportate sul...",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_36",
+      "text": "{'chunk_index': 35.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 14.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '10. Informazioni e contatti', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 35.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 14.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "10. Informazioni e contatti",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_37",
+      "text": "{'chunk_index': 36.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 15.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '15 E-mail segrstudenti.I3S@uniroma1.it Settore CIAO - Centro informazioni accoglienza orientamento Sede Piazzale Aldo Moro, 5 – 00185 Roma Palazzo del...', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 36.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 15.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "15 E-mail segrstudenti.I3S@uniroma1.it Settore CIAO - Centro informazioni accoglienza orientamento Sede Piazzale Aldo Moro, 5 – 00185 Roma Palazzo del...",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_43",
+      "text": "{'chunk_index': 42.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 20.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': \"20 Per presentare la domanda dovrai inviare entro il 31 ottobre 2025 all'indirizzo di posta elettronica del corso di studio...\", 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 42.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 20.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "20 Per presentare la domanda dovrai inviare entro il 31 ottobre 2025 all'indirizzo di posta elettronica del corso di studio...",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_9",
+      "text": "{'chunk_index': 8.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 2.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': 'DECRETA', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 8.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 2.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "DECRETA",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_16",
+      "text": "{'chunk_index': 15.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 4.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '6. \\nPre-immatricolazione .......................................................................................................................... 12', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 15.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 4.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "6. \nPre-immatricolazione .......................................................................................................................... 12",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_38",
+      "text": "{'chunk_index': 37.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 16.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '11. Responsabile del procedimento amministrativo e foro competente', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 37.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 16.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "11. Responsabile del procedimento amministrativo e foro competente",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_35",
+      "text": "{'chunk_index': 34.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 14.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '2025.  \\n \\n9. Obblighi formativi aggiuntivi (OFA)', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 34.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 14.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "2025.  \n \n9. Obblighi formativi aggiuntivi (OFA)",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_46",
+      "text": "{'chunk_index': 45.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 23.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '23 Allegato 4 – Cittadinanza di Paesi esteri e/o titolo di studio conseguito in un sistema di istruzione estero A4.1...', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 45.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 23.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "23 Allegato 4 – Cittadinanza di Paesi esteri e/o titolo di studio conseguito in un sistema di istruzione estero A4.1...",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_49",
+      "text": "{'chunk_index': 48.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 25.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '25 Allegato 5. - Disabilità o DSA A5.1 - Disabilità/invalidità riconosciuta Se hai una disabilità riconosciuta ai sensi dell’art. 3,...', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 48.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 25.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "25 Allegato 5. - Disabilità o DSA A5.1 - Disabilità/invalidità riconosciuta Se hai una disabilità riconosciuta ai sensi dell’art. 3,...",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_48",
+      "text": "{'chunk_index': 47.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 24.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '24 A4.5 – Immatricolazione per chi ha un titolo estero Coloro che hanno un titolo di studio estero, per effettuare...', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 47.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 24.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "24 A4.5 – Immatricolazione per chi ha un titolo estero Coloro che hanno un titolo di studio estero, per effettuare...",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_31",
+      "text": "{'chunk_index': 30.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 12.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '7. Immatricolazione', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 30.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 12.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "7. Immatricolazione",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_26",
+      "text": "{'chunk_index': 25.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 8.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '4. Posti disponibili', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 25.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 8.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "4. Posti disponibili",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "iscrizione_ingegneria_informatica_automatica_25_26_chunk_40",
+      "text": "{'chunk_index': 39.0, 'doc_id': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'page': 17.0, 'pdf_file': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'pdf_path': '../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'section_title': '17 Allegato 1 - TOLC-I o ENGLISH TOLC-I (anche in modalità TOLC@CASA) Possono sostenere il TOLC-I o l’ENGLISH TOLC-I (anche...', 'source': 'iscrizione_ingegneria_informatica_automatica_25_26.pdf', 'source_type': 'pdf'}",
+      "namespace": "pdf_v2",
+      "metadata": {
+        "chunk_index": 39.0,
+        "doc_id": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "page": 17.0,
+        "pdf_file": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "pdf_path": "../data/iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "section_title": "17 Allegato 1 - TOLC-I o ENGLISH TOLC-I (anche in modalità TOLC@CASA) Possono sostenere il TOLC-I o l’ENGLISH TOLC-I (anche...",
+        "source": "iscrizione_ingegneria_informatica_automatica_25_26.pdf",
+        "source_type": "pdf"
+      }
+    },
+    {
+      "id": "course_profile_f8051a59-2b7e-49a9-924f-3d19c0ef5fb8_S1/2024",
+      "text": "**Riepilogo:** [RIS] Riassunto:\nCorso Sistemi Dinamici, 9 CFU, non idoneo, per Ingegneria Informatica e Automatica, facoltà di Ingegneria dell'informazione e test di ammissione. Docente Claudia Califano, esonero possibile, esame scritto e orale. [/RIS]\n\n**Informazioni Complete:**\n**Corso: Sistemi Dinamici**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2024\n**Stato:** attivo\n**Docente:** Claudia Califano\n**Esonero:** Sì\n**Modalità Esame:** Scritto + Orale\n\n\n**Recensioni Studenti:**\n• Voto: 4/5 - molto bello",
+      "namespace": "contextual_db",
+      "metadata": {
+        "cfu": 9.0,
+        "chunk_type": "course_profile",
+        "course_name": "Sistemi Dinamici",
+        "degree_program": "Ingegneria Informatica e Automatica",
+        "department": "Ingegneria informatica, automatica e gestionale Antonio Ruberti",
+        "faculty": "Ingegneria dell'informazione, informatica e statistica",
+        "primary_key": "f8051a59-2b7e-49a9-924f-3d19c0ef5fb8",
+        "professor": "Claudia Califano",
+        "semester": "S1/2024",
+        "text": "**Riepilogo:** [RIS] Riassunto:\nCorso Sistemi Dinamici, 9 CFU, non idoneo, per Ingegneria Informatica e Automatica, facoltà di Ingegneria dell'informazione e test di ammissione. Docente Claudia Califano, esonero possibile, esame scritto e orale. [/RIS]\n\n**Informazioni Complete:**\n**Corso: Sistemi Dinamici**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2024\n**Stato:** attivo\n**Docente:** Claudia Califano\n**Esonero:** Sì\n**Modalità Esame:** Scritto + Orale\n\n\n**Recensioni Studenti:**\n• Voto: 4/5 - molto bello"
+      }
+    },
+    {
+      "id": "professor_profile_4a7e1cd0-a0e8-4a47-b004-849ddcc05671",
+      "text": "**Riepilogo:** Risposta:\nIl Docente Gabriele Proietti Mattia insegna almeno un corso all'università e si occupa anche dei Complementi di Programmazione. Attualmente, insegna un solo corso attivo. [/risposta]\n\n**Informazioni Complete:**\n**Docente: Gabriele Proietti Mattia**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Complementi di Programmazione\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "chunk_type": "professor_profile",
+        "courses_count": 1.0,
+        "primary_key": "4a7e1cd0-a0e8-4a47-b004-849ddcc05671",
+        "professor_name": "Gabriele Proietti Mattia",
+        "text": "**Riepilogo:** Risposta:\nIl Docente Gabriele Proietti Mattia insegna almeno un corso all'università e si occupa anche dei Complementi di Programmazione. Attualmente, insegna un solo corso attivo. [/risposta]\n\n**Informazioni Complete:**\n**Docente: Gabriele Proietti Mattia**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Complementi di Programmazione\n"
+      }
+    },
+    {
+      "id": "professor_profile_742a6cc1-45e8-46b2-967f-ced465c03ecf",
+      "text": "**Riepilogo:** Risposta:\n* Emilio De Santis è il docente che inseña Corsi Attivi: 1\n* Inoltre, insegna Corsi Insegnati: Elementi di Calcolo delle Probabilita' e Statistica\n* Studia attentamente questi corsi per approfondire la teoria delle probabilità e la statistica.\n\n**Informazioni Complete:**\n**Docente: Emilio De Santis**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Elementi di Calcolo delle Probabilita' e Statistica\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "chunk_type": "professor_profile",
+        "courses_count": 1.0,
+        "primary_key": "742a6cc1-45e8-46b2-967f-ced465c03ecf",
+        "professor_name": "Emilio De Santis",
+        "text": "**Riepilogo:** Risposta:\n* Emilio De Santis è il docente che inseña Corsi Attivi: 1\n* Inoltre, insegna Corsi Insegnati: Elementi di Calcolo delle Probabilita' e Statistica\n* Studia attentamente questi corsi per approfondire la teoria delle probabilità e la statistica.\n\n**Informazioni Complete:**\n**Docente: Emilio De Santis**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Elementi di Calcolo delle Probabilita' e Statistica\n"
+      }
+    },
+    {
+      "id": "course_profile_518987eb-27eb-4043-8117-4d5cfb709851_S1/2025",
+      "text": "**Riepilogo:** [RIASSUNTO]\nCorso: Laboratorio di Ingegneria Informatica\nCFU: 6\nIdoneità: Sì\nFacoltà: Ingegneria dell'informazione, informatica e statistica\nDipartimento: Ingeneria informatica, automatica e gestionale Antonio Ruberti\nPreside: Prof. Marco Schaerf\n\nIl corso Laboratorio di Ingegneria Informatica è un corso di 6 CFU idoneo per la classe None del corso di Laurea in Ingegneria Informatica e Automatica, un corso triennale con test di ammissione. Si trova nell'edizione S1/2025, è attivo e viene insegnato dal docente Roberto Navigli. Non c'è esonero e l'esame è di modalità scritta. Per ulteriori informazioni, contattare la presidenza-i3s@uniroma1.it. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Laboratorio di Ingegneria Informatica**\n**CFU:** 6\n**Idoneità:** Sì\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2025\n**Stato:** attivo\n**Docente:** Roberto Navigli\n**Esonero:** No\n**Modalità Esame:** Scritto\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "cfu": 6.0,
+        "chunk_type": "course_profile",
+        "course_name": "Laboratorio di Ingegneria Informatica",
+        "degree_program": "Ingegneria Informatica e Automatica",
+        "department": "Ingegneria informatica, automatica e gestionale Antonio Ruberti",
+        "faculty": "Ingegneria dell'informazione, informatica e statistica",
+        "primary_key": "518987eb-27eb-4043-8117-4d5cfb709851",
+        "professor": "Roberto Navigli",
+        "semester": "S1/2025",
+        "text": "**Riepilogo:** [RIASSUNTO]\nCorso: Laboratorio di Ingegneria Informatica\nCFU: 6\nIdoneità: Sì\nFacoltà: Ingegneria dell'informazione, informatica e statistica\nDipartimento: Ingeneria informatica, automatica e gestionale Antonio Ruberti\nPreside: Prof. Marco Schaerf\n\nIl corso Laboratorio di Ingegneria Informatica è un corso di 6 CFU idoneo per la classe None del corso di Laurea in Ingegneria Informatica e Automatica, un corso triennale con test di ammissione. Si trova nell'edizione S1/2025, è attivo e viene insegnato dal docente Roberto Navigli. Non c'è esonero e l'esame è di modalità scritta. Per ulteriori informazioni, contattare la presidenza-i3s@uniroma1.it. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Laboratorio di Ingegneria Informatica**\n**CFU:** 6\n**Idoneità:** Sì\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2025\n**Stato:** attivo\n**Docente:** Roberto Navigli\n**Esonero:** No\n**Modalità Esame:** Scritto\n"
+      }
+    },
+    {
+      "id": "professor_profile_c1955be6-c54d-4495-9b7e-b9be84c4efb1",
+      "text": "**Riepilogo:** Risposta:\nIl Prof. Roberto Navigli insegnante del Laboratorio di Ingegneria Informatica. Ha un solo corso attivo. Specializzato in Ingegneria Informatica, è un docente esperto e affidabile. Ricorda consultare i materiali e i laboratori del suo corso. [/risposta]\n\n**Informazioni Complete:**\n**Docente: Roberto Navigli**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Laboratorio di Ingegneria Informatica\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "chunk_type": "professor_profile",
+        "courses_count": 1.0,
+        "primary_key": "c1955be6-c54d-4495-9b7e-b9be84c4efb1",
+        "professor_name": "Roberto Navigli",
+        "text": "**Riepilogo:** Risposta:\nIl Prof. Roberto Navigli insegnante del Laboratorio di Ingegneria Informatica. Ha un solo corso attivo. Specializzato in Ingegneria Informatica, è un docente esperto e affidabile. Ricorda consultare i materiali e i laboratori del suo corso. [/risposta]\n\n**Informazioni Complete:**\n**Docente: Roberto Navigli**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Laboratorio di Ingegneria Informatica\n"
+      }
+    },
+    {
+      "id": "course_profile_930415af-454b-49a3-9fb8-2c4687065cba_S1/2023",
+      "text": "**Riepilogo:** [RIASSUNTOLFO] Il corso è di 9 CFU, è idoneo per tutti gli studenti e fa parte della Laurea in Ingegneria Informatica e Automatica nel corso None, gestita dal dipartimento Ruberti. Il docente attuale è Giuseppe Santucci e l'esame è a modalità scritta. [/RIASSUNTOLFO]\n\n**Informazioni Complete:**\n**Corso: Introduzione alla Programmazione**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2023\n**Stato:** attivo\n**Docente:** Giuseppe Santucci\n**Esonero:** No\n**Modalità Esame:** Scritto\n\n\n**Recensioni Studenti:**\n• Voto: 4/5 - Bel corso di introduzione a Python\n• Voto: 1/5 - bellissimo, bravo peppe",
+      "namespace": "contextual_db",
+      "metadata": {
+        "cfu": 9.0,
+        "chunk_type": "course_profile",
+        "course_name": "Introduzione alla Programmazione",
+        "degree_program": "Ingegneria Informatica e Automatica",
+        "department": "Ingegneria informatica, automatica e gestionale Antonio Ruberti",
+        "faculty": "Ingegneria dell'informazione, informatica e statistica",
+        "primary_key": "930415af-454b-49a3-9fb8-2c4687065cba",
+        "professor": "Giuseppe Santucci",
+        "semester": "S1/2023",
+        "text": "**Riepilogo:** [RIASSUNTOLFO] Il corso è di 9 CFU, è idoneo per tutti gli studenti e fa parte della Laurea in Ingegneria Informatica e Automatica nel corso None, gestita dal dipartimento Ruberti. Il docente attuale è Giuseppe Santucci e l'esame è a modalità scritta. [/RIASSUNTOLFO]\n\n**Informazioni Complete:**\n**Corso: Introduzione alla Programmazione**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2023\n**Stato:** attivo\n**Docente:** Giuseppe Santucci\n**Esonero:** No\n**Modalità Esame:** Scritto\n\n\n**Recensioni Studenti:**\n• Voto: 4/5 - Bel corso di introduzione a Python\n• Voto: 1/5 - bellissimo, bravo peppe"
+      }
+    },
+    {
+      "id": "course_profile_1bd0f0d4-c2b3-4e74-9a58-26bd45e94000_S2/2025",
+      "text": "**Riepilogo:** Risposta:\n# Corso: Fisica\n**CFU**: 12\n**Idoneità**: Non idoneo\n\nQuesto corso di 12 CFU è non idoneo e vuole fornirti una base solida di fisica classica, particolarmente utile per gli studenti di Ingegneria Informatica e Automatica. Non richiede esoneri ed il modo di svolgimento dell'esame è scritto e orale. [/RIS]\n\n**Informazioni Complete:**\n**Corso: Fisica**\n**CFU:** 12\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S2/2025\n**Stato:** attivo\n**Docente:** Massimo Petrarca\n**Esonero:** Sì\n**Modalità Esame:** Scritto + Orale\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "cfu": 12.0,
+        "chunk_type": "course_profile",
+        "course_name": "Fisica",
+        "degree_program": "Ingegneria Informatica e Automatica",
+        "department": "Ingegneria informatica, automatica e gestionale Antonio Ruberti",
+        "faculty": "Ingegneria dell'informazione, informatica e statistica",
+        "primary_key": "1bd0f0d4-c2b3-4e74-9a58-26bd45e94000",
+        "professor": "Massimo Petrarca",
+        "semester": "S2/2025",
+        "text": "**Riepilogo:** Risposta:\n# Corso: Fisica\n**CFU**: 12\n**Idoneità**: Non idoneo\n\nQuesto corso di 12 CFU è non idoneo e vuole fornirti una base solida di fisica classica, particolarmente utile per gli studenti di Ingegneria Informatica e Automatica. Non richiede esoneri ed il modo di svolgimento dell'esame è scritto e orale. [/RIS]\n\n**Informazioni Complete:**\n**Corso: Fisica**\n**CFU:** 12\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S2/2025\n**Stato:** attivo\n**Docente:** Massimo Petrarca\n**Esonero:** Sì\n**Modalità Esame:** Scritto + Orale\n"
+      }
+    },
+    {
+      "id": "course_profile_505fa646-9fa1-4419-b675-fe347cb1a704_S1/2024",
+      "text": "**Riepilogo:** [RIASSUNTO] Il corso Programmazione Matematica è un corso di 9 CFU che non è idoneo per il Corso di Laurea in Ingegneria Informatica e Automatica (classe None). È parte del triennale del I Dipartimento Ingegneria informatica, automatica e gestionale Antonio Ruberti, presieduto dal Prof. Marco Schaerf. L'edizione attuale è S1/2024 e è in stato attivo. Il docente è Giampaolo Liuzzi e non ci sono esoneri. L'esame avviene in modalità scritta. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Programmazione Matematica**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2024\n**Stato:** attivo\n**Docente:** Giampaolo Liuzzi\n**Esonero:** No\n**Modalità Esame:** Scritto\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "cfu": 9.0,
+        "chunk_type": "course_profile",
+        "course_name": "Programmazione Matematica",
+        "degree_program": "Ingegneria Informatica e Automatica",
+        "department": "Ingegneria informatica, automatica e gestionale Antonio Ruberti",
+        "faculty": "Ingegneria dell'informazione, informatica e statistica",
+        "primary_key": "505fa646-9fa1-4419-b675-fe347cb1a704",
+        "professor": "Giampaolo Liuzzi",
+        "semester": "S1/2024",
+        "text": "**Riepilogo:** [RIASSUNTO] Il corso Programmazione Matematica è un corso di 9 CFU che non è idoneo per il Corso di Laurea in Ingegneria Informatica e Automatica (classe None). È parte del triennale del I Dipartimento Ingegneria informatica, automatica e gestionale Antonio Ruberti, presieduto dal Prof. Marco Schaerf. L'edizione attuale è S1/2024 e è in stato attivo. Il docente è Giampaolo Liuzzi e non ci sono esoneri. L'esame avviene in modalità scritta. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Programmazione Matematica**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2024\n**Stato:** attivo\n**Docente:** Giampaolo Liuzzi\n**Esonero:** No\n**Modalità Esame:** Scritto\n"
+      }
+    },
+    {
+      "id": "course_profile_591b637c-2f41-4cff-b8c9-dcb4128b87a7_S1/2023",
+      "text": "**Riepilogo:** [RIASSUNTO] Il corso Fondamenti di Matematica è valido per 9 CFU e non è idoneo. È parte del Corso di Laurea in Ingegneria Informatica e Automatica, classe None e tipologia triennale, con un totale di 180 CFU e necessità di superare un test di ammissione. La Facoltà coinvolta è Ingegneria dell'informazione, informatica e statistica, all'interno del Dipartimento Ingegneria informatica, automatica e gestionale Antonio Ruberti, presieduto dal Prof. Marco Schaerf. Il corso è attivo nella edizione S1/2023, insegnato da Nicola Galesi e non ci sono esoneri. Il modulo di esame prevede una prova scritta. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Fondamenti di Matematica**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2023\n**Stato:** attivo\n**Docente:** Nicola Galesi\n**Esonero:** No\n**Modalità Esame:** Scritto\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "cfu": 9.0,
+        "chunk_type": "course_profile",
+        "course_name": "Fondamenti di Matematica",
+        "degree_program": "Ingegneria Informatica e Automatica",
+        "department": "Ingegneria informatica, automatica e gestionale Antonio Ruberti",
+        "faculty": "Ingegneria dell'informazione, informatica e statistica",
+        "primary_key": "591b637c-2f41-4cff-b8c9-dcb4128b87a7",
+        "professor": "Nicola Galesi",
+        "semester": "S1/2023",
+        "text": "**Riepilogo:** [RIASSUNTO] Il corso Fondamenti di Matematica è valido per 9 CFU e non è idoneo. È parte del Corso di Laurea in Ingegneria Informatica e Automatica, classe None e tipologia triennale, con un totale di 180 CFU e necessità di superare un test di ammissione. La Facoltà coinvolta è Ingegneria dell'informazione, informatica e statistica, all'interno del Dipartimento Ingegneria informatica, automatica e gestionale Antonio Ruberti, presieduto dal Prof. Marco Schaerf. Il corso è attivo nella edizione S1/2023, insegnato da Nicola Galesi e non ci sono esoneri. Il modulo di esame prevede una prova scritta. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Fondamenti di Matematica**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2023\n**Stato:** attivo\n**Docente:** Nicola Galesi\n**Esonero:** No\n**Modalità Esame:** Scritto\n"
+      }
+    },
+    {
+      "id": "professor_profile_36d654ba-dbd3-440c-be76-8bfd1968e28c",
+      "text": "**Riepilogo:** Risposta:\n**Maurizio Lenzerini** è un docente che insegnava un solo corso attivo, Basi di Dati, ma ha ricevuto buoni feedback dall'alunni, con valutazioni fino a 5/5. Egli è noto per la sua competenza nel suo campo e per la strutturazione dei suoi corsi. [/RIS]\n\n**Informazioni Complete:**\n**Docente: Maurizio Lenzerini**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Basi di Dati\n\n**Feedback Studenti:**\n• Basi di Dati: 5/5 - Molto bello il corso è bello il professore è bravo\n• Basi di Dati: 5/5 - Lenzerini ti amo\n• Basi di Dati: 4/5 - Corso ben strutturato",
+      "namespace": "contextual_db",
+      "metadata": {
+        "chunk_type": "professor_profile",
+        "courses_count": 1.0,
+        "primary_key": "36d654ba-dbd3-440c-be76-8bfd1968e28c",
+        "professor_name": "Maurizio Lenzerini",
+        "text": "**Riepilogo:** Risposta:\n**Maurizio Lenzerini** è un docente che insegnava un solo corso attivo, Basi di Dati, ma ha ricevuto buoni feedback dall'alunni, con valutazioni fino a 5/5. Egli è noto per la sua competenza nel suo campo e per la strutturazione dei suoi corsi. [/RIS]\n\n**Informazioni Complete:**\n**Docente: Maurizio Lenzerini**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Basi di Dati\n\n**Feedback Studenti:**\n• Basi di Dati: 5/5 - Molto bello il corso è bello il professore è bravo\n• Basi di Dati: 5/5 - Lenzerini ti amo\n• Basi di Dati: 4/5 - Corso ben strutturato"
+      }
+    },
+    {
+      "id": "course_profile_2c774da2-76e1-4348-b84f-b1889d5f7841_S2/2025",
+      "text": "**Riepilogo:** [RIASSUNTO] Il corso Sicurezza ha 6 CFU, non è idoneo e fa parte del corso di Laurea in Ingegneria Informatica e Automatica. La facoltà è Ingegneria dell'informazione, informatica e statistica, dipartimento Ruberti e preside Schaerf. L'edizione attuale è S2/2025 e è in stato attivo. Il docente è Daniele Cono D’Elia, senza esonero e l'esame è di modalità scritta. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Sicurezza**\n**CFU:** 6\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S2/2025\n**Stato:** attivo\n**Docente:** Daniele Cono D’Elia\n**Esonero:** No\n**Modalità Esame:** Scritto\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "cfu": 6.0,
+        "chunk_type": "course_profile",
+        "course_name": "Sicurezza",
+        "degree_program": "Ingegneria Informatica e Automatica",
+        "department": "Ingegneria informatica, automatica e gestionale Antonio Ruberti",
+        "faculty": "Ingegneria dell'informazione, informatica e statistica",
+        "primary_key": "2c774da2-76e1-4348-b84f-b1889d5f7841",
+        "professor": "Daniele Cono D’Elia",
+        "semester": "S2/2025",
+        "text": "**Riepilogo:** [RIASSUNTO] Il corso Sicurezza ha 6 CFU, non è idoneo e fa parte del corso di Laurea in Ingegneria Informatica e Automatica. La facoltà è Ingegneria dell'informazione, informatica e statistica, dipartimento Ruberti e preside Schaerf. L'edizione attuale è S2/2025 e è in stato attivo. Il docente è Daniele Cono D’Elia, senza esonero e l'esame è di modalità scritta. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Sicurezza**\n**CFU:** 6\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S2/2025\n**Stato:** attivo\n**Docente:** Daniele Cono D’Elia\n**Esonero:** No\n**Modalità Esame:** Scritto\n"
+      }
+    },
+    {
+      "id": "course_profile_e21961e5-3020-45d4-862b-594d648d00b4_S1/2024",
+      "text": "**Riepilogo:** [RIASSUNTO] Il corso Progettazione del Software ha 9 CFU, non è idoneo, fa parte della Laurea in Ingegneria Informatica e Automatica, e il suo docente è Francesco Leotta. È possibile ottenere l'esonero e l'esame avviene in modalità scritta. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Progettazione del Software**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2024\n**Stato:** attivo\n**Docente:** Francesco Leotta\n**Esonero:** Sì\n**Modalità Esame:** Scritto\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "cfu": 9.0,
+        "chunk_type": "course_profile",
+        "course_name": "Progettazione del Software",
+        "degree_program": "Ingegneria Informatica e Automatica",
+        "department": "Ingegneria informatica, automatica e gestionale Antonio Ruberti",
+        "faculty": "Ingegneria dell'informazione, informatica e statistica",
+        "primary_key": "e21961e5-3020-45d4-862b-594d648d00b4",
+        "professor": "Francesco Leotta",
+        "semester": "S1/2024",
+        "text": "**Riepilogo:** [RIASSUNTO] Il corso Progettazione del Software ha 9 CFU, non è idoneo, fa parte della Laurea in Ingegneria Informatica e Automatica, e il suo docente è Francesco Leotta. È possibile ottenere l'esonero e l'esame avviene in modalità scritta. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Progettazione del Software**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2024\n**Stato:** attivo\n**Docente:** Francesco Leotta\n**Esonero:** Sì\n**Modalità Esame:** Scritto\n"
+      }
+    },
+    {
+      "id": "course_profile_1bd0f0d4-c2b3-4e74-9a58-26bd45e94000_S2/2023",
+      "text": "**Riepilogo:** [RIASSUNTORISPOSTA]\nCorso: Fisica\nCFU: 12\nIdoneità: no\n\nClasse: None\nTipologia: Triennale\nCFU Totali: 180\nTest di Ammissione: Sì\n\nDocente: Massimo Petrarca\nEsonero: No\nModalità Esame: Scritto + Orale\n\n[/RIASSUNTORISPOSTA]\n\n[ALTREDOMEANDA]\nSe la domanda richiede informazioni aggiuntive, prosegui con l'aiuto del FAQBuddy. Se invece la domanda può essere risolta con un breve riassunto come quello richiesto, non è necessario chiedere aiuto al FAQBuddy.\n\nDomanda:\nIl mio professore di Fisica è il quale?\n[/ALTREDOMEANDA]\n\n[FAQBUDDY]\nIl tuo professore di Fisica è Massimo Petrarca.\n\n[/FAQBUDDY]\n\n**Informazioni Complete:**\n**Corso: Fisica**\n**CFU:** 12\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S2/2023\n**Stato:** attivo\n**Docente:** Massimo Petrarca\n**Esonero:** No\n**Modalità Esame:** Scritto + Orale\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "cfu": 12.0,
+        "chunk_type": "course_profile",
+        "course_name": "Fisica",
+        "degree_program": "Ingegneria Informatica e Automatica",
+        "department": "Ingegneria informatica, automatica e gestionale Antonio Ruberti",
+        "faculty": "Ingegneria dell'informazione, informatica e statistica",
+        "primary_key": "1bd0f0d4-c2b3-4e74-9a58-26bd45e94000",
+        "professor": "Massimo Petrarca",
+        "semester": "S2/2023",
+        "text": "**Riepilogo:** [RIASSUNTORISPOSTA]\nCorso: Fisica\nCFU: 12\nIdoneità: no\n\nClasse: None\nTipologia: Triennale\nCFU Totali: 180\nTest di Ammissione: Sì\n\nDocente: Massimo Petrarca\nEsonero: No\nModalità Esame: Scritto + Orale\n\n[/RIASSUNTORISPOSTA]\n\n[ALTREDOMEANDA]\nSe la domanda richiede informazioni aggiuntive, prosegui con l'aiuto del FAQBuddy. Se invece la domanda può essere risolta con un breve riassunto come quello richiesto, non è necessario chiedere aiuto al FAQBuddy.\n\nDomanda:\nIl mio professore di Fisica è il quale?\n[/ALTREDOMEANDA]\n\n[FAQBUDDY]\nIl tuo professore di Fisica è Massimo Petrarca.\n\n[/FAQBUDDY]\n\n**Informazioni Complete:**\n**Corso: Fisica**\n**CFU:** 12\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S2/2023\n**Stato:** attivo\n**Docente:** Massimo Petrarca\n**Esonero:** No\n**Modalità Esame:** Scritto + Orale\n"
+      }
+    },
+    {
+      "id": "professor_profile_f30c5bdf-5493-4fab-8cf6-39b045b77662",
+      "text": "**Riepilogo:** Risposta:\nIl docente Massimo Petrarca insegnante a contratto, impegna le sue competenze in due corsi attuali e precedentemente insegnava Fisica. Ha ricevuto un buon feedback, di 5/5, per l'insegnamento dell'Introduzione alla Programmazione. [/risposta]\n\n**Informazioni Complete:**\n**Docente: Massimo Petrarca**\n**Corsi Attivi:** 2\n**Corsi Insegnati:** Fisica, Introduzione alla Programmazione\n\n**Feedback Studenti:**\n• Introduzione alla Programmazione: 5/5 - Bello",
+      "namespace": "contextual_db",
+      "metadata": {
+        "chunk_type": "professor_profile",
+        "courses_count": 2.0,
+        "primary_key": "f30c5bdf-5493-4fab-8cf6-39b045b77662",
+        "professor_name": "Massimo Petrarca",
+        "text": "**Riepilogo:** Risposta:\nIl docente Massimo Petrarca insegnante a contratto, impegna le sue competenze in due corsi attuali e precedentemente insegnava Fisica. Ha ricevuto un buon feedback, di 5/5, per l'insegnamento dell'Introduzione alla Programmazione. [/risposta]\n\n**Informazioni Complete:**\n**Docente: Massimo Petrarca**\n**Corsi Attivi:** 2\n**Corsi Insegnati:** Fisica, Introduzione alla Programmazione\n\n**Feedback Studenti:**\n• Introduzione alla Programmazione: 5/5 - Bello"
+      }
+    },
+    {
+      "id": "professor_profile_164a5698-60af-4d56-9ed3-8596ce218916",
+      "text": "**Riepilogo:** Risposta:\n**Claudia Califano**: Docente dell'Università di Bologna, attualmente insegnante un solo corso attivo. Ha insegnato Sistemi Dinamici, ricevendo un feedback di 4/5 \"molto bello\".\n\n**Informazioni Complete:**\n**Docente: Claudia Califano**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Sistemi Dinamici\n\n**Feedback Studenti:**\n• Sistemi Dinamici: 4/5 - molto bello",
+      "namespace": "contextual_db",
+      "metadata": {
+        "chunk_type": "professor_profile",
+        "courses_count": 1.0,
+        "primary_key": "164a5698-60af-4d56-9ed3-8596ce218916",
+        "professor_name": "Claudia Califano",
+        "text": "**Riepilogo:** Risposta:\n**Claudia Califano**: Docente dell'Università di Bologna, attualmente insegnante un solo corso attivo. Ha insegnato Sistemi Dinamici, ricevendo un feedback di 4/5 \"molto bello\".\n\n**Informazioni Complete:**\n**Docente: Claudia Califano**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Sistemi Dinamici\n\n**Feedback Studenti:**\n• Sistemi Dinamici: 4/5 - molto bello"
+      }
+    },
+    {
+      "id": "course_profile_43f08883-7b54-40e2-9fc9-3c92ecb1b518_S1/2025",
+      "text": "**Riepilogo:** [RIASSUMO]\nCorso: Economia\nCFU: 9\nIdoneità: no\nFa parte: Ingegneria Informatica e Automatica (triennale)\nDocente: Eugenio Oropallo\nEsonero: Sì\nModalità Esame: Scritto\nVoto Media: 4/5\n\nEconomia è un corso di 9 CFU non idoneo per l'Ingegneria Informatica e Automatica, triennale. Insegnato da Eugenio Oropallo, offre un esonero e l'esame avviene in modalità scritta. Lo studente universitario può sperare in una media di voto di 4 su 5. [/RIASSUMO]\n\n**Informazioni Complete:**\n**Corso: Economia**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2025\n**Stato:** attivo\n**Docente:** Eugenio Oropallo\n**Esonero:** Sì\n**Modalità Esame:** Scritto\n\n\n**Recensioni Studenti:**\n• Voto: 4/5 - Bel corso",
+      "namespace": "contextual_db",
+      "metadata": {
+        "cfu": 9.0,
+        "chunk_type": "course_profile",
+        "course_name": "Economia",
+        "degree_program": "Ingegneria Informatica e Automatica",
+        "department": "Ingegneria informatica, automatica e gestionale Antonio Ruberti",
+        "faculty": "Ingegneria dell'informazione, informatica e statistica",
+        "primary_key": "43f08883-7b54-40e2-9fc9-3c92ecb1b518",
+        "professor": "Eugenio Oropallo",
+        "semester": "S1/2025",
+        "text": "**Riepilogo:** [RIASSUMO]\nCorso: Economia\nCFU: 9\nIdoneità: no\nFa parte: Ingegneria Informatica e Automatica (triennale)\nDocente: Eugenio Oropallo\nEsonero: Sì\nModalità Esame: Scritto\nVoto Media: 4/5\n\nEconomia è un corso di 9 CFU non idoneo per l'Ingegneria Informatica e Automatica, triennale. Insegnato da Eugenio Oropallo, offre un esonero e l'esame avviene in modalità scritta. Lo studente universitario può sperare in una media di voto di 4 su 5. [/RIASSUMO]\n\n**Informazioni Complete:**\n**Corso: Economia**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2025\n**Stato:** attivo\n**Docente:** Eugenio Oropallo\n**Esonero:** Sì\n**Modalità Esame:** Scritto\n\n\n**Recensioni Studenti:**\n• Voto: 4/5 - Bel corso"
+      }
+    },
+    {
+      "id": "professor_profile_5388ecc6-8f1a-4be3-9d07-019d407267f2",
+      "text": "**Riepilogo:** Risposta:\n**Francesco Leotta** è un docente che insegnava Progettazione del Software. Ora insegna solo un corso, ma è un esperto nel campo del software. Se stai cercando un insegnante per imparare a progettare sistemi software, potrebbe essere una scelta interessante. [/risposta]\n\n**Informazioni Complete:**\n**Docente: Francesco Leotta**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Progettazione del Software\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "chunk_type": "professor_profile",
+        "courses_count": 1.0,
+        "primary_key": "5388ecc6-8f1a-4be3-9d07-019d407267f2",
+        "professor_name": "Francesco Leotta",
+        "text": "**Riepilogo:** Risposta:\n**Francesco Leotta** è un docente che insegnava Progettazione del Software. Ora insegna solo un corso, ma è un esperto nel campo del software. Se stai cercando un insegnante per imparare a progettare sistemi software, potrebbe essere una scelta interessante. [/risposta]\n\n**Informazioni Complete:**\n**Docente: Francesco Leotta**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Progettazione del Software\n"
+      }
+    },
+    {
+      "id": "professor_profile_83f07cda-e34a-415d-af43-997f40947b20",
+      "text": "**Riepilogo:** Risposta:\nIl prof. Nicola Galesi insegna un solo corso attivo, ma ha insegnato in passato Fondamenti di Matematica. Attualmente, è l'unico corso che egli gestisce. Come studente, puoi concentrarti su questa materia, poiché è l'unica disponibile con il suo insegnamento.\n\n**Informazioni Complete:**\n**Docente: Nicola Galesi**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Fondamenti di Matematica\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "chunk_type": "professor_profile",
+        "courses_count": 1.0,
+        "primary_key": "83f07cda-e34a-415d-af43-997f40947b20",
+        "professor_name": "Nicola Galesi",
+        "text": "**Riepilogo:** Risposta:\nIl prof. Nicola Galesi insegna un solo corso attivo, ma ha insegnato in passato Fondamenti di Matematica. Attualmente, è l'unico corso che egli gestisce. Come studente, puoi concentrarti su questa materia, poiché è l'unica disponibile con il suo insegnamento.\n\n**Informazioni Complete:**\n**Docente: Nicola Galesi**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Fondamenti di Matematica\n"
+      }
+    },
+    {
+      "id": "course_profile_1c4d3764-3697-461b-b7be-07e21bcab6d3_S1/2025",
+      "text": "**Riepilogo:** [RIASSUNTO] Il corso Sistemi Operativi ha 9 CFU, è non idoneo e fa parte del corso di laurea in Ingegneria Informatica e Automatica, una triennale con 180 CFU e con esame di ammissione. Si svolge nella facoltà di Ingegneria dell'informazione, informatica e statistica, nel dipartimento Ruberti, presieduto da Prof. Schaerf. L'edizione attuale è S1/2025 e è in stato attivo, insegnato dal prof. Ottolino, con esonero e modalità esame scritto. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Sistemi Operativi**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2025\n**Stato:** attivo\n**Docente:** Paolo Ottolino\n**Esonero:** Sì\n**Modalità Esame:** Scritto\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "cfu": 9.0,
+        "chunk_type": "course_profile",
+        "course_name": "Sistemi Operativi",
+        "degree_program": "Ingegneria Informatica e Automatica",
+        "department": "Ingegneria informatica, automatica e gestionale Antonio Ruberti",
+        "faculty": "Ingegneria dell'informazione, informatica e statistica",
+        "primary_key": "1c4d3764-3697-461b-b7be-07e21bcab6d3",
+        "professor": "Paolo Ottolino",
+        "semester": "S1/2025",
+        "text": "**Riepilogo:** [RIASSUNTO] Il corso Sistemi Operativi ha 9 CFU, è non idoneo e fa parte del corso di laurea in Ingegneria Informatica e Automatica, una triennale con 180 CFU e con esame di ammissione. Si svolge nella facoltà di Ingegneria dell'informazione, informatica e statistica, nel dipartimento Ruberti, presieduto da Prof. Schaerf. L'edizione attuale è S1/2025 e è in stato attivo, insegnato dal prof. Ottolino, con esonero e modalità esame scritto. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Sistemi Operativi**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2025\n**Stato:** attivo\n**Docente:** Paolo Ottolino\n**Esonero:** Sì\n**Modalità Esame:** Scritto\n"
+      }
+    },
+    {
+      "id": "course_profile_99d0d07c-bb23-43f3-919b-c2017a760589_S2/2023",
+      "text": "**Riepilogo:** [RIASSUNTO]\nIl corso Complementi di Programmazione è un corso di 9 CFU, non idoneo per la triennale di Ingegneria Informatica e Automatica. Si trova nella stessa classe di altri corsi. È insegnato nella Facoltà di Ingegneria dell'informazione, informatica e statistica, all'interno del Dipartimento di Ingegneria informatica, automatica e gestionale Antonio Ruberti, presieduto dal Prof. Marco Schaerf. L'edizione attuale è S2/2023, attiva e insegnata dal prof. Gabriele Proietti Mattia. Non c'è esonero e l'esame avviene in modalità scritta. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Complementi di Programmazione**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S2/2023\n**Stato:** attivo\n**Docente:** Gabriele Proietti Mattia\n**Esonero:** No\n**Modalità Esame:** Scritto\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "cfu": 9.0,
+        "chunk_type": "course_profile",
+        "course_name": "Complementi di Programmazione",
+        "degree_program": "Ingegneria Informatica e Automatica",
+        "department": "Ingegneria informatica, automatica e gestionale Antonio Ruberti",
+        "faculty": "Ingegneria dell'informazione, informatica e statistica",
+        "primary_key": "99d0d07c-bb23-43f3-919b-c2017a760589",
+        "professor": "Gabriele Proietti Mattia",
+        "semester": "S2/2023",
+        "text": "**Riepilogo:** [RIASSUNTO]\nIl corso Complementi di Programmazione è un corso di 9 CFU, non idoneo per la triennale di Ingegneria Informatica e Automatica. Si trova nella stessa classe di altri corsi. È insegnato nella Facoltà di Ingegneria dell'informazione, informatica e statistica, all'interno del Dipartimento di Ingegneria informatica, automatica e gestionale Antonio Ruberti, presieduto dal Prof. Marco Schaerf. L'edizione attuale è S2/2023, attiva e insegnata dal prof. Gabriele Proietti Mattia. Non c'è esonero e l'esame avviene in modalità scritta. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Complementi di Programmazione**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S2/2023\n**Stato:** attivo\n**Docente:** Gabriele Proietti Mattia\n**Esonero:** No\n**Modalità Esame:** Scritto\n"
+      }
+    },
+    {
+      "id": "course_profile_facc64a1-bcbc-4507-989b-c5c19064ee44_S2/2024",
+      "text": "**Riepilogo:** [RIASSUNTO] Il corso Sistemi di Controllo ha 9 CFU, è non idoneo e si trova nella Laurea in Ingegneria Informatica e Automatica, una triennale con esami di ammissione. È parte della Facoltà di Ingegneria dell'informazione, informatica e statistica, nel Dipartimento di Ingegneria Informatica, Automatica e Gestionale Antonio Ruberti, presieduto da Prof. Marco Schaerf. L'edizione attuale è S2/2024, è attivo e insegnato da Giuseppe Oriolo, con esonero. L'esame avviene in modalità scritta. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Sistemi di Controllo**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S2/2024\n**Stato:** attivo\n**Docente:** Giuseppe Oriolo\n**Esonero:** Sì\n**Modalità Esame:** Scritto\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "cfu": 9.0,
+        "chunk_type": "course_profile",
+        "course_name": "Sistemi di Controllo",
+        "degree_program": "Ingegneria Informatica e Automatica",
+        "department": "Ingegneria informatica, automatica e gestionale Antonio Ruberti",
+        "faculty": "Ingegneria dell'informazione, informatica e statistica",
+        "primary_key": "facc64a1-bcbc-4507-989b-c5c19064ee44",
+        "professor": "Giuseppe Oriolo",
+        "semester": "S2/2024",
+        "text": "**Riepilogo:** [RIASSUNTO] Il corso Sistemi di Controllo ha 9 CFU, è non idoneo e si trova nella Laurea in Ingegneria Informatica e Automatica, una triennale con esami di ammissione. È parte della Facoltà di Ingegneria dell'informazione, informatica e statistica, nel Dipartimento di Ingegneria Informatica, Automatica e Gestionale Antonio Ruberti, presieduto da Prof. Marco Schaerf. L'edizione attuale è S2/2024, è attivo e insegnato da Giuseppe Oriolo, con esonero. L'esame avviene in modalità scritta. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Sistemi di Controllo**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S2/2024\n**Stato:** attivo\n**Docente:** Giuseppe Oriolo\n**Esonero:** Sì\n**Modalità Esame:** Scritto\n"
+      }
+    },
+    {
+      "id": "course_profile_716862a1-7bbe-4606-aff1-3b4975bded6e_S1/2025",
+      "text": "**Riepilogo:** [RIASSUNTO] Il corso Basi di Dati è valido per 6 CFU, richiede l'idoneità e fa parte del corso di Laurea in Ingegneria Informatica e Automatica, con 180 CFU totali. Il docente è Maurizio Lenzerini e l'esame avviene in modalità scritta. Nell'edizione attuale S1/2025, il corso è attivo e non ci sono esoneri. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Basi di Dati**\n**CFU:** 6\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2025\n**Stato:** attivo\n**Docente:** Maurizio Lenzerini\n**Esonero:** No\n**Modalità Esame:** Scritto\n\n\n**Recensioni Studenti:**\n• Voto: 5/5 - Molto bello il corso è bello il professore è bravo\n• Voto: 5/5 - Lenzerini ti amo\n• Voto: 4/5 - Corso ben strutturato",
+      "namespace": "contextual_db",
+      "metadata": {
+        "cfu": 6.0,
+        "chunk_type": "course_profile",
+        "course_name": "Basi di Dati",
+        "degree_program": "Ingegneria Informatica e Automatica",
+        "department": "Ingegneria informatica, automatica e gestionale Antonio Ruberti",
+        "faculty": "Ingegneria dell'informazione, informatica e statistica",
+        "primary_key": "716862a1-7bbe-4606-aff1-3b4975bded6e",
+        "professor": "Maurizio Lenzerini",
+        "semester": "S1/2025",
+        "text": "**Riepilogo:** [RIASSUNTO] Il corso Basi di Dati è valido per 6 CFU, richiede l'idoneità e fa parte del corso di Laurea in Ingegneria Informatica e Automatica, con 180 CFU totali. Il docente è Maurizio Lenzerini e l'esame avviene in modalità scritta. Nell'edizione attuale S1/2025, il corso è attivo e non ci sono esoneri. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Basi di Dati**\n**CFU:** 6\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2025\n**Stato:** attivo\n**Docente:** Maurizio Lenzerini\n**Esonero:** No\n**Modalità Esame:** Scritto\n\n\n**Recensioni Studenti:**\n• Voto: 5/5 - Molto bello il corso è bello il professore è bravo\n• Voto: 5/5 - Lenzerini ti amo\n• Voto: 4/5 - Corso ben strutturato"
+      }
+    },
+    {
+      "id": "professor_profile_e34c3a8a-a364-4747-8026-c19e56d64882",
+      "text": "**Riepilogo:** Risposta:\nDaniele Cono D’Elia insegnante presso l'università, dirige 2 corsi attivi e ha ricevuto un feedback di 5/5 per il corso di Sistemi di Calcolo.\n\n**Informazioni Complete:**\n**Docente: Daniele Cono D’Elia**\n**Corsi Attivi:** 2\n**Corsi Insegnati:** Sicurezza, Sistemi di Calcolo\n\n**Feedback Studenti:**\n• Sistemi di Calcolo: 5/5 - Corso interessante.",
+      "namespace": "contextual_db",
+      "metadata": {
+        "chunk_type": "professor_profile",
+        "courses_count": 2.0,
+        "primary_key": "e34c3a8a-a364-4747-8026-c19e56d64882",
+        "professor_name": "Daniele Cono D’Elia",
+        "text": "**Riepilogo:** Risposta:\nDaniele Cono D’Elia insegnante presso l'università, dirige 2 corsi attivi e ha ricevuto un feedback di 5/5 per il corso di Sistemi di Calcolo.\n\n**Informazioni Complete:**\n**Docente: Daniele Cono D’Elia**\n**Corsi Attivi:** 2\n**Corsi Insegnati:** Sicurezza, Sistemi di Calcolo\n\n**Feedback Studenti:**\n• Sistemi di Calcolo: 5/5 - Corso interessante."
+      }
+    },
+    {
+      "id": "course_profile_cec8d844-3aa6-4f03-9902-edfff6be47ae_S1/2025",
+      "text": "**Riepilogo:** [RIASSUNTO] Il corso Sistemi Operativi e Reti di Calcolatori ha 6 CFU ed è indicato per la classe di Laurea in Ingegneria Informatica e Automatica, che è un corso triennale, totale di 180 CFU e richiede un test di ammissione. Il corso si svolge nella Facoltà di Ingegneria dell'informazione, informatica e statistica, all'interno del Dipartimento di Ingegneria informatica, automatica e gestionale Antonio Ruberti, presieduto dal Prof. Marco Schaerf. Nell'edizione attuale S1/2025, il corso è in stato attivo, insegnato da Riccardo Lazzeretti e offre l'esonero. L'esame avviene in modalità scritta. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Sistemi Operativi e Reti di Calcolatori**\n**CFU:** 6\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2025\n**Stato:** attivo\n**Docente:** Riccardo Lazzeretti\n**Esonero:** Sì\n**Modalità Esame:** Scritto\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "cfu": 6.0,
+        "chunk_type": "course_profile",
+        "course_name": "Sistemi Operativi e Reti di Calcolatori",
+        "degree_program": "Ingegneria Informatica e Automatica",
+        "department": "Ingegneria informatica, automatica e gestionale Antonio Ruberti",
+        "faculty": "Ingegneria dell'informazione, informatica e statistica",
+        "primary_key": "cec8d844-3aa6-4f03-9902-edfff6be47ae",
+        "professor": "Riccardo Lazzeretti",
+        "semester": "S1/2025",
+        "text": "**Riepilogo:** [RIASSUNTO] Il corso Sistemi Operativi e Reti di Calcolatori ha 6 CFU ed è indicato per la classe di Laurea in Ingegneria Informatica e Automatica, che è un corso triennale, totale di 180 CFU e richiede un test di ammissione. Il corso si svolge nella Facoltà di Ingegneria dell'informazione, informatica e statistica, all'interno del Dipartimento di Ingegneria informatica, automatica e gestionale Antonio Ruberti, presieduto dal Prof. Marco Schaerf. Nell'edizione attuale S1/2025, il corso è in stato attivo, insegnato da Riccardo Lazzeretti e offre l'esonero. L'esame avviene in modalità scritta. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Sistemi Operativi e Reti di Calcolatori**\n**CFU:** 6\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2025\n**Stato:** attivo\n**Docente:** Riccardo Lazzeretti\n**Esonero:** Sì\n**Modalità Esame:** Scritto\n"
+      }
+    },
+    {
+      "id": "course_profile_e9a561ea-2cf1-475d-be08-a02dbdfb2b3e_S1/2023",
+      "text": "**Riepilogo:** [RIASSUNTO] Il corso Elementi di Calcolo delle Probabilità e Statistica vale 6 CFU ed è non idoneo per la laurea in Ingegneria Informatica e Automatica, triennale, della Facoltà di Ingegneria dell'informazione, informatica e statistica, nel Dipartimento di Ingegneria informatica, automatica e gestionale Antonio Ruberti, presieduto dal Prof. Marco Schaerf. L'edizione attuale (S1/2023) è in corso con modalità esame scritt\n\n**Informazioni Complete:**\n**Corso: Elementi di Calcolo delle Probabilita' e Statistica**\n**CFU:** 6\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2023\n**Stato:** attivo\n**Docente:** Emilio De Santis\n**Esonero:** No\n**Modalità Esame:** Scritto + Orale\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "cfu": 6.0,
+        "chunk_type": "course_profile",
+        "course_name": "Elementi di Calcolo delle Probabilita' e Statistica",
+        "degree_program": "Ingegneria Informatica e Automatica",
+        "department": "Ingegneria informatica, automatica e gestionale Antonio Ruberti",
+        "faculty": "Ingegneria dell'informazione, informatica e statistica",
+        "primary_key": "e9a561ea-2cf1-475d-be08-a02dbdfb2b3e",
+        "professor": "Emilio De Santis",
+        "semester": "S1/2023",
+        "text": "**Riepilogo:** [RIASSUNTO] Il corso Elementi di Calcolo delle Probabilità e Statistica vale 6 CFU ed è non idoneo per la laurea in Ingegneria Informatica e Automatica, triennale, della Facoltà di Ingegneria dell'informazione, informatica e statistica, nel Dipartimento di Ingegneria informatica, automatica e gestionale Antonio Ruberti, presieduto dal Prof. Marco Schaerf. L'edizione attuale (S1/2023) è in corso con modalità esame scritt\n\n**Informazioni Complete:**\n**Corso: Elementi di Calcolo delle Probabilita' e Statistica**\n**CFU:** 6\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2023\n**Stato:** attivo\n**Docente:** Emilio De Santis\n**Esonero:** No\n**Modalità Esame:** Scritto + Orale\n"
+      }
+    },
+    {
+      "id": "professor_profile_3785fbaf-124c-4918-89bc-0b6fc64232da",
+      "text": "**Riepilogo:** Risposta:\nDocente: Giuseppe Santucci\nCorsi attivi: 1\nCorsi insegnati: Introduzione alla Programmazione\n\nFeedback studenti:\n- Introduzione alla Programmazione: 4/5 - Buon corso di introduzione a Python\n- Introduzione alla Programmazione: 1/5 - Corsi del professore possono variare\n\nGiuseppe Santucci insegna un singolo corso attivo e ha insegnato Introduzione alla Programmazione. I feedback studenti sono generalmente positivi per l'Introduzione alla Programmazione (4/5) e uno negativo per il corso del professore (1/5). Sei in grado di seguire i corsi di Giuseppe Santucci e formare la propria opinione.\n\n**Informazioni Complete:**\n**Docente: Giuseppe Santucci**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Introduzione alla Programmazione\n\n**Feedback Studenti:**\n• Introduzione alla Programmazione: 4/5 - Bel corso di introduzione a Python\n• Introduzione alla Programmazione: 1/5 - bellissimo, bravo peppe",
+      "namespace": "contextual_db",
+      "metadata": {
+        "chunk_type": "professor_profile",
+        "courses_count": 1.0,
+        "primary_key": "3785fbaf-124c-4918-89bc-0b6fc64232da",
+        "professor_name": "Giuseppe Santucci",
+        "text": "**Riepilogo:** Risposta:\nDocente: Giuseppe Santucci\nCorsi attivi: 1\nCorsi insegnati: Introduzione alla Programmazione\n\nFeedback studenti:\n- Introduzione alla Programmazione: 4/5 - Buon corso di introduzione a Python\n- Introduzione alla Programmazione: 1/5 - Corsi del professore possono variare\n\nGiuseppe Santucci insegna un singolo corso attivo e ha insegnato Introduzione alla Programmazione. I feedback studenti sono generalmente positivi per l'Introduzione alla Programmazione (4/5) e uno negativo per il corso del professore (1/5). Sei in grado di seguire i corsi di Giuseppe Santucci e formare la propria opinione.\n\n**Informazioni Complete:**\n**Docente: Giuseppe Santucci**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Introduzione alla Programmazione\n\n**Feedback Studenti:**\n• Introduzione alla Programmazione: 4/5 - Bel corso di introduzione a Python\n• Introduzione alla Programmazione: 1/5 - bellissimo, bravo peppe"
+      }
+    },
+    {
+      "id": "professor_profile_d4416845-ef8e-4d7d-9706-b2af518761be",
+      "text": "**Riepilogo:** [RIASSUNTO]\nDocente: Paolo Ottolino\nCorsi attivi: 1\nCorsi insegnati: Sistemi Operativi\n\nPaolo Ottolino insegna un solo corso attivo e si occupa di Sistemi Operativi. Non si hanno informazioni aggiuntive su di lui, ma potresti cercare recensioni degli studenti passati sul corso di Sistemi Operativi per avere un'idea del suo stile di insegnamento. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Docente: Paolo Ottolino**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Sistemi Operativi\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "chunk_type": "professor_profile",
+        "courses_count": 1.0,
+        "primary_key": "d4416845-ef8e-4d7d-9706-b2af518761be",
+        "professor_name": "Paolo Ottolino",
+        "text": "**Riepilogo:** [RIASSUNTO]\nDocente: Paolo Ottolino\nCorsi attivi: 1\nCorsi insegnati: Sistemi Operativi\n\nPaolo Ottolino insegna un solo corso attivo e si occupa di Sistemi Operativi. Non si hanno informazioni aggiuntive su di lui, ma potresti cercare recensioni degli studenti passati sul corso di Sistemi Operativi per avere un'idea del suo stile di insegnamento. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Docente: Paolo Ottolino**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Sistemi Operativi\n"
+      }
+    },
+    {
+      "id": "course_profile_19e971ff-6b33-4e90-91e5-88b20b874e12_S1/2024",
+      "text": "**Riepilogo:** [RIASSUNTO] Il corso Fondamenti di Comunicazioni e Internet ha un carico di lavoro di 9 CFU ed è non idoneo. Si trova nella classe di laurea in Ingegneria Informatica e Automatica, gestita dalla Facoltà di Ingegneria dell'informazione, informatica e statistica nel Dipartimento di Ingegneria informatica, automatica e gestionale Antonio Ruberti, presieduto dal Prof. Marco Schaerf. Nell'edizione attuale S1/2024, il corso è insegnato da Marco Polverini e offre l'esonero. L'esame avviene con modalità scritta. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Fondamenti di Comunicazioni e Internet**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2024\n**Stato:** attivo\n**Docente:** Marco Polverini\n**Esonero:** Sì\n**Modalità Esame:** Scritto\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "cfu": 9.0,
+        "chunk_type": "course_profile",
+        "course_name": "Fondamenti di Comunicazioni e Internet",
+        "degree_program": "Ingegneria Informatica e Automatica",
+        "department": "Ingegneria informatica, automatica e gestionale Antonio Ruberti",
+        "faculty": "Ingegneria dell'informazione, informatica e statistica",
+        "primary_key": "19e971ff-6b33-4e90-91e5-88b20b874e12",
+        "professor": "Marco Polverini",
+        "semester": "S1/2024",
+        "text": "**Riepilogo:** [RIASSUNTO] Il corso Fondamenti di Comunicazioni e Internet ha un carico di lavoro di 9 CFU ed è non idoneo. Si trova nella classe di laurea in Ingegneria Informatica e Automatica, gestita dalla Facoltà di Ingegneria dell'informazione, informatica e statistica nel Dipartimento di Ingegneria informatica, automatica e gestionale Antonio Ruberti, presieduto dal Prof. Marco Schaerf. Nell'edizione attuale S1/2024, il corso è insegnato da Marco Polverini e offre l'esonero. L'esame avviene con modalità scritta. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Fondamenti di Comunicazioni e Internet**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2024\n**Stato:** attivo\n**Docente:** Marco Polverini\n**Esonero:** Sì\n**Modalità Esame:** Scritto\n"
+      }
+    },
+    {
+      "id": "course_profile_930415af-454b-49a3-9fb8-2c4687065cba_S1/2022",
+      "text": "**Riepilogo:** [RIASSUNTORISPOSTA]\nCorso: Introduzione alla Programmazione\nCFU: 9\nIdoneità: non idoneo\nOrario: lunedì venerdì\nEsonero: si\nModalità esame: esonero\nVoto: 5/5 - Bello\n\nInformazioni principali: Corso di Laurea: Ingegneria Informatica e Automatica, Facoltà: Ingegneria dell'informazione, informatica e statistica, Dipartimento: Ingegneria informatica, automatica e gestionale Antonio Ruberti, Preside: Prof. Marco Schaerf, Docente: Massimo Petrarca. [/RIASSUNTORISPOSTA]\n\n**Informazioni Complete:**\n**Corso: Introduzione alla Programmazione**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2022\n**Stato:** attivo\n**Docente:** Massimo Petrarca\n**Orario:** Luendi venerdi\n**Esonero:** Sì\n**Modalità Esame:** Esonero\n\n\n**Recensioni Studenti:**\n• Voto: 5/5 - Bello",
+      "namespace": "contextual_db",
+      "metadata": {
+        "cfu": 9.0,
+        "chunk_type": "course_profile",
+        "course_name": "Introduzione alla Programmazione",
+        "degree_program": "Ingegneria Informatica e Automatica",
+        "department": "Ingegneria informatica, automatica e gestionale Antonio Ruberti",
+        "faculty": "Ingegneria dell'informazione, informatica e statistica",
+        "primary_key": "930415af-454b-49a3-9fb8-2c4687065cba",
+        "professor": "Massimo Petrarca",
+        "semester": "S1/2022",
+        "text": "**Riepilogo:** [RIASSUNTORISPOSTA]\nCorso: Introduzione alla Programmazione\nCFU: 9\nIdoneità: non idoneo\nOrario: lunedì venerdì\nEsonero: si\nModalità esame: esonero\nVoto: 5/5 - Bello\n\nInformazioni principali: Corso di Laurea: Ingegneria Informatica e Automatica, Facoltà: Ingegneria dell'informazione, informatica e statistica, Dipartimento: Ingegneria informatica, automatica e gestionale Antonio Ruberti, Preside: Prof. Marco Schaerf, Docente: Massimo Petrarca. [/RIASSUNTORISPOSTA]\n\n**Informazioni Complete:**\n**Corso: Introduzione alla Programmazione**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S1/2022\n**Stato:** attivo\n**Docente:** Massimo Petrarca\n**Orario:** Luendi venerdi\n**Esonero:** Sì\n**Modalità Esame:** Esonero\n\n\n**Recensioni Studenti:**\n• Voto: 5/5 - Bello"
+      }
+    },
+    {
+      "id": "professor_profile_552e58a4-8087-42ba-ab42-fdf88e65c0bd",
+      "text": "**Riepilogo:** Risposta:\n**Riccardo Lazzeretti** è il docente che insegnava Sistemi Operativi e Reti di Calcolatori. Attualmente, sembra non stia impartendo altri corsi attivi. Lo studente può contattarlo se sta seguendo o ha interesse nel suo corso passato.\n\n**Informazioni Complete:**\n**Docente: Riccardo Lazzeretti**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Sistemi Operativi e Reti di Calcolatori\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "chunk_type": "professor_profile",
+        "courses_count": 1.0,
+        "primary_key": "552e58a4-8087-42ba-ab42-fdf88e65c0bd",
+        "professor_name": "Riccardo Lazzeretti",
+        "text": "**Riepilogo:** Risposta:\n**Riccardo Lazzeretti** è il docente che insegnava Sistemi Operativi e Reti di Calcolatori. Attualmente, sembra non stia impartendo altri corsi attivi. Lo studente può contattarlo se sta seguendo o ha interesse nel suo corso passato.\n\n**Informazioni Complete:**\n**Docente: Riccardo Lazzeretti**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Sistemi Operativi e Reti di Calcolatori\n"
+      }
+    },
+    {
+      "id": "professor_profile_a9c02949-f4e1-45a6-802a-35c3e794f466",
+      "text": "**Riepilogo:** Risposta:\n# Giampaolo Liuzzi\n**Corsi attivi**: 1\n**Corsi insegnati**: Programmazione Matematica\n\nGiampaolo Liuzzi è un docente che insegna un corso di Programmazione Matematica. Attualmente, conduce un solo corso attivo. [/risposta]\n\n**Informazioni Complete:**\n**Docente: Giampaolo Liuzzi**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Programmazione Matematica\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "chunk_type": "professor_profile",
+        "courses_count": 1.0,
+        "primary_key": "a9c02949-f4e1-45a6-802a-35c3e794f466",
+        "professor_name": "Giampaolo Liuzzi",
+        "text": "**Riepilogo:** Risposta:\n# Giampaolo Liuzzi\n**Corsi attivi**: 1\n**Corsi insegnati**: Programmazione Matematica\n\nGiampaolo Liuzzi è un docente che insegna un corso di Programmazione Matematica. Attualmente, conduce un solo corso attivo. [/risposta]\n\n**Informazioni Complete:**\n**Docente: Giampaolo Liuzzi**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Programmazione Matematica\n"
+      }
+    },
+    {
+      "id": "course_profile_a1bb310e-57c8-46b7-8695-4f14a4cb06cf_S2/2024",
+      "text": "**Riepilogo:** [RIASSUNTO]\nIl corso Sistemi di Calcolo ha 9 CFU, è idoneo per la Laurea in Ingegneria Informatica e Automatica (triennale) e richiede un test di ammissione. È insegnato nello stesso anno accademico (Edizione S2/2024) dal docente Daniele Cono D’Elia e non ci sono esenzioni. Il corso è attivo e ha ricevuto recensioni positive, con un voto di 5/5 per essere interessante. La Facoltà appartiene alla Ingegneria dell'informazione, informatica e statistica e il Preside è Prof. Marco Schaerf. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Sistemi di Calcolo**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S2/2024\n**Stato:** attivo\n**Docente:** Daniele Cono D’Elia\n**Esonero:** No\n**Modalità Esame:** Scritto\n\n\n**Recensioni Studenti:**\n• Voto: 5/5 - Corso interessante.",
+      "namespace": "contextual_db",
+      "metadata": {
+        "cfu": 9.0,
+        "chunk_type": "course_profile",
+        "course_name": "Sistemi di Calcolo",
+        "degree_program": "Ingegneria Informatica e Automatica",
+        "department": "Ingegneria informatica, automatica e gestionale Antonio Ruberti",
+        "faculty": "Ingegneria dell'informazione, informatica e statistica",
+        "primary_key": "a1bb310e-57c8-46b7-8695-4f14a4cb06cf",
+        "professor": "Daniele Cono D’Elia",
+        "semester": "S2/2024",
+        "text": "**Riepilogo:** [RIASSUNTO]\nIl corso Sistemi di Calcolo ha 9 CFU, è idoneo per la Laurea in Ingegneria Informatica e Automatica (triennale) e richiede un test di ammissione. È insegnato nello stesso anno accademico (Edizione S2/2024) dal docente Daniele Cono D’Elia e non ci sono esenzioni. Il corso è attivo e ha ricevuto recensioni positive, con un voto di 5/5 per essere interessante. La Facoltà appartiene alla Ingegneria dell'informazione, informatica e statistica e il Preside è Prof. Marco Schaerf. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Sistemi di Calcolo**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S2/2024\n**Stato:** attivo\n**Docente:** Daniele Cono D’Elia\n**Esonero:** No\n**Modalità Esame:** Scritto\n\n\n**Recensioni Studenti:**\n• Voto: 5/5 - Corso interessante."
+      }
+    },
+    {
+      "id": "degree_overview_5c317d75-c880-4cc6-9747-8bc93ff916b9",
+      "text": "**Riepilogo:** [RIASSUNTOPAGES]\nIl Corso di Laurea in Ingegneria Informatica e Automatica è una scelta triennale duri 180 CFU, con 19 corsi in totale. Viene valutato un test di ammissione e fa parte della Facoltà di Ingegneria dell'informazione, informatica e statistica.\n\nNella struttura del corso, vi sono corsi legati alla matematica, alla programmazione, all'informatica ed alla statistica. Alcuni esempi includono Algoritmi e Strutture Dati, Fondamenti di Matematica e Introduzione alla Programmazione.\n\nOltre a ciò, sono presenti corsi più specifici come Basi di Dati, Fondamenti di Comunicazioni e Internet, e Sistemi Operativi. Infine, ci sono corsi che coprono temi transversali come Economia, Fisica e Sicurezza.\n\nRicorda che questo è solo un riassunto delle informazioni principali, per maggiori dettagli consulta il sito ufficiale del tuo ateneo. [/RIASSUNTOPAGES]\n\n**Informazioni Complete:**\n**Corso di Laurea: Ingegneria Informatica e Automatica**\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Numero Corsi:** 19\n**Test di Ammissione:** Sì\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n\n**Struttura Corsi:**\n• Algoritmi e Strutture Dati (9 CFU)\n• Basi di Dati (6 CFU)\n• Complementi di Programmazione (9 CFU)\n• Economia (9 CFU)\n• Elementi di Calcolo delle Probabilita' e Statistica (6 CFU)\n• Fisica (12 CFU)\n• Fondamenti di Algebra e Geometria (9 CFU)\n• Fondamenti di Comunicazioni e Internet (9 CFU)\n• Fondamenti di Matematica (9 CFU)\n• Introduzione alla Programmazione (9 CFU)\n• Laboratorio di Ingegneria Informatica (6 CFU)\n• Progettazione del Software (9 CFU)\n• Programmazione Matematica (9 CFU)\n• Sicurezza (6 CFU)\n• Sistemi Dinamici (9 CFU)\n• Sistemi Operativi (9 CFU)\n• Sistemi Operativi e Reti di Calcolatori (6 CFU)\n• Sistemi di Calcolo (9 CFU)\n• Sistemi di Controllo (9 CFU)",
+      "namespace": "contextual_db",
+      "metadata": {
+        "chunk_type": "degree_overview",
+        "degree_name": "Ingegneria Informatica e Automatica",
+        "degree_type": "Triennale",
+        "department": "Ingegneria informatica, automatica e gestionale Antonio Ruberti",
+        "faculty": "Ingegneria dell'informazione, informatica e statistica",
+        "primary_key": "5c317d75-c880-4cc6-9747-8bc93ff916b9",
+        "text": "**Riepilogo:** [RIASSUNTOPAGES]\nIl Corso di Laurea in Ingegneria Informatica e Automatica è una scelta triennale duri 180 CFU, con 19 corsi in totale. Viene valutato un test di ammissione e fa parte della Facoltà di Ingegneria dell'informazione, informatica e statistica.\n\nNella struttura del corso, vi sono corsi legati alla matematica, alla programmazione, all'informatica ed alla statistica. Alcuni esempi includono Algoritmi e Strutture Dati, Fondamenti di Matematica e Introduzione alla Programmazione.\n\nOltre a ciò, sono presenti corsi più specifici come Basi di Dati, Fondamenti di Comunicazioni e Internet, e Sistemi Operativi. Infine, ci sono corsi che coprono temi transversali come Economia, Fisica e Sicurezza.\n\nRicorda che questo è solo un riassunto delle informazioni principali, per maggiori dettagli consulta il sito ufficiale del tuo ateneo. [/RIASSUNTOPAGES]\n\n**Informazioni Complete:**\n**Corso di Laurea: Ingegneria Informatica e Automatica**\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Numero Corsi:** 19\n**Test di Ammissione:** Sì\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n\n**Struttura Corsi:**\n• Algoritmi e Strutture Dati (9 CFU)\n• Basi di Dati (6 CFU)\n• Complementi di Programmazione (9 CFU)\n• Economia (9 CFU)\n• Elementi di Calcolo delle Probabilita' e Statistica (6 CFU)\n• Fisica (12 CFU)\n• Fondamenti di Algebra e Geometria (9 CFU)\n• Fondamenti di Comunicazioni e Internet (9 CFU)\n• Fondamenti di Matematica (9 CFU)\n• Introduzione alla Programmazione (9 CFU)\n• Laboratorio di Ingegneria Informatica (6 CFU)\n• Progettazione del Software (9 CFU)\n• Programmazione Matematica (9 CFU)\n• Sicurezza (6 CFU)\n• Sistemi Dinamici (9 CFU)\n• Sistemi Operativi (9 CFU)\n• Sistemi Operativi e Reti di Calcolatori (6 CFU)\n• Sistemi di Calcolo (9 CFU)\n• Sistemi di Controllo (9 CFU)",
+        "total_courses": 19.0
+      }
+    },
+    {
+      "id": "professor_profile_aa8dc5a4-9f39-43dd-b833-f15ea3d2e039",
+      "text": "**Riepilogo:** Risposta:\n# Docente: Luca Becchetti\nCorsi Attivi: 1\nCorsi Insegnati: Algoritmi e Strutture Dati\n\n**Luca Becchetti** è un docente che insegnava Algoritmi e Strutture Dati. Attualmente, è attivo in un solo corso. Lo studente universitario potrebbe trovarlo come insegnante di un interessante e fondamentale corso di Laurea. [/RES]\n\n**Informazioni Complete:**\n**Docente: Luca Becchetti**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Algoritmi e Strutture Dati\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "chunk_type": "professor_profile",
+        "courses_count": 1.0,
+        "primary_key": "aa8dc5a4-9f39-43dd-b833-f15ea3d2e039",
+        "professor_name": "Luca Becchetti",
+        "text": "**Riepilogo:** Risposta:\n# Docente: Luca Becchetti\nCorsi Attivi: 1\nCorsi Insegnati: Algoritmi e Strutture Dati\n\n**Luca Becchetti** è un docente che insegnava Algoritmi e Strutture Dati. Attualmente, è attivo in un solo corso. Lo studente universitario potrebbe trovarlo come insegnante di un interessante e fondamentale corso di Laurea. [/RES]\n\n**Informazioni Complete:**\n**Docente: Luca Becchetti**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Algoritmi e Strutture Dati\n"
+      }
+    },
+    {
+      "id": "professor_profile_7bedac12-48fc-4fa1-916a-3954fb0d8128",
+      "text": "**Riepilogo:** Risposta:\nIl docente Eugenio Oropallo insegna attualmente un solo corso attivo e la sua specializzazione è in Economia. Secondo i feedback dei studenti, il corso di Economia è valutato 4 su 5 come un buon corso. [/risposta]\n\n**Informazioni Complete:**\n**Docente: Eugenio Oropallo**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Economia\n\n**Feedback Studenti:**\n• Economia: 4/5 - Bel corso",
+      "namespace": "contextual_db",
+      "metadata": {
+        "chunk_type": "professor_profile",
+        "courses_count": 1.0,
+        "primary_key": "7bedac12-48fc-4fa1-916a-3954fb0d8128",
+        "professor_name": "Eugenio Oropallo",
+        "text": "**Riepilogo:** Risposta:\nIl docente Eugenio Oropallo insegna attualmente un solo corso attivo e la sua specializzazione è in Economia. Secondo i feedback dei studenti, il corso di Economia è valutato 4 su 5 come un buon corso. [/risposta]\n\n**Informazioni Complete:**\n**Docente: Eugenio Oropallo**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Economia\n\n**Feedback Studenti:**\n• Economia: 4/5 - Bel corso"
+      }
+    },
+    {
+      "id": "professor_profile_3cc00f15-bc94-4ea9-b61e-a1c3321fbcb1",
+      "text": "**Riepilogo:** Risposta:\n**Giuseppe Oriolo** è un docente che insegna Sistemi di Controllo. Attualmente siede a un solo corso attivo. Se stai cercando informazioni sui suoi interessi accademici o per conoscere meglio il corso di Sistemi di Controllo, non esitare a chiedi specifiche domande. [/risposta]\n\n**Informazioni Complete:**\n**Docente: Giuseppe Oriolo**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Sistemi di Controllo\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "chunk_type": "professor_profile",
+        "courses_count": 1.0,
+        "primary_key": "3cc00f15-bc94-4ea9-b61e-a1c3321fbcb1",
+        "professor_name": "Giuseppe Oriolo",
+        "text": "**Riepilogo:** Risposta:\n**Giuseppe Oriolo** è un docente che insegna Sistemi di Controllo. Attualmente siede a un solo corso attivo. Se stai cercando informazioni sui suoi interessi accademici o per conoscere meglio il corso di Sistemi di Controllo, non esitare a chiedi specifiche domande. [/risposta]\n\n**Informazioni Complete:**\n**Docente: Giuseppe Oriolo**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Sistemi di Controllo\n"
+      }
+    },
+    {
+      "id": "course_profile_183c2450-fe5c-49ba-abba-856546006523_S2/2024",
+      "text": "**Riepilogo:** [RIASSUNTO]\nCorso: Algoritmi e Strutture Dati\nCFU: 9\nIdoneità: non idoneo per altri corsi\nFacoltà: Ingegneria dell'informazione, informatica e statistica\nDipartimento: Ingegneria informatica, automatica e gestionale Antonio Ruberti\nDocente: Luca Becchetti\n[/RIASSUNTO]\n\nDomanda:\nQuali sono le principali competenze che uno studente svilupperà seguendo il corso Algoritmi e Strutture Dati? \n\n[RISPOSTA]\nL'allenamento nel corso Algoritmi e Strutture Dati si concentra sulle competenze nello sviluppo di algoritmi efficienti e l'uso di dati strutturati, come array, liste, alberi e grafi. Lo studente svilupperà capacità di programmazione avanzata e di analisi algoritmica. [/RISPOSTA]\n\nDomanda:\nIn che modo il corso Algoritmi e Strutture Dati si interseca con i corsi successivi della laurea in Ingegneria Informatica e Automatica? \n\n[RISPOSTA]\nIl corso Algoritmi e Strutture Dati costituisce una base solida per molti corsi successivi nella laurea in Ingegneria Informatica e Automatica. Le competenze acquisite in questo corso saranno utili in corsi come Algoritmi e Complessità Computazionale, Sistemi Distribuiti e Sistemi Operativi. Inoltre, il corso rappresenta un punto di partenza per lo studio della programmazione orientata agli oggetti e dell'analisi dei dati. [/RISPOSTA]\n\n**Informazioni Complete:**\n**Corso: Algoritmi e Strutture Dati**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S2/2024\n**Stato:** attivo\n**Docente:** Luca Becchetti\n**Esonero:** No\n**Modalità Esame:** Scritto\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "cfu": 9.0,
+        "chunk_type": "course_profile",
+        "course_name": "Algoritmi e Strutture Dati",
+        "degree_program": "Ingegneria Informatica e Automatica",
+        "department": "Ingegneria informatica, automatica e gestionale Antonio Ruberti",
+        "faculty": "Ingegneria dell'informazione, informatica e statistica",
+        "primary_key": "183c2450-fe5c-49ba-abba-856546006523",
+        "professor": "Luca Becchetti",
+        "semester": "S2/2024",
+        "text": "**Riepilogo:** [RIASSUNTO]\nCorso: Algoritmi e Strutture Dati\nCFU: 9\nIdoneità: non idoneo per altri corsi\nFacoltà: Ingegneria dell'informazione, informatica e statistica\nDipartimento: Ingegneria informatica, automatica e gestionale Antonio Ruberti\nDocente: Luca Becchetti\n[/RIASSUNTO]\n\nDomanda:\nQuali sono le principali competenze che uno studente svilupperà seguendo il corso Algoritmi e Strutture Dati? \n\n[RISPOSTA]\nL'allenamento nel corso Algoritmi e Strutture Dati si concentra sulle competenze nello sviluppo di algoritmi efficienti e l'uso di dati strutturati, come array, liste, alberi e grafi. Lo studente svilupperà capacità di programmazione avanzata e di analisi algoritmica. [/RISPOSTA]\n\nDomanda:\nIn che modo il corso Algoritmi e Strutture Dati si interseca con i corsi successivi della laurea in Ingegneria Informatica e Automatica? \n\n[RISPOSTA]\nIl corso Algoritmi e Strutture Dati costituisce una base solida per molti corsi successivi nella laurea in Ingegneria Informatica e Automatica. Le competenze acquisite in questo corso saranno utili in corsi come Algoritmi e Complessità Computazionale, Sistemi Distribuiti e Sistemi Operativi. Inoltre, il corso rappresenta un punto di partenza per lo studio della programmazione orientata agli oggetti e dell'analisi dei dati. [/RISPOSTA]\n\n**Informazioni Complete:**\n**Corso: Algoritmi e Strutture Dati**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S2/2024\n**Stato:** attivo\n**Docente:** Luca Becchetti\n**Esonero:** No\n**Modalità Esame:** Scritto\n"
+      }
+    },
+    {
+      "id": "professor_profile_d02e044a-01cf-441d-881c-814fcee082d8",
+      "text": "**Riepilogo:** Risposta:\n**Dario Salvitti**\n- Insegna Fondamenti di Algebra e Geometria.\n- Ha 1 corso attivo.\n- È un docente esperto in materia. [/RISPOSTA]\n\n**Informazioni Complete:**\n**Docente: Dario Salvitti**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Fondamenti di Algebra e Geometria\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "chunk_type": "professor_profile",
+        "courses_count": 1.0,
+        "primary_key": "d02e044a-01cf-441d-881c-814fcee082d8",
+        "professor_name": "Dario Salvitti",
+        "text": "**Riepilogo:** Risposta:\n**Dario Salvitti**\n- Insegna Fondamenti di Algebra e Geometria.\n- Ha 1 corso attivo.\n- È un docente esperto in materia. [/RISPOSTA]\n\n**Informazioni Complete:**\n**Docente: Dario Salvitti**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Fondamenti di Algebra e Geometria\n"
+      }
+    },
+    {
+      "id": "course_profile_c351f7cd-1ad8-45ca-a6bc-e7c9963bf455_S2/2023",
+      "text": "**Riepilogo:** [RIASSUNTO]\nCorso: Fondamenti di Algebra e Geometria\nCFU: 9\nIdoneità: non idoneo\n\nIl corso si occupa di fondamenti di Algebra e Geometria, con un carico di lavoro di 9 CFU e non è idoneo come accesso alternativo. È parte del corso di Laurea in Ingegneria Informatica e Automatica, un corso triennale con 180 CFU totali e richiede un test di ammissione. Il diploma è concesso dalla Facoltà di Ingegneria dell'informazione, informatica e statistica, parte del Dipartimento Ruberti e presieduto dal Prof. Marco Schaerf. Il corso specifico è attivo nell'edizione S2/2023, insegnato da Dario Salvitti, non ha esonero e l'esame si svolge in modalità scritta. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Fondamenti di Algebra e Geometria**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S2/2023\n**Stato:** attivo\n**Docente:** Dario Salvitti\n**Esonero:** No\n**Modalità Esame:** Scritto\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "cfu": 9.0,
+        "chunk_type": "course_profile",
+        "course_name": "Fondamenti di Algebra e Geometria",
+        "degree_program": "Ingegneria Informatica e Automatica",
+        "department": "Ingegneria informatica, automatica e gestionale Antonio Ruberti",
+        "faculty": "Ingegneria dell'informazione, informatica e statistica",
+        "primary_key": "c351f7cd-1ad8-45ca-a6bc-e7c9963bf455",
+        "professor": "Dario Salvitti",
+        "semester": "S2/2023",
+        "text": "**Riepilogo:** [RIASSUNTO]\nCorso: Fondamenti di Algebra e Geometria\nCFU: 9\nIdoneità: non idoneo\n\nIl corso si occupa di fondamenti di Algebra e Geometria, con un carico di lavoro di 9 CFU e non è idoneo come accesso alternativo. È parte del corso di Laurea in Ingegneria Informatica e Automatica, un corso triennale con 180 CFU totali e richiede un test di ammissione. Il diploma è concesso dalla Facoltà di Ingegneria dell'informazione, informatica e statistica, parte del Dipartimento Ruberti e presieduto dal Prof. Marco Schaerf. Il corso specifico è attivo nell'edizione S2/2023, insegnato da Dario Salvitti, non ha esonero e l'esame si svolge in modalità scritta. [/RIASSUNTO]\n\n**Informazioni Complete:**\n**Corso: Fondamenti di Algebra e Geometria**\n**CFU:** 9\n**Idoneità:** No\n\n**Corso di Laurea:** Ingegneria Informatica e Automatica\n**Classe:** None\n**Tipologia:** Triennale\n**CFU Totali:** 180\n**Test di Ammissione:** Sì\n\n**Facoltà:** Ingegneria dell'informazione, informatica e statistica\n**Dipartimento:** Ingegneria informatica, automatica e gestionale Antonio Ruberti\n**Preside:** Prof. Marco Schaerf\n**Contatti Facoltà:** presidenza-i3s@uniroma1.it\n\n**Edizione Attuale:** S2/2023\n**Stato:** attivo\n**Docente:** Dario Salvitti\n**Esonero:** No\n**Modalità Esame:** Scritto\n"
+      }
+    },
+    {
+      "id": "professor_profile_e37327b7-232a-4523-9cd7-707d49d76a95",
+      "text": "**Riepilogo:** Risposta:\n**Marco Polverini**\n- Insegnante universitario\n- Corsi attivi: 1\n- Corsi insegnati: Fondamenti di Comunicazioni e Internet\n\n**Informazioni Complete:**\n**Docente: Marco Polverini**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Fondamenti di Comunicazioni e Internet\n",
+      "namespace": "contextual_db",
+      "metadata": {
+        "chunk_type": "professor_profile",
+        "courses_count": 1.0,
+        "primary_key": "e37327b7-232a-4523-9cd7-707d49d76a95",
+        "professor_name": "Marco Polverini",
+        "text": "**Riepilogo:** Risposta:\n**Marco Polverini**\n- Insegnante universitario\n- Corsi attivi: 1\n- Corsi insegnati: Fondamenti di Comunicazioni e Internet\n\n**Informazioni Complete:**\n**Docente: Marco Polverini**\n**Corsi Attivi:** 1\n**Corsi Insegnati:** Fondamenti di Comunicazioni e Internet\n"
+      }
+    }
+  ]
+}
