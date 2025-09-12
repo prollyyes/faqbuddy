@@ -137,6 +137,9 @@ class CompleteCourseRequest(BaseModel):
     edition_data: str
     voto: int
     
+# --- RICHIESTA PER RIMUOVERE UN CORSO/EDIZIONE DAI CORSI SEGUITI ---
+class UnenrollRequest(BaseModel):
+    edition_data: str
     
 # Chat.py
 class T2SQLRequest(BaseModel):

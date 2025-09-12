@@ -2,12 +2,12 @@ import React, { useState } from "react";
 
 export default function ReviewModal({ corso, onClose, onSubmit, error }) {
   const [descrizione, setDescrizione] = useState("");
-  const [voto, setVoto] = useState("");
+  const [voto, setVoto] = useState(0);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!voto || isNaN(voto) || voto < 1 || voto > 5) return;
-    onSubmit(corso, descrizione, Number(voto));
+    if (!voto || voto < 1 || voto > 5) return;
+    onSubmit(corso, descrizione, voto);
   };
 
   return (
@@ -22,7 +22,7 @@ export default function ReviewModal({ corso, onClose, onSubmit, error }) {
         <h3 className="text-lg font-bold mb-4 text-[#991B1B]">Aggiungi Recensione</h3>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="block font-semibold mb-1 text-black">Descrizione:</label>
+            <label className="block font-semibold mb-1 text-black">Lascia una review !</label>
             <textarea
               className="border rounded p-2 w-full text-black"
               value={descrizione}
@@ -32,29 +32,37 @@ export default function ReviewModal({ corso, onClose, onSubmit, error }) {
             />
           </div>
           <div>
-            <label className="block font-semibold mb-1 text-black">Voto (1-5):</label>
-            <input
-              type="number"
-              min={1}
-              max={5}
-              className="border rounded p-2 w-full text-black"
-              value={voto}
-              onChange={e => setVoto(e.target.value)}
-              required
-            />
+            <label className="block font-semibold mb-2 text-black">Quanto sei soddisfatto?</label>
+            <div className="flex gap-3 mb-1">
+              {[1,2,3,4,5].map((num) => (
+                <button
+                  key={num}
+                  type="button"
+                  aria-label={`Voto ${num}`}
+                  title={`Voto ${num}`}
+                  onClick={() => setVoto(num)}
+                  className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-200
+                    ${voto >= num ? 'bg-[#991B1B] border-[#991B1B]' : 'bg-white border-black'}
+                    hover:border-[#991B1B] hover:bg-[#fde8e8] focus:outline-none
+                  `}
+                >
+                  <span className={`block w-4 h-4 rounded-full ${voto >= num ? 'bg-white' : ''}`}></span>
+                </button>
+              ))}
+            </div>
           </div>
           {error && <div className="text-red-600">{error}</div>}
           <div className="flex justify-end gap-4 mt-2">
-            <button
+            {/* <button
               type="button"
-              className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+              className="px-3 py-1 bg-gray-200 text-gray-700 rounded border-1 border-black hover:bg-gray-300"
               onClick={onClose}
             >
               Annulla
-            </button>
+            </button> */}
             <button
               type="submit"
-              className="px-3 py-1 bg-[#991B1B] text-white rounded hover:bg-red-800 font-semibold"
+              className="px-3 py-1 bg-[#991B1B] text-white rounded border-1 border-black hover:bg-red-800 font-semibold"
             >
               Invia
             </button>

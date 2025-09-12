@@ -267,6 +267,24 @@ def get_completed_courses(current_user=Depends(get_current_user), db_handler: DB
         )
         for row in results
     ]
+    
+# --- Endpoint: per rimuovere un edizione del corso allo studente che è loggato ---
+@router.delete("/courses/editions/{edition_id}/unenroll")
+def unenroll_from_edition(
+    edition_id: str,
+    data: UnenrollRequest,
+    current_user=Depends(get_current_user),
+    db_handler: DBHandler = Depends(get_db_handler)
+):
+    user_id = current_user["user_id"]
+    edition_data = data.edition_data
+    delete_query = """
+        DELETE FROM Corsi_seguiti
+        WHERE student_id = %s AND edition_id = %s AND edition_data = %s
+    """
+    db_handler.run_query(delete_query, params=(user_id, edition_id, edition_data), fetch=False)
+    return {"detail": "Disiscrizione avvenuta con successo"}
+
 
 # --- Endpoint: per completare un edizione del corso allo studente che è loggato ---
 @router.put("/profile/courses/{edition_id}/complete")
