@@ -553,6 +553,36 @@ def get_stats(current_user=Depends(get_current_user), db_handler: DBHandler = De
     )
 
 
+# --- Endpoint: Corsi del corso di laurea non ancora completati dallo studente che è loggato ---
+# --- Serve per simualre gli esami ---
+@router.get("/courses/not-completed", response_model=List[CourseBase])
+def get_not_completed_courses(
+        current_user=Depends(get_current_user), 
+        db_handler: DBHandler = Depends(get_db_handler)):
+    
+    user_id = current_user["user_id"]
+    # Recupera il corso di laurea dello studente
+    query_cdl = "SELECT corso_laurea_id FROM Studenti WHERE id = %s"
+    result = db_handler.run_query(query_cdl, params=(user_id,), fetch=True)
+    if not result:
+        raise HTTPException(status_code=404, detail="Studente non trovato")
+    corso_laurea_id = result[0][0]
+    # Prendi tutti i corsi del corso di laurea che NON sono stati completati
+    query = """
+        SELECT c.id, c.nome, c.cfu
+        FROM Corso c
+        WHERE c.id_corso = %s
+        AND c.id NOT IN (
+            SELECT c2.id
+            FROM Corsi_seguiti cs
+            JOIN EdizioneCorso e ON cs.edition_id = e.id AND cs.edition_data = e.data
+            JOIN Corso c2 ON e.id = c2.id
+            WHERE cs.student_id = %s AND cs.stato = 'completato'
+        )
+        ORDER BY c.nome
+    """
+    results = db_handler.run_query(query, params=(corso_laurea_id, user_id), fetch=True)
+    return [CourseBase(id=row[0], nome=row[1], cfu=row[2]) for row in results]
 
 
 

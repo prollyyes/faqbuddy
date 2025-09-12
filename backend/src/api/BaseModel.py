@@ -19,9 +19,6 @@ class SignupRequest(BaseModel):
     cv: Optional[str] = None
     ricevimento: Optional[str] = None
 
-class SearchCorsi(BaseModel):
-    nomeCorso : str
-
 # --- PROFILO ---
 class UserProfileResponse(BaseModel):
     nome: str
