@@ -1,5 +1,4 @@
-import os
-
+import os, json, requests
 from langdetect import detect, DetectorFactory
 from langdetect.lang_detect_exception import LangDetectException
 from typing import Generator, Iterator
@@ -7,26 +6,29 @@ from typing import Generator, Iterator
 # Seed the detector for consistent results
 DetectorFactory.seed = 0
 
-# Conditional import for llama_cpp
+# Remote (preferred)
+REMOTE_BASE  = os.getenv("REMOTE_LLM_BASE")            # e.g. https://abc123.trycloudflare.com
+REMOTE_MODEL = os.getenv("REMOTE_LLM_MODEL", "mistral:7b-instruct")
+REMOTE_KEY   = os.getenv("REMOTE_LLM_API_KEY", "")
+
+# Local fallback (only used if REMOTE_LLM_BASE is not set)
 llm_mistral = None
-try:
-    from llama_cpp import Llama
-    mistral_model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'models', 'capybarahermes-2.5-mistral-7b.Q4_K_M.gguf'))
-    
-    if os.path.exists(mistral_model_path):
-        llm_mistral = Llama(
-            model_path=mistral_model_path,
-            n_ctx=4096, 
-            n_threads=6,
-            n_gpu_layers=20,
-            verbose=True
+if not REMOTE_BASE:
+    try:
+        from llama_cpp import Llama
+        mistral_model_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), '..', '..', 'models', 'capybarahermes-2.5-mistral-7b.Q4_K_M.gguf')
         )
-    else:
-        print(f"⚠️ Warning: Mistral model not found at {mistral_model_path}")
+        if os.path.exists(mistral_model_path):
+            llm_mistral = Llama(
+                model_path=mistral_model_path,
+                n_ctx=4096,
+                n_threads=6,
+                n_gpu_layers=-1,
+                verbose=False
+            )
+    except Exception:
         llm_mistral = None
-except ImportError:
-    print("⚠️ Warning: llama_cpp not available, LLM generation will be disabled")
-    llm_mistral = None
 
 def clean_response(response: str) -> str:
     """Clean system tokens and unwanted prefixes from LLM response."""
@@ -52,51 +54,74 @@ def clean_response(response: str) -> str:
     return response.strip()
 
 def get_language_instruction(question: str) -> str:
-    """Detects the language of the question and returns a strong instruction for the LLM."""
     try:
         lang = detect(question)
-        if lang == 'it':
-            return "IMPORTANTE: Rispondi SEMPRE in italiano. Non usare mai l'inglese. Mantieni la conversazione in italiano."
-        elif lang == 'en':
-            return "IMPORTANT: Always answer in English. Never use Italian. Keep the conversation in English."
+        if lang == "en":
+            return "IMPORTANT: Rispondi in italiano (traduci se necessario)."
         else:
-            # Default to Italian for FAQBuddy since it's an Italian university system
-            return "IMPORTANTE: Rispondi SEMPRE in italiano. Non usare mai l'inglese. Mantieni la conversazione in italiano."
+            return "IMPORTANTE: Rispondi SEMPRE in italiano. Non usare mai l'inglese."
     except LangDetectException:
-        # Default to Italian for FAQBuddy
-        return "IMPORTANTE: Rispondi SEMPRE in italiano. Non usare mai l'inglese. Mantieni la conversazione in italiano."
+        return "IMPORTANTE: Rispondi SEMPRE in italiano. Non usare mai l'inglese."
+
+def _build_prompt(context: str, question: str) -> str:
+    li = get_language_instruction(question)
+    return (
+        f"[INST] Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. Anche i professori usano la piattaforma, quindi mantieni un tono professionale ma amichevole. Non rispondere a domande generali non legate all'università. {li} \n\nIMPORTANTE: \n- Rispondi SEMPRE in formato Markdown pulito\n- Usa titoli (# ##), elenchi puntati (-), grassetto (**testo**), corsivo (*testo*) e link quando appropriato\n- NON includere MAI token di sistema come <|im_start|>, <|im_end|>, [/INST], o simili\n- Inizia direttamente con la risposta, senza prefissi o tag\n- Termina con la risposta completa senza token aggiuntivi\n\nContesto:\n{context}\n\nDomanda:\n{question} [/INST]"
+    )
+
+def _generate_remote(context: str, question: str) -> str:
+    url = REMOTE_BASE.rstrip("/") + "/v1/chat/completions"
+    headers = {"Content-Type": "application/json"}
+    if REMOTE_KEY:
+        headers["Authorization"] = f"Bearer {REMOTE_KEY}"
+    
+    li = get_language_instruction(question)
+    system_message = (
+        f"Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. Anche i professori usano la piattaforma, quindi mantieni un tono professionale ma amichevole. Non rispondere a domande generali non legate all'università. {li} "
+        f"IMPORTANTE: Rispondi SEMPRE in formato Markdown pulito. Usa titoli (# ##), elenchi puntati (-), grassetto (**testo**), corsivo (*testo*) e link quando appropriato. NON includere MAI token di sistema come <|im_start|>, <|im_end|>, [/INST], o simili. Inizia direttamente con la risposta, senza prefissi o tag. Termina con la risposta completa senza token aggiuntivi. Usa solo il contesto fornito; se manca, dillo chiaramente."
+    )
+    
+    payload = {
+        "model": REMOTE_MODEL,
+        "temperature": 0.2,
+        "messages": [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": f"Contesto:\n{context}\n\nDomanda:\n{question}"}
+        ]
+    }
+    r = requests.post(url, headers=headers, data=json.dumps(payload), timeout=120)
+    r.raise_for_status()
+    data = r.json()
+    return data["choices"][0]["message"]["content"].strip()
 
 def generate_answer(context: str, question: str) -> str:
+    if REMOTE_BASE:
+        return _generate_remote(context, question)
     if llm_mistral is None:
-        return "⚠️ LLM generation is not available. Please install llama-cpp-python and ensure the Mistral model is available."
-    
-    language_instruction = get_language_instruction(question)
-    prompt = (
-        f"[INST] Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. Anche i professori usano la piattaforma, quindi mantieni un tono professionale ma amichevole. Non rispondere a domande generali non legate all'università. {language_instruction} \n\nIMPORTANTE: \n- Rispondi SEMPRE in formato Markdown pulito\n- Usa titoli (# ##), elenchi puntati (-), grassetto (**testo**), corsivo (*testo*) e link quando appropriato\n- NON includere MAI token di sistema come <|im_start|>, <|im_end|>, [/INST], o simili\n- Inizia direttamente con la risposta, senza prefissi o tag\n- Termina con la risposta completa senza token aggiuntivi\n\nContesto:\n{context}\n\nDomanda:\n{question} [/INST]"
-    )
-    output = llm_mistral(prompt, max_tokens=1024, stop=["</s>"])
-    raw_response = output["choices"][0]["text"].strip()
-    return clean_response(raw_response)
+        return "⚠️ LLM non disponibile. Imposta REMOTE_LLM_BASE per usare il modello locale via tunnel."
+    out = llm_mistral(_build_prompt(context, question), max_tokens=700, temperature=0.2)
+    return out["choices"][0].get("text", "").strip()
 
 def generate_answer_streaming(context: str, question: str) -> Generator[str, None, None]:
     """
     Generate an answer token by token using streaming.
     Returns a generator that yields tokens as they are generated.
     """
+    if REMOTE_BASE:
+        # For remote LLM, we'll get the full response and yield it as a single chunk
+        # since streaming over HTTP is more complex and may not be supported by all remote services
+        response = _generate_remote(context, question)
+        yield response
+        return
+    
     if llm_mistral is None:
         yield "⚠️ LLM generation is not available. Please install llama-cpp-python and ensure the Mistral model is available."
         return
     
-    language_instruction = get_language_instruction(question)
-    prompt = f"[INST] Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. Anche i professori usano la piattaforma, quindi mantieni un tono professionale ma amichevole. Non rispondere a domande generali non legate all'università. {language_instruction} IMPORTANTE: \
-                - Rispondi SEMPRE in formato Markdown pulito \
-                - Usa titoli (# ##), elenchi puntati (-), grassetto (**testo**), corsivo (*testo*) e link quando appropriato \
-                 - NON includere MAI token di sistema come <|im_start|>, <|im_end|>, [/INST], [/risposta], [risposta], o simili \
-                - Inizia direttamente con la risposta, senza prefissi o tag \
-                - Termina con la risposta completa senza token aggiuntivi Contesto:\n{context}\n\nDomanda:\n{question} [/INST]"
+    prompt = _build_prompt(context, question)
     
     # Use the streaming API
-    stream = llm_mistral(prompt, max_tokens=1024, stop=["</s>"], stream=True)
+    stream = llm_mistral(prompt, max_tokens=700, temperature=0.2, stream=True)
     
     for chunk in stream:
         # Check if the chunk has the expected structure
@@ -127,6 +152,21 @@ def generate_answer_streaming_with_metadata(context: str, question: str) -> Gene
     Generate an answer token by token using streaming with metadata.
     Returns a generator that yields dictionaries with token and metadata.
     """
+    if REMOTE_BASE:
+        # For remote LLM, we'll get the full response and yield it as a single chunk
+        response = _generate_remote(context, question)
+        yield {
+            "type": "token",
+            "content": response,
+            "token_count": 1
+        }
+        yield {
+            "type": "metadata",
+            "token_count": 1,
+            "finished": True
+        }
+        return
+    
     if llm_mistral is None:
         yield {
             "type": "token",
@@ -139,17 +179,10 @@ def generate_answer_streaming_with_metadata(context: str, question: str) -> Gene
         }
         return
     
-    language_instruction = get_language_instruction(question)
-    prompt = f"[INST] Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. Anche i professori usano la piattaforma, quindi mantieni un tono professionale ma amichevole. Non rispondere a domande generali non legate all'università. {language_instruction} IMPORTANTE: \
-                - Rispondi SEMPRE in formato Markdown pulito \
-                - Usa titoli (# ##), elenchi puntati (-), grassetto (**testo**), corsivo (*testo*) e link quando appropriato \
-                 - NON includere MAI token di sistema come <|im_start|>, <|im_end|>, [/INST], [/risposta], [risposta], o simili \
-                - Inizia direttamente con la risposta, senza prefissi o tag \
-                - Termina con la risposta completa senza token aggiuntivi Contesto:\n{context}\n\nDomanda:\n{question} [/INST]"
-    
+    prompt = _build_prompt(context, question)
     
     # Use the streaming API
-    stream = llm_mistral(prompt, max_tokens=1024, stop=["</s>"], stream=True)
+    stream = llm_mistral(prompt, max_tokens=700, temperature=0.2, stream=True)
     
     token_count = 0
     for chunk in stream:
