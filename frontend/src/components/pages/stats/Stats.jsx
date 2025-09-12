@@ -2,13 +2,15 @@
 import React, { useEffect, useState } from "react";
 import Chart from "@/components/pages/stats/ExamsChart";
 import SimulExamModal from "./SimulExamModal";
+import { simulatiStore } from "@/components/store/store";
+import { useSnapshot } from "valtio";
 const HOST = process.env.NEXT_PUBLIC_HOST;
 
 export default function EsamiPage() {
   const [stats, setStats] = useState(null);
-  const [simulati, setSimulati] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [esamiSimulabili, setEsamiSimulabili] = useState([]);
+  const simulatiSnap = useSnapshot(simulatiStore);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -40,7 +42,7 @@ export default function EsamiPage() {
       cfu: stats.cfu[i],
       simulato: false
     })),
-    ...simulati.map(e => ({ ...e, simulato: true }))
+    ...simulatiSnap.simulati.map(e => ({ ...e, simulato: true }))
   ];
 
   const MIN_COLONNE = 6;
@@ -95,7 +97,7 @@ export default function EsamiPage() {
                 open={showForm}
                 onClose={() => setShowForm(false)}
                 esami={esamiSimulabili}
-                onAdd={esame => setSimulati([...simulati, esame])}
+                onAdd={esame => simulatiStore.simulati.push(esame)}
               />
             </div>
             <div className="overflow-x-auto">
@@ -121,7 +123,7 @@ export default function EsamiPage() {
                             className="ml-2 text-yellow-700 hover:text-yellow-900 font-bold rounded-full px-2 py-0.5 border border-yellow-300 bg-yellow-100"
                             title="Rimuovi esame simulato"
                             onClick={() => {
-                              setSimulati(simulati.filter((_, idx) => idx !== i - stats.esami.length));
+                              simulatiStore.simulati.splice(i - stats.esami.length, 1);
                             }}
                           >
                             -
