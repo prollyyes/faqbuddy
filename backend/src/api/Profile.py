@@ -116,6 +116,39 @@ def update_profile(data: UserProfileUpdate, current_user=Depends(get_current_use
     # Ritorna il nuovo profilo aggiornato
     return get_profile(current_user, db_handler)
 
+
+@router.post("/profile/change-password")
+def change_password(
+    data: dict,
+    current_user=Depends(get_current_user),
+    db_handler: DBHandler = Depends(get_db_handler)
+):
+    from passlib.hash import bcrypt
+    user_id = current_user["user_id"]
+    old_password = data.get("old_password")
+    new_password = data.get("new_password")
+    if not old_password or not new_password:
+        raise HTTPException(status_code=400, detail="Dati mancanti")
+
+    # Recupera la password attuale hashata
+    query = "SELECT pwd_hash FROM Utente WHERE id = %s"
+    result = db_handler.run_query(query, params=(user_id,), fetch=True)
+    if not result:
+        raise HTTPException(status_code=404, detail="Utente non trovato")
+    hashed = result[0][0]
+
+    # Verifica la vecchia password
+    if not bcrypt.verify(old_password, hashed):
+        raise HTTPException(status_code=401, detail="Vecchia password errata")
+
+    # Aggiorna la password
+    new_hashed = bcrypt.hash(new_password)
+    db_handler.execute_sql_insertion(
+        "UPDATE Utente SET pwd_hash = %s WHERE id = %s",
+        (new_hashed, user_id)
+    )
+    return {"detail": "Password aggiornata"}
+
 # Endpoint riutilizzabile per l'eliminazione di file
 @router.delete("/files/delete/{file_id}")
 def delete_file(file_id: str, db_handler: DBHandler = Depends(get_db_handler)):
