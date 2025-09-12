@@ -26,6 +26,7 @@ scikit-learn==1.6.1
 python-jose==3.5.0
 bcrypt==4.3.0
 passlib==1.7.4
+email-validator==2.1.1
 
 # Language detection and text processing
 langdetect==1.0.9
