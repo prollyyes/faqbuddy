@@ -6,8 +6,8 @@ from langdetect.lang_detect_exception import LangDetectException
 DetectorFactory.seed = 0
 
 # Remote (preferred)
-REMOTE_BASE  = os.getenv("REMOTE_LLM_BASE")            # e.g. https://abc123.trycloudflare.com
-REMOTE_MODEL = os.getenv("REMOTE_LLM_MODEL", "mistral:7b-instruct")
+REMOTE_BASE  = os.getenv("REMOTE_LLM_BASE")            
+REMOTE_MODEL = os.getenv("REMOTE_LLM_MODEL", "mistral:7b-instruct") # fallback to mistral
 REMOTE_KEY   = os.getenv("REMOTE_LLM_API_KEY", "")
 
 # Local fallback (only used if REMOTE_LLM_BASE is not set)
@@ -45,7 +45,7 @@ def _build_prompt(context: str, question: str) -> str:
     )
 
 def _generate_remote(context: str, question: str) -> str:
-    url = REMOTE_BASE.rstrip("/") + "/v1/chat/completions"
+    url = REMOTE_BASE.rstrip("/") + "/api/generate"
     headers = {"Content-Type": "application/json"}
     if REMOTE_KEY:
         headers["Authorization"] = f"Bearer {REMOTE_KEY}"
@@ -56,40 +56,47 @@ def _generate_remote(context: str, question: str) -> str:
         f"IMPORTANTE: Rispondi sempre in formato Markdown per una migliore leggibilità. Usa titoli (# ##), elenchi puntati (-), grassetto (**testo**), corsivo (*testo*) e link quando appropriato. Usa solo il contesto fornito; se manca, dillo chiaramente."
     )
     
+    # Build the prompt in Ollama format
+    prompt = f"[INST] {system_message}\n\nContesto:\n{context}\n\nDomanda:\n{question} [/INST]"
+    
     payload = {
         "model": REMOTE_MODEL,
-        "temperature": 0.2,
-        "messages": [
-            {"role": "system", "content": system_message},
-            {"role": "user", "content": f"Contesto:\n{context}\n\nDomanda:\n{question}"}
-        ]
+        "prompt": prompt,
+        "stream": False,
+        "options": {
+            "temperature": 0.2,
+            "num_ctx": 2048
+        }
     }
     r = requests.post(url, headers=headers, data=json.dumps(payload), timeout=120)
     r.raise_for_status()
     data = r.json()
-    return data["choices"][0]["message"]["content"].strip()
+    return data["response"].strip()
 
 def classify_question(question: str) -> str:
     if REMOTE_BASE:
         # For remote LLM, use a simple classification
-        url = REMOTE_BASE.rstrip("/") + "/v1/chat/completions"
+        url = REMOTE_BASE.rstrip("/") + "/api/generate"
         headers = {"Content-Type": "application/json"}
         if REMOTE_KEY:
             headers["Authorization"] = f"Bearer {REMOTE_KEY}"
+        
+        prompt = f"[INST] Classifica la domanda come 'simple' o 'complex'. Rispondi solo con una parola.\n\nDomanda: {question}\nRisposta: [/INST]"
+        
         payload = {
             "model": REMOTE_MODEL,
-            "temperature": 0.1,
-            "max_tokens": 2,
-            "messages": [
-                {"role": "system", "content": "Classifica la domanda come 'simple' o 'complex'. Rispondi solo con una parola."},
-                {"role": "user", "content": f"Domanda: {question}\nRisposta:"}
-            ]
+            "prompt": prompt,
+            "stream": False,
+            "options": {
+                "temperature": 0.1,
+                "num_ctx": 2048
+            }
         }
         try:
             r = requests.post(url, headers=headers, data=json.dumps(payload), timeout=30)
             r.raise_for_status()
             data = r.json()
-            text = data["choices"][0]["message"]["content"].strip().lower()
+            text = data["response"].strip().lower()
             if not text:
                 return "simple"
             return text.split()[0]

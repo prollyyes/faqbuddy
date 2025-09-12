@@ -70,7 +70,7 @@ def _build_prompt(context: str, question: str) -> str:
     )
 
 def _generate_remote(context: str, question: str) -> str:
-    url = REMOTE_BASE.rstrip("/") + "/v1/chat/completions"
+    url = REMOTE_BASE.rstrip("/") + "/api/generate"
     headers = {"Content-Type": "application/json"}
     if REMOTE_KEY:
         headers["Authorization"] = f"Bearer {REMOTE_KEY}"
@@ -81,18 +81,22 @@ def _generate_remote(context: str, question: str) -> str:
         f"IMPORTANTE: Rispondi SEMPRE in formato Markdown pulito. Usa titoli (# ##), elenchi puntati (-), grassetto (**testo**), corsivo (*testo*) e link quando appropriato. NON includere MAI token di sistema come <|im_start|>, <|im_end|>, [/INST], o simili. Inizia direttamente con la risposta, senza prefissi o tag. Termina con la risposta completa senza token aggiuntivi. Usa solo il contesto fornito; se manca, dillo chiaramente."
     )
     
+    # Build the prompt in Ollama format
+    prompt = f"[INST] {system_message}\n\nContesto:\n{context}\n\nDomanda:\n{question} [/INST]"
+    
     payload = {
         "model": REMOTE_MODEL,
-        "temperature": 0.2,
-        "messages": [
-            {"role": "system", "content": system_message},
-            {"role": "user", "content": f"Contesto:\n{context}\n\nDomanda:\n{question}"}
-        ]
+        "prompt": prompt,
+        "stream": False,
+        "options": {
+            "temperature": 0.2,
+            "num_ctx": 4096
+        }
     }
     r = requests.post(url, headers=headers, data=json.dumps(payload), timeout=120)
     r.raise_for_status()
     data = r.json()
-    return data["choices"][0]["message"]["content"].strip()
+    return data["response"].strip()
 
 def generate_answer(context: str, question: str) -> str:
     if REMOTE_BASE:
