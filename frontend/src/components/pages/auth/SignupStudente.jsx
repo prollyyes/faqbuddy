@@ -16,12 +16,12 @@ export function SignupStudente({ formData, handleChange }) {
     <>
       <select
         required
-        className="border rounded p-2 w-full mb-2"
         name="corsoDiLaurea"
         value={formData.corsoDiLaurea || ""}
         onChange={handleChange}
+        className={`w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#822433] mb-2 ${!formData.corsoDiLaurea ? 'text-gray-500' : 'text-gray-900'}`}
       >
-        <option value="">Seleziona corso di laurea</option>
+        <option value="" disabled hidden>Seleziona corso di laurea</option>
         {corsi.map(corso => (
           <option key={corso.id} value={corso.id}>
             {corso.nome}
