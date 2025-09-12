@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { FaStar } from "react-icons/fa";
 
 export default function ReviewModal({ corso, onClose, onSubmit, error }) {
   const [descrizione, setDescrizione] = useState("");
@@ -33,7 +34,7 @@ export default function ReviewModal({ corso, onClose, onSubmit, error }) {
           </div>
           <div>
             <label className="block font-semibold mb-2 text-black">Quanto sei soddisfatto?</label>
-            <div className="flex gap-3 mb-1">
+            <div className="flex gap-2 mb-1">
               {[1,2,3,4,5].map((num) => (
                 <button
                   key={num}
@@ -41,25 +42,19 @@ export default function ReviewModal({ corso, onClose, onSubmit, error }) {
                   aria-label={`Voto ${num}`}
                   title={`Voto ${num}`}
                   onClick={() => setVoto(num)}
-                  className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-200
-                    ${voto >= num ? 'bg-[#991B1B] border-[#991B1B]' : 'bg-white border-black'}
-                    hover:border-[#991B1B] hover:bg-[#fde8e8] focus:outline-none
-                  `}
+                  className="focus:outline-none"
                 >
-                  <span className={`block w-4 h-4 rounded-full ${voto >= num ? 'bg-white' : ''}`}></span>
+                  <FaStar
+                    size={32}
+                    color={voto >= num ? "#991B1B" : "#e5e7eb"}
+                    className={`transition-colors duration-200 ${voto >= num ? "" : "hover:scale-110"}`}
+                  />
                 </button>
               ))}
             </div>
           </div>
           {error && <div className="text-red-600">{error}</div>}
           <div className="flex justify-end gap-4 mt-2">
-            {/* <button
-              type="button"
-              className="px-3 py-1 bg-gray-200 text-gray-700 rounded border-1 border-black hover:bg-gray-300"
-              onClick={onClose}
-            >
-              Annulla
-            </button> */}
             <button
               type="submit"
               className="px-3 py-1 bg-[#991B1B] text-white rounded border-1 border-black hover:bg-red-800 font-semibold"
