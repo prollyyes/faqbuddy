@@ -1,9 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IoClose } from "react-icons/io5";
 
 export default function SimulExamModal({ open, onClose, esami, onAdd }) {
-  const [selected, setSelected] = useState(esami[0]?.nome || "");
+  const [selected, setSelected] = useState("");
   const [voto, setVoto] = useState("");
+
+  // Imposta esame di default quando la modale si apre o cambia la lista esami
+  useEffect(() => {
+    if (open && esami.length > 0) {
+      setSelected(esami[0].nome);
+    }
+  }, [open, esami]);
 
   if (!open) return null;
 
