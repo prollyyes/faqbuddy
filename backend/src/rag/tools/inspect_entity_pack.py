@@ -23,8 +23,8 @@ from pinecone import Pinecone
 # Add src to path for absolute-style imports
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from rag.config import ADVANCED_DB_NAMESPACE
-from utils.db_utils import get_connection, MODE
+from ..config import ADVANCED_DB_NAMESPACE
+from ...utils.db_utils import get_connection, MODE
 
 
 TABLE_PREFIX = {

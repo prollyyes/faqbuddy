@@ -5,12 +5,12 @@
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from src.text_2_SQL.converter import TextToSQLConverter
-from src.switcher.MLmodel import MLModel
-from src.utils.db_utils import get_connection, MODE
-from src.utils.db_handler import DBHandler
-from src.rag.rag_adapter import RAGSystem
-from src.api.AuthAPI import router as auth_router
+from .text_2_SQL.converter import TextToSQLConverter
+from .switcher.MLmodel import MLModel
+from .utils.db_utils import get_connection, MODE
+from .utils.db_handler import DBHandler
+from .rag.rag_adapter import RAGSystem
+from .api.AuthAPI import router as auth_router
 
 app = FastAPI()
 app.add_middleware(

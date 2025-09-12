@@ -13,7 +13,7 @@ import time
 from typing import Dict, Any, List, Optional, Tuple
 from sentence_transformers import CrossEncoder
 from .config import HALLUCINATION_GUARDS, RERANKER_THRESHOLD, CROSS_ENCODER_MODEL
-from utils.llm_mistral import generate_answer
+from ..utils.llm_mistral import generate_answer
 
 class GenerationGuards:
     """

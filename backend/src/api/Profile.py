@@ -3,7 +3,7 @@ from .BaseModel import *
 from typing import List
 from ..utils.db_utils import get_connection, MODE
 from ..utils.db_handler import DBHandler
-from auth.jwt_handler import decode_access_token
+from ..auth.jwt_handler import decode_access_token
 from .utils import *
 from .drive_utils import *
 

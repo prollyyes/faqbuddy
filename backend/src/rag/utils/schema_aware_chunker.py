@@ -10,7 +10,7 @@ IDs are stored only in Pinecone metadata (edition_id, etc.) and adds "node_type"
 import json
 import re
 from typing import List, Dict, Any, Optional
-from utils.db_utils import get_connection, MODE
+from ...utils.db_utils import get_connection, MODE
 from ..config import SCHEMA_AWARE_CHUNKING, MAX_CHUNK_TOKENS, NODE_TYPE_PREFIX
 
 class SchemaAwareChunker:

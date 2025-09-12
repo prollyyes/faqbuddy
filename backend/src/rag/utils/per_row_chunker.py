@@ -16,7 +16,7 @@ Features:
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
-from utils.db_utils import get_connection, MODE
+from ...utils.db_utils import get_connection, MODE
 from dotenv import load_dotenv
 from typing import List, Dict, Any, Optional
 import uuid

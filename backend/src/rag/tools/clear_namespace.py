@@ -13,7 +13,7 @@ from pinecone import Pinecone
 # Add src to path for absolute-style imports
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from rag.config import INDEX_NAME
+from ..config import INDEX_NAME
 
 def main():
     load_dotenv()

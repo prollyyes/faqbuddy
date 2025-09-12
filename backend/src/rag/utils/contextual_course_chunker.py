@@ -21,8 +21,8 @@ from dotenv import load_dotenv
 # Add src to path for absolute-style imports
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from utils.db_utils import get_connection, MODE
-from utils.llm_mistral import generate_answer
+from ...utils.db_utils import get_connection, MODE
+from ...utils.llm_mistral import generate_answer
 
 load_dotenv()
 

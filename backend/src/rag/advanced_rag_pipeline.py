@@ -26,7 +26,7 @@ from .answer_verification import AdvancedAnswerVerification, VerificationResult
 from .retrieval_v2_enhanced import EnhancedRetrievalV2
 from .web_search_enhancer import WebSearchEnhancer
 from .config import *
-from utils.llm_mistral import generate_answer
+from ..utils.llm_mistral import generate_answer
 
 @dataclass
 class AdvancedRAGResult:
