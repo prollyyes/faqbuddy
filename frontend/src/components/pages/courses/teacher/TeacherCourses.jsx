@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { EditionsModal } from "@/components/pages/courses/teacher/EditionsModal";
 import { AddEditionModal } from "@/components/pages/courses/teacher/AddEditionModal";
+import Button from "@/components/utils/Button";
+import SwipeWrapperInsegnante from "@/components/wrappers/SwipeWrapperInsegnante";
+
 
 const HOST = process.env.NEXT_PUBLIC_HOST;
 
@@ -11,6 +14,7 @@ export default function TeacherCourses() {
   const [error, setError] = useState("");
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [refresh, setRefresh] = useState(false);
+  const [tab, setTab] = useState("attivi");
 
   // Stato per la modale
   const [showAddModal, setShowAddModal] = useState(false);
@@ -79,43 +83,69 @@ export default function TeacherCourses() {
   );
 
   return (
-    <div className="flex flex-col p-4 min-h-screen pb-24 pt-20">
-      <div className="flex justify-end mb-4">
-        <button
-          className="bg-[#991B1B] text-white rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow hover:bg-red-800 transition"
-          onClick={openAddModal}
-          title="Aggiungi nuova edizione"
-        >
-          +
-        </button>
-      </div>
-      <h2 className="text-2xl font-bold text-[#991B1B] mb-6 text-center">Corsi che insegni</h2>
-      <div className="flex flex-wrap gap-4 justify-center mb-10">
-        {activeCourses.length === 0 && (
-          <div className="text-gray-500 text-center">Nessun corso attivo trovato.</div>
+    <SwipeWrapperInsegnante>
+      <div className="flex flex-col p-4 min-h-screen pb-24 pt-20">
+        {/* Toggle centrato con stessa UI dello studente */}
+        <div className="sticky top-16 z-10 bg-white/90 backdrop-blur px-1 pb-3">
+          <div className="grid grid-cols-3 items-center">
+            <div className="justify-self-end pr-3">
+              <span className={`text-sm font-semibold ${tab === 'attivi' ? 'text-[#822433]' : 'text-gray-400'}`}>Attivi</span>
+            </div>
+            <div className="justify-self-center">
+              <button
+                type="button"
+                className={`w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-[#822433]`}
+                onClick={() => setTab(prev => (prev === 'attivi' ? 'passati' : 'attivi'))}
+                aria-label="Toggle Attivi/Passati"
+              >
+                <div
+                  className={`bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out ${tab === 'passati' ? 'translate-x-7' : ''}`}
+                />
+              </button>
+            </div>
+            <div className="justify-self-start pl-3">
+              <span className={`text-sm font-semibold ${tab === 'passati' ? 'text-[#822433]' : 'text-gray-400'}`}>Passati</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Lista in base al tab */}
+        {tab === 'attivi' ? (
+          <div className="flex flex-col items-center mb-10">
+            <div className="flex flex-wrap gap-4 justify-center">
+              {activeCourses.length === 0 && (
+                <div className="text-gray-500 text-center">Nessun corso attivo trovato.</div>
+              )}
+              {activeCourses.map(renderCourseBox)}
+            </div>
+            <div className="mt-4 w-full flex justify-center">
+              <Button onClick={openAddModal}>
+                Aggiungi Corso +
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-4 justify-center">
+            {pastCourses.length === 0 && (
+              <div className="text-gray-500 text-center">Nessun corso archiviato/annullato trovato.</div>
+            )}
+            {pastCourses.map(renderCourseBox)}
+          </div>
         )}
-        {activeCourses.map(renderCourseBox)}
-      </div>
-      <h2 className="text-2xl font-bold text-[#991B1B] mb-6 text-center">Corsi che hai insegnato</h2>
-      <div className="flex flex-wrap gap-4 justify-center">
-        {pastCourses.length === 0 && (
-          <div className="text-gray-500 text-center">Nessun corso archiviato/annullato trovato.</div>
+        {selectedCourse && (
+          <EditionsModal
+            corso={selectedCourse}
+            onClose={() => setSelectedCourse(null)}
+            onUpdateStato={() => setRefresh(r => !r)}
+          />
         )}
-        {pastCourses.map(renderCourseBox)}
-      </div>
-      {selectedCourse && (
-        <EditionsModal
-          corso={selectedCourse}
-          onClose={() => setSelectedCourse(null)}
-          onUpdateStato={() => setRefresh(r => !r)}
+        <AddEditionModal
+          show={showAddModal}
+          onClose={() => setShowAddModal(false)}
+          courses={allCourses}
+          onSuccess={() => setRefresh(r => !r)}
         />
-      )}
-      <AddEditionModal
-        show={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        courses={allCourses}
-        onSuccess={() => setRefresh(r => !r)}
-      />
-    </div>
+      </div>
+    </SwipeWrapperInsegnante>
   );
 }
