@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Button from "../utils/Button";
 import axios from "axios";
+import { FaStar } from "react-icons/fa";
 
 const HOST = process.env.NEXT_PUBLIC_HOST;
 
@@ -316,13 +317,18 @@ export default function ReasearchMaterials() {
           <div className="w-full max-w-md mt-6 space-y-3">
             <h3 className="font-semibold text-lg border-b pb-1">Review</h3>
             {reviews.map((r, idx) => {
-              // Presupponiamo che ogni record sia un array [descrizione, voto]
               const descrizione = r.descrizione ?? r[0];
               const voto = r.voto ?? r[1];
               return (
                 <div key={idx} className="border rounded-md p-3 text-sm space-y-1 bg-gray-50">
                   <div><strong>Commento:</strong> {descrizione}</div>
-                  <div><strong>Voto:</strong> {voto}</div>
+                  <div><strong>Valutazione studenti:</strong>{" "}
+                    <span className="flex gap-1 inline-flex align-middle">
+                      {[...Array(Number(voto))].map((_, idx) => (
+                        <FaStar key={idx} color="#991B1B" />
+                      ))}
+                    </span>
+                  </div>
                 </div>
               );
             })}
