@@ -3,7 +3,10 @@ frontend/.next
 frontend/node_modules
 
 # llm && ML models
-backend/models
+backend/models/*.gguf
+backend/models/*.bin
+backend/models/*.safetensors
+# Allow ml_model.joblib to be committed (small file needed on Render. THIS IS FOR REMOTE ONLY)
 
 # pytest
 **/.benchmarks
