@@ -1,7 +1,6 @@
 from .BaseModel import *
 from .utils import *
 from .conversation_memory import conversation_memory
-from .response_cache import response_cache
 from ..utils.db_handler import DBHandler
 from ..switcher.MLmodel import MLModel
 from ..text_2_SQL import TextToSQLConverter
@@ -47,13 +46,6 @@ def call_rag_system(question: str, streaming: bool = False, include_metadata: bo
     Unified function to call the RAG system.
     This is the single point of entry for all RAG operations.
     """
-    # Check cache first (only for non-streaming responses)
-    if not streaming:
-        cached_response = response_cache.get_response(question, conversation_context)
-        if cached_response:
-            print("🚀 Cache hit! Returning cached response")
-            return cached_response
-    
     rag = get_rag()
     
     # Add conversation context to the question if provided
@@ -69,8 +61,6 @@ def call_rag_system(question: str, streaming: bool = False, include_metadata: bo
             return rag.generate_response_streaming(enhanced_question)
     else:
         result = rag.generate_response(enhanced_question)
-        # Cache the result
-        response_cache.set_response(question, result, conversation_context)
         return result
 
 def decide_route(question: str) -> Dict[str, Any]:
