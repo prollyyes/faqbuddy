@@ -116,6 +116,39 @@ def update_profile(data: UserProfileUpdate, current_user=Depends(get_current_use
     # Ritorna il nuovo profilo aggiornato
     return get_profile(current_user, db_handler)
 
+
+@router.post("/profile/change-password")
+def change_password(
+    data: dict,
+    current_user=Depends(get_current_user),
+    db_handler: DBHandler = Depends(get_db_handler)
+):
+    from passlib.hash import bcrypt
+    user_id = current_user["user_id"]
+    old_password = data.get("old_password")
+    new_password = data.get("new_password")
+    if not old_password or not new_password:
+        raise HTTPException(status_code=400, detail="Dati mancanti")
+
+    # Recupera la password attuale hashata
+    query = "SELECT pwd_hash FROM Utente WHERE id = %s"
+    result = db_handler.run_query(query, params=(user_id,), fetch=True)
+    if not result:
+        raise HTTPException(status_code=404, detail="Utente non trovato")
+    hashed = result[0][0]
+
+    # Verifica la vecchia password
+    if not bcrypt.verify(old_password, hashed):
+        raise HTTPException(status_code=401, detail="Vecchia password errata")
+
+    # Aggiorna la password
+    new_hashed = bcrypt.hash(new_password)
+    db_handler.execute_sql_insertion(
+        "UPDATE Utente SET pwd_hash = %s WHERE id = %s",
+        (new_hashed, user_id)
+    )
+    return {"detail": "Password aggiornata"}
+
 # Endpoint riutilizzabile per l'eliminazione di file
 @router.delete("/files/delete/{file_id}")
 def delete_file(file_id: str, db_handler: DBHandler = Depends(get_db_handler)):
@@ -267,6 +300,24 @@ def get_completed_courses(current_user=Depends(get_current_user), db_handler: DB
         )
         for row in results
     ]
+    
+# --- Endpoint: per rimuovere un edizione del corso allo studente che è loggato ---
+@router.delete("/courses/editions/{edition_id}/unenroll")
+def unenroll_from_edition(
+    edition_id: str,
+    data: UnenrollRequest,
+    current_user=Depends(get_current_user),
+    db_handler: DBHandler = Depends(get_db_handler)
+):
+    user_id = current_user["user_id"]
+    edition_data = data.edition_data
+    delete_query = """
+        DELETE FROM Corsi_seguiti
+        WHERE student_id = %s AND edition_id = %s AND edition_data = %s
+    """
+    db_handler.run_query(delete_query, params=(user_id, edition_id, edition_data), fetch=False)
+    return {"detail": "Disiscrizione avvenuta con successo"}
+
 
 # --- Endpoint: per completare un edizione del corso allo studente che è loggato ---
 @router.put("/profile/courses/{edition_id}/complete")
@@ -535,6 +586,36 @@ def get_stats(current_user=Depends(get_current_user), db_handler: DBHandler = De
     )
 
 
+# --- Endpoint: Corsi del corso di laurea non ancora completati dallo studente che è loggato ---
+# --- Serve per simualre gli esami ---
+@router.get("/courses/not-completed", response_model=List[CourseBase])
+def get_not_completed_courses(
+        current_user=Depends(get_current_user), 
+        db_handler: DBHandler = Depends(get_db_handler)):
+    
+    user_id = current_user["user_id"]
+    # Recupera il corso di laurea dello studente
+    query_cdl = "SELECT corso_laurea_id FROM Studenti WHERE id = %s"
+    result = db_handler.run_query(query_cdl, params=(user_id,), fetch=True)
+    if not result:
+        raise HTTPException(status_code=404, detail="Studente non trovato")
+    corso_laurea_id = result[0][0]
+    # Prendi tutti i corsi del corso di laurea che NON sono stati completati
+    query = """
+        SELECT c.id, c.nome, c.cfu
+        FROM Corso c
+        WHERE c.id_corso = %s
+        AND c.id NOT IN (
+            SELECT c2.id
+            FROM Corsi_seguiti cs
+            JOIN EdizioneCorso e ON cs.edition_id = e.id AND cs.edition_data = e.data
+            JOIN Corso c2 ON e.id = c2.id
+            WHERE cs.student_id = %s AND cs.stato = 'completato'
+        )
+        ORDER BY c.nome
+    """
+    results = db_handler.run_query(query, params=(corso_laurea_id, user_id), fetch=True)
+    return [CourseBase(id=row[0], nome=row[1], cfu=row[2]) for row in results]
 
 
 

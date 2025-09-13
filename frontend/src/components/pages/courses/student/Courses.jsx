@@ -7,6 +7,7 @@ import CompleteModal from "./CompleteModal";
 import ReviewModal from "./ReviewModal";
 import CourseDetailModal from "./CourseDetailModal";
 import AddActionModal from "./AddActionModal";
+import { IoClose } from "react-icons/io5";
 
 const HOST = process.env.NEXT_PUBLIC_HOST;
 
@@ -229,6 +230,26 @@ export default function CorsiPage() {
     }
   };
 
+  
+  // Funzione per disiscriversi da un corso
+  const handleUnenrollCourse = async (corso) => {
+    const token = localStorage.getItem("token");
+    try {
+      await axios.delete(
+        `${HOST}/courses/editions/${corso.edition_id}/unenroll`,
+        {
+          data: { edition_data: corso.edition_data },
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      setSuccess("Disiscrizione avvenuta!");
+      // Aggiorna corsi attivi
+      const resCurrent = await axios.get(`${HOST}/profile/courses/current`, { headers: { Authorization: `Bearer ${token}` } });
+      setCurrentCourses(resCurrent.data);
+    } catch (err) {
+      setError(err.response?.data?.detail || "Errore durante la disiscrizione");
+    }
+  };
   // --- Aggiungi recensione ---
   const handleAddReview = async (corso, descrizione, voto) => {
     const token = localStorage.getItem("token");
@@ -362,17 +383,10 @@ export default function CorsiPage() {
               key={corso.edition_id}
               corso={corso}
               onClick={() => handleOpenDetailModal(corso)}
+              onUnenroll={() => handleUnenrollCourse(corso)}
+              onComplete={() => handleOpenCompleteModal(corso)}
             >
-              <div className="flex justify-end">
-                <button
-                  className="w-8 h-8 flex items-center justify-center bg-[#991B1B] text-white rounded-full hover:bg-red-800 text-xl shadow"
-                  style={{ marginTop: "-0.5rem", marginRight: "-0.5rem" }}
-                  onClick={e => { e.stopPropagation(); handleOpenCompleteModal(corso); }}
-                  title="Completa corso"
-                >
-                  ✓
-                </button>
-              </div>
+              {/* puoi lasciare vuoto oppure aggiungere altro contenuto */}
             </CourseBox>
           ))}
       </div>

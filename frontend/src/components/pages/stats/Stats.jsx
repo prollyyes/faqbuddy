@@ -1,13 +1,16 @@
 'use client'
 import React, { useEffect, useState } from "react";
 import Chart from "@/components/pages/stats/ExamsChart";
+import SimulExamModal from "./SimulExamModal";
+import { simulatiStore } from "@/components/store/store";
+import { useSnapshot } from "valtio";
 const HOST = process.env.NEXT_PUBLIC_HOST;
 
 export default function EsamiPage() {
   const [stats, setStats] = useState(null);
-  const [simulati, setSimulati] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [newExam, setNewExam] = useState({ nome: "", voto: "", cfu: "" });
+  const [esamiSimulabili, setEsamiSimulabili] = useState([]);
+  const simulatiSnap = useSnapshot(simulatiStore);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -17,6 +20,18 @@ export default function EsamiPage() {
       .then(res => res.json())
       .then(data => setStats(data));
   }, []);
+
+  // Carica i corsi non completati per la simulazione
+  useEffect(() => {
+    if (!showForm) return;
+    const token = localStorage.getItem("token");
+    fetch(`${HOST}/courses/not-completed`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => setEsamiSimulabili(data));
+  }, [showForm]);
+
   if (!stats) return <div className="p-8 text-center">Caricamento statistiche...</div>;
 
   // Unisci esami reali e simulati
@@ -27,24 +42,22 @@ export default function EsamiPage() {
       cfu: stats.cfu[i],
       simulato: false
     })),
-    ...simulati.map(e => ({ ...e, simulato: true }))
+    ...simulatiSnap.simulati.map(e => ({ ...e, simulato: true }))
   ];
 
   const MIN_COLONNE = 6;
   const allEsamiGrafico = allEsami.length < MIN_COLONNE
-  ? [
-      ...allEsami,
-      ...Array.from({ length: MIN_COLONNE - allEsami.length }, (_, i) => ({
-        nome: "",
-        voto: null,
-        cfu: null,
-        simulato: false,
-        placeholder: true,
-      }))
-    ]
-  : allEsami;
-
-
+    ? [
+        ...allEsami,
+        ...Array.from({ length: MIN_COLONNE - allEsami.length }, (_, i) => ({
+          nome: "",
+          voto: null,
+          cfu: null,
+          simulato: false,
+          placeholder: true,
+        }))
+      ]
+    : allEsami;
 
   // Ricalcola le medie con gli esami simulati
   const mediaAritmetica = allEsami.length
@@ -79,46 +92,14 @@ export default function EsamiPage() {
                 onClick={() => setShowForm(!showForm)}
                 title="Simula un nuovo esame"
               >+</button>
+
+              <SimulExamModal
+                open={showForm}
+                onClose={() => setShowForm(false)}
+                esami={esamiSimulabili}
+                onAdd={esame => simulatiStore.simulati.push(esame)}
+              />
             </div>
-            {showForm && (
-              <form
-                className="flex gap-2 mb-2"
-                onSubmit={e => {
-                  e.preventDefault();
-                  setSimulati([...simulati, { ...newExam, voto: Number(newExam.voto), cfu: Number(newExam.cfu) }]);
-                  setNewExam({ nome: "", voto: "", cfu: "" });
-                  setShowForm(false);
-                }}
-              >
-                <input
-                  required
-                  className="border rounded px-2 py-1 text-sm"
-                  placeholder="Nome"
-                  value={newExam.nome}
-                  onChange={e => setNewExam({ ...newExam, nome: e.target.value })}
-                />
-                <input
-                  required
-                  type="number"
-                  min={18}
-                  max={30}
-                  className="border rounded px-2 py-1 text-sm w-16"
-                  placeholder="Voto"
-                  value={newExam.voto}
-                  onChange={e => setNewExam({ ...newExam, voto: e.target.value })}
-                />
-                <input
-                  required
-                  type="number"
-                  min={1}
-                  className="border rounded px-2 py-1 text-sm w-16"
-                  placeholder="CFU"
-                  value={newExam.cfu}
-                  onChange={e => setNewExam({ ...newExam, cfu: e.target.value })}
-                />
-                <button className="bg-[#822433] text-white rounded px-2 py-1 text-sm" type="submit">OK</button>
-              </form>
-            )}
             <div className="overflow-x-auto">
               <table className="w-full border border-gray-300 rounded text-sm">
                 <thead>
@@ -142,7 +123,7 @@ export default function EsamiPage() {
                             className="ml-2 text-yellow-700 hover:text-yellow-900 font-bold rounded-full px-2 py-0.5 border border-yellow-300 bg-yellow-100"
                             title="Rimuovi esame simulato"
                             onClick={() => {
-                              setSimulati(simulati.filter((_, idx) => idx !== i - stats.esami.length));
+                              simulatiStore.simulati.splice(i - stats.esami.length, 1);
                             }}
                           >
                             -

@@ -6,6 +6,7 @@ import { HiOutlineInformationCircle } from "react-icons/hi2";
 import axios from 'axios';
 import { InfoProfiloStudente } from './PeronalInfo_studente';
 import { InfoProfiloInsegnante } from './PersonalInfo_insegnante';
+import ChangePasswordModal from './ChangePasswordModal';
 
 const HOST = process.env.NEXT_PUBLIC_HOST;
 
@@ -16,6 +17,7 @@ const PersonalInfo = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [editData, setEditData] = useState({});
   const [pendingCV, setPendingCV] = useState(null);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -65,8 +67,8 @@ const PersonalInfo = () => {
         }
         const formData = new FormData();
         formData.append("file", pendingCV);
-        formData.append("parent_folder", "FAQBuddy"); // <-- nuovo parametro
-        formData.append("child_folder", "CV");        // <-- nuovo parametro
+        formData.append("parent_folder", "FAQBuddy");
+        formData.append("child_folder", "CV");
         formData.append("nome", editData.nome);
         formData.append("cognome", editData.cognome);
         try {
@@ -149,12 +151,15 @@ const PersonalInfo = () => {
             )}
           </div>
         </div>
-        <div className="pt-12 flex justify-center space-x-4">
+        <div className="pt-1 flex flex-col items-center space-y-4">
           {isEdit ? (
-            <>
+            <div className="flex flex-row gap-4">
               <Button className="text-2xl font-bold" onClick={handleSave}>Salva</Button>
               <Button className="text-2xl font-bold" onClick={() => { setIsEdit(false); setEditData(profile); setPendingCV(null); }}>Annulla</Button>
-            </>
+              <Button className="text-2xl font-bold" onClick={() => setShowPasswordModal(true)}>
+                Cambia password
+              </Button>
+            </div>
           ) : (
             <Button className="text-2xl font-bold" onClick={() => setIsEdit(true)}>
               Modifica Profilo
@@ -181,6 +186,11 @@ const PersonalInfo = () => {
           </div>
         </div>
       )}
+
+      <ChangePasswordModal
+        open={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
+      />
     </motion.div>
   );
 };
