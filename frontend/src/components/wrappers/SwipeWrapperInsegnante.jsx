@@ -1,3 +1,4 @@
+'use client'
 import { useSwipeable } from 'react-swipeable';
 import { useRouter, usePathname } from 'next/navigation';
 
