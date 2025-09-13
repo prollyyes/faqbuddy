@@ -7,7 +7,7 @@ from typing import Generator, Iterator
 DetectorFactory.seed = 0
 
 # Remote (preferred)
-REMOTE_BASE  = os.getenv("REMOTE_LLM_BASE")            # e.g. https://abc123.trycloudflare.com
+REMOTE_BASE  = os.getenv("REMOTE_LLM_BASE")            # now uses a named tunnel from cloudflare
 REMOTE_MODEL = os.getenv("REMOTE_LLM_MODEL", "capybarahermes:latest")
 REMOTE_KEY   = os.getenv("REMOTE_LLM_API_KEY", "")
 
@@ -128,6 +128,7 @@ def _generate_remote(context: str, question: str) -> str:
     return data["response"].strip()
 
 def _generate_remote(context: str, question: str) -> str:
+    """Generate a non-streaming response from remote LLM (for compatibility)"""
     url = REMOTE_BASE.rstrip("/") + "/api/generate"
     headers = {"Content-Type": "application/json"}
     if REMOTE_KEY:
@@ -145,7 +146,7 @@ def _generate_remote(context: str, question: str) -> str:
     payload = {
         "model": REMOTE_MODEL,
         "prompt": prompt,
-        "stream": False,
+        "stream": False,  # Non-streaming for this function
         "options": {
             "temperature": 0.2,
             "num_ctx": 4096
@@ -155,6 +156,49 @@ def _generate_remote(context: str, question: str) -> str:
     r.raise_for_status()
     data = r.json()
     return data["response"].strip()
+
+def _generate_remote_streaming(context: str, question: str) -> Generator[str, None, None]:
+    """Generate a streaming response from remote LLM"""
+    url = REMOTE_BASE.rstrip("/") + "/api/generate"
+    headers = {"Content-Type": "application/json"}
+    if REMOTE_KEY:
+        headers["Authorization"] = f"Bearer {REMOTE_KEY}"
+    
+    li = get_language_instruction(question)
+    system_message = (
+        f"Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. Anche i professori usano la piattaforma, quindi mantieni un tono professionale ma amichevole. Non rispondere a domande generali non legate all'università. {li} "
+        f"IMPORTANTE: Rispondi SEMPRE in formato Markdown pulito. Usa titoli (# ##), elenchi puntati (-), grassetto (**testo**), corsivo (*testo*) e link quando appropriato. NON includere MAI token di sistema come <|im_start|>, <|im_end|>, [/INST], o simili. Inizia direttamente con la risposta, senza prefissi o tag. Termina con la risposta completa senza token aggiuntivi. Usa solo il contesto fornito; se manca, dillo chiaramente."
+    )
+    
+    # Build the prompt in Ollama format
+    prompt = f"[INST] {system_message}\n\nContesto:\n{context}\n\nDomanda:\n{question} [/INST]"
+    
+    payload = {
+        "model": REMOTE_MODEL,
+        "prompt": prompt,
+        "stream": True,  # Streaming enabled
+        "options": {
+            "temperature": 0.2,
+            "num_ctx": 4096
+        }
+    }
+    
+    try:
+        r = requests.post(url, headers=headers, data=json.dumps(payload), timeout=120, stream=True)
+        r.raise_for_status()
+        
+        for line in r.iter_lines():
+            if line:
+                try:
+                    data = json.loads(line.decode('utf-8'))
+                    if 'response' in data:
+                        yield data['response']
+                    if data.get('done', False):
+                        break
+                except json.JSONDecodeError:
+                    continue
+    except Exception as e:
+        yield f"⚠️ Error in remote streaming: {str(e)}"
 
 def generate_answer(context: str, question: str) -> str:
     if REMOTE_BASE:
@@ -172,9 +216,9 @@ def generate_answer_streaming(context: str, question: str) -> Generator[str, Non
     Returns a generator that yields tokens as they are generated.
     """
     if REMOTE_BASE:
-        # For remote LLM, we'll get the full response and yield it as a single chunk
-        response = _generate_remote(context, question)
-        yield response
+        # Use the new streaming function for remote LLM
+        for token in _generate_remote_streaming(context, question):
+            yield token
         return
     
     if llm_mistral is None:
@@ -216,17 +260,21 @@ def generate_answer_streaming_with_metadata(context: str, question: str) -> Gene
     Returns a generator that yields dictionaries with token and metadata.
     """
     if REMOTE_BASE:
-        # For remote LLM, we'll get the full response and yield it as a single chunk
-        response = _generate_remote(context, question)
-        yield {
-            "type": "token",
-            "content": response,
-            "token_count": 1
-        }
+        # Use streaming for remote LLM with metadata
+        token_count = 0
+        for token in _generate_remote_streaming(context, question):
+            token_count += 1
+            yield {
+                "type": "token",
+                "content": token,
+                "token_count": token_count
+            }
+        
+        # Send final metadata
         yield {
             "type": "metadata",
-            "token_count": 1,
-            "total_tokens": 1,
+            "token_count": token_count,
+            "total_tokens": token_count,
             "finished": True
         }
         return
