@@ -1,18 +1,23 @@
-from src.utils.db_utils import get_db_connection
-from src.utils.db_handler import DBHandler
-from fastapi import APIRouter, HTTPException, UploadFile, Form, File
-from src.api.BaseModel import *
+from ..utils.db_utils import get_connection, MODE
+from ..utils.db_handler import DBHandler
+from fastapi import APIRouter, HTTPException, UploadFile, Form, File, Depends
+from ..api.BaseModel import *
 from psycopg2 import errors
-from src.api.drive_utils import *
+from ..api.drive_utils import *
 
-conn = get_db_connection()
-
-db_handler = DBHandler(conn)
+# Database connection dependency for Render
+def get_db_handler():
+    conn = get_connection(mode=MODE)
+    db_handler = DBHandler(conn)
+    try:
+        yield db_handler
+    finally:
+	    db_handler.close_connection()
 
 router = APIRouter()
 
 @router.post("/addEdizioneCorso")
-def addEdizioneCorso(edizioneCorso: AddEdizioneCorso):
+def addEdizioneCorso(edizioneCorso: AddEdizioneCorso, db_handler: DBHandler = Depends(get_db_handler)):
     """
     Aggiunge una nuova edizione di un corso.
 
@@ -60,7 +65,7 @@ def addEdizioneCorso(edizioneCorso: AddEdizioneCorso):
 
 
 @router.post("/addCorso")
-def addCorso(corso: AddCorso):
+def addCorso(corso: AddCorso, db_handler: DBHandler = Depends(get_db_handler)):
     """
     Aggiunge un nuovo corso associato a un corso di laurea.
 
@@ -89,7 +94,7 @@ def addCorso(corso: AddCorso):
     return {"message": "Corso aggiunto con successo"}
 
 @router.post("/addCorsoSeguito")
-def addCorsoSeguito(seguito: AddCorsoSeguito): 
+def addCorsoSeguito(seguito: AddCorsoSeguito, db_handler: DBHandler = Depends(get_db_handler)): 
     """
     Aggiunge un corso seguito da uno studente.
 
@@ -133,7 +138,7 @@ def addCorsoSeguito(seguito: AddCorsoSeguito):
 
 
 @router.post("/addPiattaforma")
-def addPiattaforma(piattaforma: AddPiattaforma):
+def addPiattaforma(piattaforma: AddPiattaforma, db_handler: DBHandler = Depends(get_db_handler)):
     """
     Aggiunge una nuova piattaforma.
 
@@ -154,7 +159,7 @@ def addPiattaforma(piattaforma: AddPiattaforma):
     return {"message": "Piattaforma aggiunta con successo"}
 
 @router.post("/addEdizioneCorsoPiattaforma")
-def addEdizioneCorso_Piattaforma(data: AddEdizioneCorsoPiattaforma):
+def addEdizioneCorso_Piattaforma(data: AddEdizioneCorsoPiattaforma, db_handler: DBHandler = Depends(get_db_handler)):
     """
     Associa una piattaforma a una specifica edizione di un corso.
 
@@ -193,7 +198,8 @@ async def addTesi(
     matricola: str = Form(...),
     parent_folder: str = Form("FAQBuddy"),
     child_folder: str = Form("Tesi"),
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
+    db_handler: DBHandler = Depends(get_db_handler)
     ):
     """
     Carica e aggiunge la tesi di uno studente.
@@ -237,7 +243,8 @@ async def addMaterialeDidattico(
         verificato : bool = Form(False),
         parent_folder: str = Form("FAQBuddy"),
         child_folder: str = Form("Materiale_Didattico"),
-        file: UploadFile = File(...)
+        file: UploadFile = File(...),
+        db_handler: DBHandler = Depends(get_db_handler)
     ):
     """
     Carica e aggiunge materiale didattico associato a un utente e corso.
@@ -282,7 +289,7 @@ async def addMaterialeDidattico(
     return {"message": "Materiale Didattico Aggiunto con successo."}
 
 @router.post("/addValutazione")
-def addValutazione(valutazione: AddValutazione):
+def addValutazione(valutazione: AddValutazione, db_handler: DBHandler = Depends(get_db_handler)):
     """
     Aggiunge una valutazione a un materiale didattico da parte di uno studente.
 
@@ -318,7 +325,8 @@ async def upload_file(
     parent_folder: str = Form(...), # FAQBuddy
     child_folder: str = Form(...), # CV, Materiale_Didattico, Tesi
     nome: str = Form(...),
-    cognome: str = Form(...)
+    cognome: str = Form(...),
+    db_handler: DBHandler = Depends(get_db_handler)
 ):
     """
     Carica un file su Google Drive in una cartella specifica.
