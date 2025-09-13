@@ -8,7 +8,7 @@ DetectorFactory.seed = 0
 
 # Remote (preferred)
 REMOTE_BASE  = os.getenv("REMOTE_LLM_BASE")            # e.g. https://abc123.trycloudflare.com
-REMOTE_MODEL = os.getenv("REMOTE_LLM_MODEL", "mistral:7b-instruct")
+REMOTE_MODEL = os.getenv("REMOTE_LLM_MODEL", "capybarahermes:latest")
 REMOTE_KEY   = os.getenv("REMOTE_LLM_API_KEY", "")
 
 # Local fallback (only used if REMOTE_LLM_BASE is not set)
@@ -68,6 +68,64 @@ def _build_prompt(context: str, question: str) -> str:
     return (
         f"[INST] Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. Anche i professori usano la piattaforma, quindi mantieni un tono professionale ma amichevole. Non rispondere a domande generali non legate all'università. {li} \n\nIMPORTANTE: \n- Rispondi SEMPRE in formato Markdown pulito\n- Usa titoli (# ##), elenchi puntati (-), grassetto (**testo**), corsivo (*testo*) e link quando appropriato\n- NON includere MAI token di sistema come <|im_start|>, <|im_end|>, [/INST], o simili\n- Inizia direttamente con la risposta, senza prefissi o tag\n- Termina con la risposta completa senza token aggiuntivi\n\nContesto:\n{context}\n\nDomanda:\n{question} [/INST]"
     )
+    
+def _generate_remote(context: str, question: str) -> str:
+    url = REMOTE_BASE.rstrip("/") + "/api/generate"
+    headers = {"Content-Type": "application/json"}
+    if REMOTE_KEY:
+        headers["Authorization"] = f"Bearer {REMOTE_KEY}"
+    
+    li = get_language_instruction(question)
+    system_message = (
+        f"Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. Anche i professori usano la piattaforma, quindi mantieni un tono professionale ma amichevole. Non rispondere a domande generali non legate all'università. {li} "
+        f"IMPORTANTE: Rispondi SEMPRE in formato Markdown pulito. Usa titoli (# ##), elenchi puntati (-), grassetto (**testo**), corsivo (*testo*) e link quando appropriato. NON includere MAI token di sistema come <|im_start|>, <|im_end|>, [/INST], o simili. Inizia direttamente con la risposta, senza prefissi o tag. Termina con la risposta completa senza token aggiuntivi. Usa solo il contesto fornito; se manca, dillo chiaramente."
+    )
+    
+    # Build the prompt in Ollama format
+    prompt = f"[INST] {system_message}\n\nContesto:\n{context}\n\nDomanda:\n{question} [/INST]"
+    
+    payload = {
+        "model": REMOTE_MODEL,
+        "prompt": prompt,
+        "stream": False,
+        "options": {
+            "temperature": 0.2,
+            "num_ctx": 4096
+        }
+    }
+    r = requests.post(url, headers=headers, data=json.dumps(payload), timeout=120)
+    r.raise_for_status()
+    data = r.json()
+    return data["response"].strip()
+
+def _generate_remote(context: str, question: str) -> str:
+    url = REMOTE_BASE.rstrip("/") + "/api/generate"
+    headers = {"Content-Type": "application/json"}
+    if REMOTE_KEY:
+        headers["Authorization"] = f"Bearer {REMOTE_KEY}"
+    
+    li = get_language_instruction(question)
+    system_message = (
+        f"Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. Anche i professori usano la piattaforma, quindi mantieni un tono professionale ma amichevole. Non rispondere a domande generali non legate all'università. {li} "
+        f"IMPORTANTE: Rispondi SEMPRE in formato Markdown pulito. Usa titoli (# ##), elenchi puntati (-), grassetto (**testo**), corsivo (*testo*) e link quando appropriato. NON includere MAI token di sistema come <|im_start|>, <|im_end|>, [/INST], o simili. Inizia direttamente con la risposta, senza prefissi o tag. Termina con la risposta completa senza token aggiuntivi. Usa solo il contesto fornito; se manca, dillo chiaramente."
+    )
+    
+    # Build the prompt in Ollama format
+    prompt = f"[INST] {system_message}\n\nContesto:\n{context}\n\nDomanda:\n{question} [/INST]"
+    
+    payload = {
+        "model": REMOTE_MODEL,
+        "prompt": prompt,
+        "stream": False,
+        "options": {
+            "temperature": 0.2,
+            "num_ctx": 4096
+        }
+    }
+    r = requests.post(url, headers=headers, data=json.dumps(payload), timeout=120)
+    r.raise_for_status()
+    data = r.json()
+    return data["response"].strip()
 
 def _generate_remote(context: str, question: str) -> str:
     url = REMOTE_BASE.rstrip("/") + "/api/generate"
@@ -101,6 +159,8 @@ def _generate_remote(context: str, question: str) -> str:
 def generate_answer(context: str, question: str) -> str:
     if REMOTE_BASE:
         return _generate_remote(context, question)
+    if REMOTE_BASE:
+        return _generate_remote(context, question)
     if llm_mistral is None:
         return "⚠️ LLM non disponibile. Imposta REMOTE_LLM_BASE per usare il modello locale via tunnel."
     out = llm_mistral(_build_prompt(context, question), max_tokens=700, temperature=0.2)
@@ -113,7 +173,6 @@ def generate_answer_streaming(context: str, question: str) -> Generator[str, Non
     """
     if REMOTE_BASE:
         # For remote LLM, we'll get the full response and yield it as a single chunk
-        # since streaming over HTTP is more complex and may not be supported by all remote services
         response = _generate_remote(context, question)
         yield response
         return
@@ -167,6 +226,7 @@ def generate_answer_streaming_with_metadata(context: str, question: str) -> Gene
         yield {
             "type": "metadata",
             "token_count": 1,
+            "total_tokens": 1,
             "finished": True
         }
         return
