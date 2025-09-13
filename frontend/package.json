@@ -24,6 +24,7 @@
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.6.2",
     "react-select": "^5.10.1",
+    "react-swipeable": "^7.0.2",
     "valtio": "^2.1.7"
   },
   "devDependencies": {
