@@ -7,7 +7,9 @@ import CompleteModal from "./CompleteModal";
 import ReviewModal from "./ReviewModal";
 import CourseDetailModal from "./CourseDetailModal";
 import AddActionModal from "./AddActionModal";
-import { IoClose } from "react-icons/io5";
+import { TbArrowLeftFromArc } from "react-icons/tb";
+import SwipeWrapperStudente from "@/components/wrappers/SwipeWrapperStudente";
+import RestoreConfirmModal from "./RestoreConfirmModal";
 
 const HOST = process.env.NEXT_PUBLIC_HOST;
 
@@ -20,6 +22,11 @@ export default function CorsiPage() {
   const [completeVoto, setCompleteVoto] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+
+  // popup sposta corso tra i seguiti
+  const [showRestoreConfirm, setShowRestoreConfirm] = useState(false);
+  const [restoreCourse, setRestoreCourse] = useState(null);
 
   // Modale aggiunta corso
   const [showAddModal, setShowAddModal] = useState(false);
@@ -307,136 +314,153 @@ export default function CorsiPage() {
   };
 
   return (
-    <div className="flex flex-col p-4 min-h-screen pb-24 pt-20">
-      {showCompleteModal && (
-        <CompleteModal
-          courseToComplete={courseToComplete}
-          completeVoto={completeVoto}
-          setCompleteVoto={setCompleteVoto}
-          error={error}
-          setShowCompleteModal={setShowCompleteModal}
-          handleCompleteCourse={handleCompleteCourse}
-        />
-      )}
-        {/* Pulsante piccolo in alto a destra */}
-        <button
-          className="w-10 h-10 bg-[#991B1B] text-white rounded-full shadow flex items-center justify-center text-2xl hover:bg-red-800 self-end mb-4"
-          onClick={handleOpenAddModal}
-          title="Aggiungi Corso"
-          aria-label="Aggiungi Corso"
-          style={{ marginRight: "0.5rem" }}
-        >
-          +
-        </button>
-      {showAddActionModal && (
-        <AddActionModal
-          onClose={() => setShowAddActionModal(false)}
-          onReview={() => {
-            setShowAddActionModal(false);
-            handleOpenReviewModal(actionCourse);
-          }}
-          onMaterial={() => {
-            setShowAddActionModal(false);
-            // Qui puoi aprire la modale per l'upload dei materiali
-            alert("Funzionalità aggiungi materiale non ancora implementata!");
-          }}
-        />
-      )}
-      
-
-      {showAddModal && (
-        <AddCourseModal
-          availableCourses={availableCourses}
-          selectedCourseId={selectedCourseId}
-          editions={editions}
-          showAddEdition={showAddEdition}
-          newEdition={newEdition}
-          error={error}
-          success={success}
-          setShowAddModal={setShowAddModal}
-          handleSelectCourse={handleSelectCourse}
-          handleEnroll={handleEnroll}
-          setShowAddEdition={setShowAddEdition}
-          handleAddEdition={handleAddEdition}
-          setNewEdition={setNewEdition}
-          docenti={docenti}
-        />
-      )}
-      {showReviewModal && (
-        <ReviewModal
-          corso={reviewCourse}
-          onClose={() => setShowReviewModal(false)}
-          onSubmit={handleAddReview}
-          error={error}
-        />
-      )}
-
-      {success && <div className="fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded">{success}</div>}
-      {error && <div className="fixed top-4 right-4 bg-red-600 text-white px-4 py-2 rounded">{error}</div>}
-
-      <h2 className="text-2xl font-bold text-[#991B1B] mb-4 text-center">Corsi che stai frequentando</h2>
-      <div className="flex flex-wrap gap-4 justify-center">
-        {currentCourses
-          .filter(corso => (corso.stato || "").toLowerCase() === "attivo")
-          .map((corso) => (
-            <CourseBox
-              key={corso.edition_id}
-              corso={corso}
-              onClick={() => handleOpenDetailModal(corso)}
-              onUnenroll={() => handleUnenrollCourse(corso)}
-              onComplete={() => handleOpenCompleteModal(corso)}
-            >
-              {/* puoi lasciare vuoto oppure aggiungere altro contenuto */}
-            </CourseBox>
-          ))}
-      </div>
-
-      <h2 className="text-2xl font-bold text-[#991B1B] mt-16 mb-4 text-center">Corsi che hai frequentato</h2>
-      <div className="flex flex-wrap gap-4 justify-center">
-        {completedCourses.map((corso) => {
-          const alreadyReviewed = studentReviews.some(
-            r => r.edition_id === corso.edition_id && r.edition_data === corso.edition_data
-          );
-          return (
-            <CourseBox
-              key={corso.edition_id}
-              corso={corso}
-              onClick={() => handleOpenDetailModal(corso)}
-            >
-              <div className="flex justify-end items-center gap-5">
-                {!alreadyReviewed && (
-                  <button
-                    className="w-8 h-8 flex items-center justify-center bg-[#991B1B] text-white rounded-full hover:bg-red-800 text-xl shadow"
-                    style={{ marginTop: "-0.5rem", marginRight: "-0.5rem" }}
-                    onClick={e => { e.stopPropagation(); handleOpenActionModal(corso); }}
-                    title="Aggiungi"
-                  >
-                    +
-                  </button>
-                )}
-                {alreadyReviewed && (
-                  <span className="text-sm text-gray-500 mr-2">Recensione inviata</span>
-                )}
-                {/* Pulsante ripristina */}
-                <button
-                  className="w-8 h-8 flex items-center justify-center text-black rounded-ful text-xl shadow"
-                  style={{ marginTop: "-0.5rem", marginRight: "-0.5rem" }}
-                  onClick={e => { e.stopPropagation(); handleRestoreCourse(corso); }}
-                  title="Riporta tra i corsi attivi"
-                >
-                  <span role="img" aria-label="modifica">↩</span>
-                </button>
-              </div>
-            </CourseBox>
-          );
-        })}
-        {showDetailModal && (
-          <CourseDetailModal
-            corso={detailCourse}
-            onClose={() => setShowDetailModal(false)}
+    <SwipeWrapperStudente>
+      <div className="flex flex-col p-4 min-h-screen pb-24 pt-20">
+        {showCompleteModal && (
+          <CompleteModal
+            courseToComplete={courseToComplete}
+            completeVoto={completeVoto}
+            setCompleteVoto={setCompleteVoto}
+            error={error}
+            setShowCompleteModal={setShowCompleteModal}
+            handleCompleteCourse={handleCompleteCourse}
           />
         )}
+          {/* Pulsante piccolo in alto a destra */}
+          <button
+            className="w-10 h-10 bg-[#991B1B] text-white rounded-full shadow flex items-center justify-center text-2xl hover:bg-red-800 self-end mb-4"
+            onClick={handleOpenAddModal}
+            title="Aggiungi Corso"
+            aria-label="Aggiungi Corso"
+            style={{ marginRight: "0.5rem" }}
+          >
+            +
+          </button>
+        {showAddActionModal && (
+          <AddActionModal
+            onClose={() => setShowAddActionModal(false)}
+            onReview={() => {
+              setShowAddActionModal(false);
+              handleOpenReviewModal(actionCourse);
+            }}
+            onMaterial={() => {
+              setShowAddActionModal(false);
+              // Qui puoi aprire la modale per l'upload dei materiali
+              alert("Funzionalità aggiungi materiale non ancora implementata!");
+            }}
+          />
+        )}
+        
+
+        {showAddModal && (
+          <AddCourseModal
+            availableCourses={availableCourses}
+            selectedCourseId={selectedCourseId}
+            editions={editions}
+            showAddEdition={showAddEdition}
+            newEdition={newEdition}
+            error={error}
+            success={success}
+            setShowAddModal={setShowAddModal}
+            handleSelectCourse={handleSelectCourse}
+            handleEnroll={handleEnroll}
+            setShowAddEdition={setShowAddEdition}
+            handleAddEdition={handleAddEdition}
+            setNewEdition={setNewEdition}
+            docenti={docenti}
+          />
+        )}
+        {showReviewModal && (
+          <ReviewModal
+            corso={reviewCourse}
+            onClose={() => setShowReviewModal(false)}
+            onSubmit={handleAddReview}
+            error={error}
+          />
+        )}
+
+        {success && <div className="fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded">{success}</div>}
+        {error && <div className="fixed top-4 right-4 bg-red-600 text-white px-4 py-2 rounded">{error}</div>}
+
+        <h2 className="text-2xl font-bold text-[#991B1B] mb-4 text-center italic">Corsi che stai frequentando</h2>
+        <div className="flex flex-wrap gap-4 justify-center">
+          {currentCourses
+            .filter(corso => (corso.stato || "").toLowerCase() === "attivo")
+            .map((corso) => (
+              <CourseBox
+                key={corso.edition_id}
+                corso={corso}
+                onClick={() => handleOpenDetailModal(corso)}
+                onUnenroll={() => handleUnenrollCourse(corso)}
+                onComplete={() => handleOpenCompleteModal(corso)}
+              >
+                {/* puoi lasciare vuoto oppure aggiungere altro contenuto */}
+              </CourseBox>
+            ))}
+        </div>
+
+        <h2 className="text-2xl font-bold text-[#991B1B] mt-16 mb-4 text-center italic">Corsi che hai frequentato</h2>
+        <div className="flex flex-wrap gap-4 justify-center">
+          {completedCourses.map((corso) => {
+            const alreadyReviewed = studentReviews.some(
+              r => r.edition_id === corso.edition_id && r.edition_data === corso.edition_data
+            );
+            return (
+              <CourseBox
+                key={corso.edition_id}
+                corso={corso}
+                onClick={() => handleOpenDetailModal(corso)}
+              >
+                <div className="flex justify-end items-center gap-5">
+                  {!alreadyReviewed && (
+                    <button
+                      className="w-8 h-8 flex items-center justify-center bg-[#991B1B] text-white rounded-full hover:bg-red-800 text-xl shadow"
+                      style={{ marginTop: "-0.5rem", marginRight: "-0.5rem" }}
+                      onClick={e => { e.stopPropagation(); handleOpenActionModal(corso); }}
+                      title="Aggiungi"
+                    >
+                      +
+                    </button>
+                  )}
+                  {alreadyReviewed && (
+                    <span className="text-sm text-gray-500 mr-2 italic">Recensione inviata</span>
+                  )}
+                  {/* Pulsante ripristina */}
+                  <button
+                    className="w-8 h-8 flex items-center justify-center text-black rounded-full text-xl shadow hover:bg-gray-200"
+                    style={{ marginTop: "-0.5rem", marginRight: "-0.5rem" }}
+                    onClick={e => {
+                      e.stopPropagation();
+                      setRestoreCourse(corso);
+                      setShowRestoreConfirm(true);
+                    }}
+                    title="Riporta tra i corsi attivi"
+                  >
+                    <TbArrowLeftFromArc className="w-5 h-5" />
+                  </button>
+                </div>
+              </CourseBox>
+            );
+          })}
+
+                    <RestoreConfirmModal
+            open={showRestoreConfirm}
+            onClose={() => setShowRestoreConfirm(false)}
+            onConfirm={async () => {
+              await handleRestoreCourse(restoreCourse);
+              setShowRestoreConfirm(false);
+            }}
+          />
+
+          {/* quando clicco sul corso mostra i dettagli */}
+          {showDetailModal && (
+            <CourseDetailModal
+              corso={detailCourse}
+              onClose={() => setShowDetailModal(false)}
+            />
+          )}
+        </div>
       </div>
-    </div>
+    </SwipeWrapperStudente>
   );
 }
