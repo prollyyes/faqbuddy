@@ -21,7 +21,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-clf = joblib.load("ml_model.joblib")
+import os
+model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'models', 'ml_model.joblib'))
+clf = joblib.load(model_path)
 
 class ChatRequest(BaseModel):
     question: str
