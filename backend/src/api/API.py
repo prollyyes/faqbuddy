@@ -28,6 +28,11 @@ app.include_router(chat_router)
 
 
 
+# Health check endpoint for Render
+@app.get("/")
+def root():
+    return {"message": "FAQBuddy API is running!", "status": "healthy"}
+
 # just for testing purposes
 @app.get("/test")
 def test_endpoint():
