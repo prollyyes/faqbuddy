@@ -24,21 +24,39 @@ def get_ml_model():
     """Lazy load ML model."""
     global _ml_model
     if _ml_model is None:
-        _ml_model = MLModel()
+        try:
+            print("WAIT========= Initializing ML model...")
+            _ml_model = MLModel()
+            print("✅ ML model initialized successfully")
+        except Exception as e:
+            print(f"❌ Failed to initialize ML model: {e}")
+            raise e
     return _ml_model
 
 def get_converter():
     """Lazy load Text-to-SQL converter."""
     global _converter
     if _converter is None:
-        _converter = TextToSQLConverter()
+        try:
+            print("WAIT========= Initializing Text-to-SQL converter...")
+            _converter = TextToSQLConverter()
+            print("✅ Text-to-SQL converter initialized successfully")
+        except Exception as e:
+            print(f"❌ Failed to initialize Text-to-SQL converter: {e}")
+            raise e
     return _converter
 
 def get_rag():
     """Lazy load RAG system."""
     global _rag
     if _rag is None:
-        _rag = RAGSystem()
+        try:
+            print("WAIT========= Initializing RAG system...")
+            _rag = RAGSystem()
+            print("✅ RAG system initialized successfully")
+        except Exception as e:
+            print(f"❌ Failed to initialize RAG system: {e}")
+            raise e
     return _rag
 
 def call_rag_system(question: str, streaming: bool = False, include_metadata: bool = False, conversation_context: str = "") -> Any:

@@ -14,10 +14,13 @@ app.add_middleware(
         "https://faqbuddy.net",
         "https://faqbuddy.vercel.app",
         "https://faqbuddy-frontend.vercel.app",
-        "http://localhost:3000"
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "https://localhost:3000",
+        "https://localhost:3001"
     ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -37,3 +40,15 @@ def root():
 @app.get("/test")
 def test_endpoint():
     return {"message": "Test successful!"}
+
+# Environment and system status endpoint
+@app.get("/status")
+def system_status():
+    import os
+    return {
+        "message": "System status check",
+        "remote_llm_base": os.getenv("REMOTE_LLM_BASE", "NOT SET"),
+        "remote_llm_model": os.getenv("REMOTE_LLM_MODEL", "NOT SET"),
+        "remote_llm_key": "SET" if os.getenv("REMOTE_LLM_API_KEY") else "NOT SET",
+        "status": "healthy"
+    }
