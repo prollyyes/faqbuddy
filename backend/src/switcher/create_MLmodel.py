@@ -45,6 +45,6 @@ plt.show()
 
 # Save model inside the models directory
 import joblib
-model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'models', 'ml_model.joblib'))
+model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'models', 'ml_model.joblib'))
 joblib.dump(clf, model_path)
 print(f"Modello salvato in: {model_path}")

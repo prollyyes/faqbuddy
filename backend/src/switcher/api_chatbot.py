@@ -22,7 +22,7 @@ app.add_middleware(
 )
 
 import os
-model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'models', 'ml_model.joblib'))
+model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'models', 'ml_model.joblib'))
 clf = joblib.load(model_path)
 
 class ChatRequest(BaseModel):
