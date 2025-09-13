@@ -1,6 +1,7 @@
 'use client'
 import React, { useState } from "react";
 import axios from "axios";
+import MobileSheet from "@/components/utils/MobileSheet";
 
 const HOST = process.env.NEXT_PUBLIC_HOST;
 
@@ -52,7 +53,7 @@ export function AddEditionModal({ show, onClose, courses, onSuccess }) {
             await axios.post(
                 `${HOST}/teacher/courses/${form.corso_id}/editions/add`,
                 {
-                    insegnante: "", // <-- stringa vuota per l'insegnante cosi nel Backend posso usare lo stesso BaseModel che uso per gli studenti
+                    insegnante: "",
                     data: form.data,
                     orario: form.orario,
                     esonero: form.esonero,
@@ -70,19 +71,18 @@ export function AddEditionModal({ show, onClose, courses, onSuccess }) {
         }
     };
 
-    if (!show) return null;
-
     return (
-        <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm backdrop-brightness-75">
-            <div className="relative pointer-events-auto bg-white/90 p-6 rounded-lg shadow-2xl w-[22rem] max-w-full max-h-[90vh] overflow-y-auto border-2 border-[#991B1B]">
-                <button
-                    className="absolute top-2 right-2 text-gray-500 hover:text-red-700 text-xl"
-                    onClick={onClose}
-                >
-                    &times;
-                </button>
-                <h3 className="text-lg font-bold mb-4 text-[#991B1B]">Aggiungi nuova edizione</h3>
-                <form className="space-y-3" onSubmit={handleSubmit}>
+        <MobileSheet open={show} onClose={onClose} title="Aggiungi nuova edizione" footer={
+            <button
+                type="submit"
+                form="add-edition-form"
+                className="w-full bg-[#991B1B] text-white rounded-lg py-2 font-semibold hover:opacity-90"
+                disabled={loading}
+            >
+                {loading ? "Salvataggio..." : "Aggiungi edizione"}
+            </button>
+        }>
+            <form id="add-edition-form" className="space-y-3" onSubmit={handleSubmit}>
                     <div>
                         <label className="block mb-1 font-medium text-black">Corso</label>
                         <select
@@ -90,7 +90,7 @@ export function AddEditionModal({ show, onClose, courses, onSuccess }) {
                             value={form.corso_id}
                             onChange={handleChange}
                             required
-                            className="w-full border rounded px-2 py-1 text-black"
+                            className="w-full border rounded px-3 py-2 text-black"
                         >
                             <option value="">Seleziona corso</option>
                             {courses.map(c => (
@@ -107,7 +107,7 @@ export function AddEditionModal({ show, onClose, courses, onSuccess }) {
                             value={form.data}
                             onChange={handleChange}
                             required
-                            className="w-full border rounded px-2 py-1 text-black"
+                            className="w-full border rounded px-3 py-2 text-black"
                         >
                             <option value="">Seleziona semestre</option>
                             {opzioniData.map(opt => (
@@ -121,7 +121,7 @@ export function AddEditionModal({ show, onClose, courses, onSuccess }) {
                             name="orario"
                             value={form.orario}
                             onChange={handleChange}
-                            className="w-full border rounded px-2 py-1 text-black"
+                            className="w-full border rounded px-3 py-2 text-black"
                             placeholder="Orario lezioni"
                         />
                     </div>
@@ -131,7 +131,7 @@ export function AddEditionModal({ show, onClose, courses, onSuccess }) {
                             name="mod_Esame"
                             value={form.mod_Esame}
                             onChange={handleChange}
-                            className="w-full border rounded px-2 py-1 text-black"
+                            className="w-full border rounded px-3 py-2 text-black"
                             placeholder="Es: scritto, orale..."
                         />
                     </div>
@@ -151,7 +151,7 @@ export function AddEditionModal({ show, onClose, courses, onSuccess }) {
                             name="stato"
                             value={form.stato}
                             onChange={handleChange}
-                            className="w-full border rounded px-2 py-1 text-black"
+                            className="w-full border rounded px-3 py-2 text-black"
                         >
                             <option value="attivo">Attivo</option>
                             <option value="archiviato">Archiviato</option>
@@ -159,15 +159,7 @@ export function AddEditionModal({ show, onClose, courses, onSuccess }) {
                         </select>
                     </div>
                     {error && <div className="text-red-600 text-sm">{error}</div>}
-                    <button
-                        type="submit"
-                        className="w-full bg-[#991B1B] text-white rounded py-2 font-semibold hover:bg-red-800"
-                        disabled={loading}
-                    >
-                        {loading ? "Salvataggio..." : "Aggiungi edizione"}
-                    </button>
-                </form>
-            </div>
-        </div>
+            </form>
+        </MobileSheet>
     );
 }

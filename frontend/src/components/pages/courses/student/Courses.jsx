@@ -190,8 +190,7 @@ export default function CorsiPage() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setSuccess("Iscrizione avvenuta!");
-      // Non chiudere la modale subito, lascia che l'utente decida
-      setShowAddModal(false);
+      // Lascia chiudere la modale con animazione dal componente
       // Aggiorna corsi attivi
       const resCurrent = await axios.get(`${HOST}/profile/courses/current`, { headers: { Authorization: `Bearer ${token}` } });
       setCurrentCourses(resCurrent.data);
@@ -229,8 +228,7 @@ export default function CorsiPage() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setSuccess("Edizione aggiunta e iscritto!");
-      // Non chiudere la modale subito, lascia che l'utente decida
-      setShowAddModal(false);
+      // Lascia chiudere la modale con animazione dal componente
       // Aggiorna corsi attivi
       const resCurrent = await axios.get(`${HOST}/profile/courses/current`, { headers: { Authorization: `Bearer ${token}` } });
       setCurrentCourses(resCurrent.data);
@@ -279,7 +277,6 @@ export default function CorsiPage() {
         headers: { Authorization: `Bearer ${token}` }
       });
       setStudentReviews(res.data);
-      setShowReviewModal(false);
     } catch (err) {
       setError(err.response?.data?.detail || "Errore durante l'invio della recensione");
     }

@@ -1,5 +1,8 @@
+"use client";
 import React from 'react';
 import { useState, useEffect } from 'react';
+import MobileSheet from "@/components/utils/MobileSheet";
+import { AnimatePresence, motion } from 'framer-motion';
 
 export default function AddCourseModal({
     availableCourses,
@@ -19,6 +22,11 @@ export default function AddCourseModal({
 }) {
 
     const selectedCourse = availableCourses.find(c => c.id === selectedCourseId);
+    const [sheetOpen, setSheetOpen] = useState(true);
+    const softClose = () => {
+        setSheetOpen(false);
+        setTimeout(() => setShowAddModal(false), 240);
+    };
     const anni = [];
     for (let anno = 2015; anno <= 2025; anno++) {
         anni.push(anno);
@@ -30,18 +38,12 @@ export default function AddCourseModal({
     });
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm backdrop-brightness-75 pt-25">
-            <div className="relative pointer-events-auto bg-white/80 p-6 rounded-lg shadow-2xl w-[22rem] max-w-full max-h-[90vh] overflow-y-auto border-2 border-[#991B1B] backdrop-blur-md">
-                <button
-                    className="absolute top-2 right-2 text-gray-500 hover:text-red-700 text-xl"
-                    onClick={() => setShowAddModal(false)}
-                >
-                    &times;
-                </button>
-                <h3 className="text-lg font-bold mb-4 text-[#991B1B]">Aggiungi Corso</h3>
+        <MobileSheet open={sheetOpen} onClose={softClose} title="Aggiungi Corso">
+            <motion.div layout>
+              <AnimatePresence initial={false} mode="wait">
                 {!selectedCourseId ? (
-                    <>
-                        <div className="mb-4 ">
+                  <motion.div key="list" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} transition={{ duration: 0.18 }}>
+                    <div className="mb-4 ">
                             <h4 className="font-semibold mb-2 text-black">Corsi disponibili:</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                 {availableCourses.map(corso => (
@@ -56,9 +58,9 @@ export default function AddCourseModal({
                                 ))}
                             </div>
                         </div>
-                    </>
+                  </motion.div>
                 ) : (
-                    <>
+                  <motion.div key={showAddEdition ? 'form' : 'editions'} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} transition={{ duration: 0.18 }} layout>
                         <div className="mb-4">
                             <div className="grid grid-cols-1 gap-2">
                                 {editions.map(edition => (
@@ -74,7 +76,7 @@ export default function AddCourseModal({
                                         </span>
                                         <button
                                             className="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-800"
-                                            onClick={() => handleEnroll(selectedCourseId, edition.id, edition.data)}
+                                            onClick={async () => { await handleEnroll(selectedCourseId, edition.id, edition.data); softClose(); }}
                                         >
                                             Iscriviti
                                         </button>
@@ -82,11 +84,12 @@ export default function AddCourseModal({
                                 ))}
                             </div>
                         </div>
+                        <AnimatePresence initial={false} mode="wait">
                         {!showAddEdition ? (
-                            <div className="flex flex-row justify-center gap-6 mt-4">
+                            <motion.div key="editions-actions" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} transition={{ duration: 0.18 }} className="flex flex-row justify-center gap-6 mt-4">
                                 <button
                                     className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition text-sm"
-                                    onClick={() => setShowAddModal(false)}
+                                    onClick={softClose}
                                 >
                                     Chiudi
                                 </button>
@@ -96,9 +99,9 @@ export default function AddCourseModal({
                                 >
                                     <span className="mr-1 text-lg">+</span> Aggiungi Edizione
                                 </button>
-                            </div>
+                            </motion.div>
                         ) : (
-                            <form onSubmit={handleAddEdition} className="space-y-2 mt-4">
+                            <motion.form key="form" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} transition={{ duration: 0.18 }} onSubmit={handleAddEdition} className="space-y-2 mt-4">
                                 <h4 className="font-semibold mb-2 text-black">Aggiungi nuova edizione</h4>
                                 <label className="block font-semibold text-black">Data:</label>
                                 <select
@@ -174,10 +177,13 @@ export default function AddCourseModal({
                                         <span className="mr-1 text-lg">+</span> Aggiungi edizione e iscriviti
                                     </button>
                                 </div>
-                            </form>
+                            </motion.form>
                         )}
-                    </>
+                        </AnimatePresence>
+                  </motion.div>
                 )}
+              </AnimatePresence>
+            </motion.div>
                 {error && (
                   <div className="text-red-600 mt-2">
                     {typeof error === "string"
@@ -190,7 +196,6 @@ export default function AddCourseModal({
                   </div>
                 )}
                 {success && <div className="text-green-600 mt-2">{success}</div>}
-            </div>
-        </div>
+        </MobileSheet>
     );
 }
