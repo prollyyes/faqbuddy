@@ -18,13 +18,13 @@ export default function Header() {
 
   return (
     <header className="w-full h-20 flex items-center justify-center text-[#822433] pt-2 fixed top-0 bg-white z-50 shadow-sm">
-      {showBackButton && (
+      {/* {showBackButton && (
         <div className="absolute left-6 top-8">
           <BackButton href={backHref} />
         </div>
-      )}
-      <Link href="/homepage/chat" className="text-4xl font-bold tracking-wider mr-2 ramaraja-regular">
-        FAQBuddy
+      )} */}
+      <Link href="/homepage/chat" className="text-4xl font-black tracking-wider mr-2 condiment-regular">
+        <strong className="font-black">FAQBuddy</strong>
       </Link>
     </header>
   );
