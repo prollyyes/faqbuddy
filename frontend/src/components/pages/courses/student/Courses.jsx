@@ -125,7 +125,6 @@ export default function CorsiPage() {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setShowCompleteModal(false);
       setSuccess("Corso completato!");
       // Aggiorna le liste
       const resCurrent = await axios.get(`${HOST}/profile/courses/current`, { headers: { Authorization: `Bearer ${token}` } });
@@ -325,8 +324,8 @@ export default function CorsiPage() {
             handleCompleteCourse={handleCompleteCourse}
           />
         )}
-        {/* Toggle centrato; etichette ai lati con stato attivo/grigio */}
-        <div className="sticky top-16 z-10 bg-white/90 backdrop-blur px-1 pb-3">
+        {/* Toggle centrato; non sticky */}
+        <div className="px-1 pb-3 mt-2">
           <div className="grid grid-cols-3 items-center">
             <div className="justify-self-end pr-3">
               <span className={`text-sm font-semibold ${tab === 'attivi' ? 'text-[#822433]' : 'text-gray-400'}`}>Attivi</span>
@@ -477,7 +476,6 @@ export default function CorsiPage() {
           onClose={() => setShowRestoreConfirm(false)}
           onConfirm={async () => {
             await handleRestoreCourse(restoreCourse);
-            setShowRestoreConfirm(false);
           }}
         />
 

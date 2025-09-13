@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import MobileSheet from "@/components/utils/MobileSheet";
 
 export default function CompleteModal({
@@ -11,26 +11,30 @@ export default function CompleteModal({
     handleCompleteCourse
 }) {
     const [localError, setLocalError] = useState("");
+    const [sheetOpen, setSheetOpen] = useState(true);
+    useEffect(() => { setSheetOpen(true); }, []);
+    const softClose = () => { setSheetOpen(false); setTimeout(() => setShowCompleteModal(false), 240); };
 
-    const handleClick = () => {
+    const handleClick = async () => {
         if (!completeVoto || isNaN(completeVoto) || completeVoto < 18 || completeVoto > 31) {
             setLocalError("Inserisci un voto valido tra 18 e 31");
             return;
         }
         setLocalError("");
-        handleCompleteCourse();
+        await handleCompleteCourse();
+        softClose();
     };
 
     return (
         <MobileSheet
-            open={true}
-            onClose={() => setShowCompleteModal(false)}
+            open={sheetOpen}
+            onClose={softClose}
             title={`Completa: ${courseToComplete?.nome || ''}`}
             footer={
                 <div className="flex gap-3">
                     <button
                         className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg"
-                        onClick={() => setShowCompleteModal(false)}
+                        onClick={softClose}
                         type="button"
                     >
                         Annulla

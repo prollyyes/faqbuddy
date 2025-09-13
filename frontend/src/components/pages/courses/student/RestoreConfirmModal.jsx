@@ -1,19 +1,30 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Button from "@/components/utils/Button";
 import MobileSheet from "@/components/utils/MobileSheet";
 
 export default function RestoreConfirmModal({ open, onClose, onConfirm }) {
-  if (!open) return null;
+  const [sheetOpen, setSheetOpen] = useState(open);
+
+  useEffect(() => {
+    if (open) setSheetOpen(true);
+  }, [open]);
+
+  const softClose = () => {
+    setSheetOpen(false);
+    setTimeout(() => onClose?.(), 240);
+  };
+
+  if (!open && !sheetOpen) return null;
   return (
     <MobileSheet
-      open={open}
-      onClose={onClose}
+      open={sheetOpen}
+      onClose={softClose}
       title="Sei sicuro?"
       footer={
         <div className="flex gap-3">
-          <button className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg" onClick={onClose}>Annulla</button>
-          <Button className="flex-1 px-4 py-2" onClick={onConfirm}>Continua</Button>
+          <button className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg" onClick={softClose}>Annulla</button>
+          <Button className="flex-1 px-4 py-2" onClick={async () => { await onConfirm?.(); softClose(); }}>Continua</Button>
         </div>
       }
     >

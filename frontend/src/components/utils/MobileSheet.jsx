@@ -53,13 +53,13 @@ export default function MobileSheet({ open, onClose, title, children, footer }) 
             </div>
             <div className="px-4 pb-2 flex items-center justify-between">
               <h2 className="text-base font-semibold text-[#822433] truncate">{title}</h2>
-              <button
+              {/* <button
                 className="text-gray-500 hover:text-red-700 text-xl leading-none px-2"
                 onClick={onClose}
                 aria-label="Chiudi"
               >
                 ×
-              </button>
+              </button> */}
             </div>
             <motion.div className="px-4 pt-2 pb-3 overflow-y-auto" layout>
               {children}
