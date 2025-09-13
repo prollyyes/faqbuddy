@@ -46,7 +46,7 @@ export default function TeacherCourses() {
     }
   };
 
-  if (loading) return <div className="p-8 text-center">Caricamento corsi...</div>;
+  if (loading) return <div className="p-8 text-center italic">Caricamento corsi...</div>;
   if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
 
   // Split courses

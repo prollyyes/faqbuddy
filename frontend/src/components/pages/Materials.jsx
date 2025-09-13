@@ -5,6 +5,7 @@ import Button from "@/components/utils/Button";
 import BackButton from "@/components/utils/BackButton";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import SwipeWrapperHome from "../wrappers/SwipeWrapperHome";
 
 export default function MaterialsPage() {
   const router = useRouter();
@@ -84,8 +85,10 @@ export default function MaterialsPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col justify-center items-center bg-white px-6 text-[#822433] space-y-8">
-      {renderContent()}
-    </div>
+    <SwipeWrapperHome>
+      <div className="h-screen flex flex-col justify-center items-center bg-white px-6 text-[#822433] space-y-8">
+        {renderContent()}
+      </div>
+    </SwipeWrapperHome>
   );
 }
