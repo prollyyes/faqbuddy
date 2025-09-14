@@ -56,7 +56,7 @@ class EntityPacksChunker:
             # Fallback: return first lines truncated to approximate 5 sentences
             return canonical_text.split("\n", 6)[0:6][0]
         
-        from utils.llm_mistral import generate_answer
+        from src.utils.llm_mistral import generate_answer
         context = f"Entita': {entity_name}\nDati:\n{canonical_text}"
         question = "Riassumi in massimo 5 frasi, senza inventare nulla, i dati dell'entità seguente. Mantieni solo informazioni presenti."
         
