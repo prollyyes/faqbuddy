@@ -1,5 +1,5 @@
 import logging
-from .db_utils import get_database_schema
+from src.utils.db_utils import get_database_schema
 from typing import Optional
 
 logger = logging.getLogger(__name__)

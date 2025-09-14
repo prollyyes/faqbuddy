@@ -4,8 +4,8 @@ Manages switching between Gemma and Mistral models to avoid GPU memory conflicts
 Only one model is loaded at a time to prevent segmentation faults.
 """
 
-from .llm_gemma import load_gemma_model, unload_gemma_model, ensure_gemma_loaded
-from .llm_mistral import load_mistral_model, unload_mistral_model, ensure_mistral_loaded
+from src.utils.llm_gemma import load_gemma_model, unload_gemma_model, ensure_gemma_loaded
+from src.utils.llm_mistral import load_mistral_model, unload_mistral_model, ensure_mistral_loaded
 
 class ModelSwitcher:
     """Manages switching between Gemma and Mistral models"""

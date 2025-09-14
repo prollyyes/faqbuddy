@@ -11,20 +11,20 @@ from pathlib import Path
 
 def setup_environment():
     """Set up environment variables for local development."""
-    # Set Python path
-    backend_src = Path(__file__).parent / "backend" / "src"
-    if str(backend_src) not in sys.path:
-        sys.path.insert(0, str(backend_src))
+    # Set Python path to the backend directory (not src)
+    backend_dir = Path(__file__).parent / "backend"
+    if str(backend_dir) not in sys.path:
+        sys.path.insert(0, str(backend_dir))
     
     # Set environment variables
-    os.environ["PYTHONPATH"] = str(backend_src)
+    os.environ["PYTHONPATH"] = str(backend_dir)
     os.environ["MODE"] = "local"  # Use local database mode
     
-    print(f"✅ Python path set to: {backend_src}")
+    print(f"✅ Python path set to: {backend_dir}")
 
 def run_backend():
     """Run the FastAPI backend locally."""
-    backend_src = Path(__file__).parent / "backend" / "src"
+    backend_dir = Path(__file__).parent / "backend"
     
     print("🚀 Starting FAQBuddy Backend locally...")
     print("📍 Backend will be available at: http://localhost:8000")
@@ -35,12 +35,12 @@ def run_backend():
     print("-" * 60)
     
     # Change to backend directory
-    os.chdir(backend_src)
+    os.chdir(backend_dir)
     
     # Run uvicorn
     cmd = [
         "uvicorn", 
-        "api.API:app", 
+        "src.api.API:app", 
         "--host", "0.0.0.0", 
         "--port", "8000", 
         "--reload",

@@ -1,4 +1,4 @@
-from ..utils.llm_mistral import llm_mistral
+from src.utils.llm_mistral import llm_mistral
 from typing import Optional
 
 
@@ -152,7 +152,7 @@ class TextToSQLConverter:
         return None
     
     def sql_results_to_text_llm(self, question: str, results: list) -> str:
-        from ..utils.llm_gemma import llm_gemma
+        from src.utils.llm_gemma import llm_gemma
         prompt = (
             "Rispondi in italiano in modo sintetico e diretto alla seguente domanda, "
             "usando SOLO i dati forniti qui sotto. Non aggiungere spiegazioni o ringraziamenti.\n\n"

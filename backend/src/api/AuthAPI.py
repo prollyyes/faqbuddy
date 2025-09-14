@@ -1,6 +1,6 @@
 from uuid import uuid4
-from ..utils.db_utils import get_connection, MODE
-from ..utils.db_handler import DBHandler
+from src.utils.db_utils import get_connection, MODE
+from src.utils.db_handler import DBHandler
 from fastapi import APIRouter, HTTPException, status, UploadFile, File, Form, Depends
 from .BaseModel import LoginRequest, SignupRequest
 from .utils import *
