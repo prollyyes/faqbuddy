@@ -3,6 +3,8 @@ import ProfileNavBarStudente from '@/components/utils/ProfileNavBarStudente';
 import ProfileNavBarInsegnante from '@/components/utils/ProfileNavBarInsegnante';
 import Header from '@/components/utils/Header';
 import { useEffect, useState } from 'react';
+import { LogoutProvider } from '@/components/utils/LogoutContext';
+import LogoutPopup from '@/components/utils/LogoutPopup';
 
 const HOST = process.env.NEXT_PUBLIC_HOST;
 
@@ -21,11 +23,14 @@ export default function ProfileLayout({ children }) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white ">
-      <Header />
-      {ruolo === 'studente' && <ProfileNavBarStudente />}
-      {ruolo === 'insegnante' && <ProfileNavBarInsegnante />}
-      <main className="pt-4">{children}</main>
-    </div>
+    <LogoutProvider>
+      <div className="min-h-screen bg-white ">
+        <Header />
+        {ruolo === 'studente' && <ProfileNavBarStudente />}
+        {ruolo === 'insegnante' && <ProfileNavBarInsegnante />}
+        <main className="pt-4">{children}</main>
+        <LogoutPopup />
+      </div>
+    </LogoutProvider>
   );
 }

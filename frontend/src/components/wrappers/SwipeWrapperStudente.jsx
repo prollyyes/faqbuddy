@@ -1,6 +1,7 @@
 'use client'
 import { useSwipeable } from 'react-swipeable';
 import { useRouter, usePathname } from 'next/navigation';
+import { useLogout } from '@/components/utils/LogoutContext';
 
 const pages = [
   '/profile/personalInfo',
@@ -17,6 +18,7 @@ export default function SwipeWrapperStudente({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const normalizedPath = normalizePath(pathname);
+  const { openLogout } = useLogout();
 
   const currentIndex = pages.indexOf(normalizedPath);
 
@@ -24,8 +26,12 @@ export default function SwipeWrapperStudente({ children }) {
 
   const handlers = useSwipeable({
     onSwipedLeft: () => {
-      if (currentIndex < pages.length - 1 && currentIndex !== -1) {
-        router.push(pages[currentIndex + 1]);
+      if (currentIndex !== -1) {
+        if (currentIndex < pages.length - 1) {
+          router.push(pages[currentIndex + 1]);
+        } else {
+          openLogout();
+        }
       }
     },
     onSwipedRight: () => {
