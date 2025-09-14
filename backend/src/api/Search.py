@@ -1,7 +1,7 @@
 from uuid import uuid4
 import bcrypt
-from src.utils.db_utils import get_connection, MODE
-from src.utils.db_handler import DBHandler
+from utils.db_utils import get_connection, MODE
+from utils.db_handler import DBHandler
 from fastapi import APIRouter, HTTPException, status
 from .BaseModel import SearchCorsi, SearchEdizione, SearchMaterials
 
