@@ -200,6 +200,8 @@ def get_editions_for_course(corso_id: uuid.UUID, db_handler: DBHandler = Depends
         FROM EdizioneCorso e
         JOIN Insegnanti_Anagrafici ia ON e.insegnante_anagrafico = ia.id
         WHERE e.id = %s
+          AND e.stato = 'attivo'
+        ORDER BY e.data DESC
     """
     results = db_handler.run_query(query, params=(str(corso_id),), fetch=True)
     return [
