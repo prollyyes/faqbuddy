@@ -43,7 +43,7 @@ export default function CourseBox({ corso, children, onClick, onUnenroll, onComp
           ✓
         </button>
       )}
-      <div className="font-bold text-lg mb-2 text-[#991B1B]">{corso.nome}</div>
+      <div className="font-bold text-lg mb-2 text-[#991B1B] pr-10 break-words whitespace-normal leading-snug">{corso.nome}</div>
       <div className="mb-1 text-black">Edizione: <span className="font-semibold">{corso.edition_data}</span></div>
       <div className="mb-1 text-black" >CFU: <span className="font-semibold">{corso.cfu}</span></div>
       <div className="mb-1 text-black">Stato: <span className="font-semibold">{corso.stato}</span></div>
