@@ -12,7 +12,7 @@ llm_gemma = Llama(
     model_path=gemma_model_path,
     n_ctx=2048,
     n_threads=6,
-    n_gpu_layers=-1,
+    n_gpu_layers=15,
     verbose=False
 )
 
