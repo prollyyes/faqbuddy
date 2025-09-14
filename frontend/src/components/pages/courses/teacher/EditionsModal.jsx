@@ -1,5 +1,7 @@
+'use client'
 import React, { useState } from "react";
 import axios from "axios";
+import MobileSheet from "@/components/utils/MobileSheet";
 
 const HOST = process.env.NEXT_PUBLIC_HOST;
 
@@ -89,15 +91,7 @@ export function EditionsModal({ corso, onClose, onUpdateStato }) {
     };
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm backdrop-brightness-75">
-            <div className="relative pointer-events-auto bg-white/90 p-6 rounded-lg shadow-2xl w-[22rem] max-w-full max-h-[90vh] overflow-y-auto border-2 border-[#991B1B]">
-                <button
-                    className="absolute top-2 right-2 text-gray-500 hover:text-red-700 text-xl"
-                    onClick={onClose}
-                >
-                    &times;
-                </button>
-                <h3 className="text-lg font-bold mb-4 text-[#991B1B]">{corso.nome}</h3>
+        <MobileSheet open={true} onClose={onClose} title={corso.nome}>
                 <div className="mb-2 text-gray-700">CFU: <span className="font-bold">{corso.cfu}</span></div>
                 <h4 className="font-semibold mb-2 text-black">Edizioni:</h4>
                 <div className="space-y-2">
@@ -200,7 +194,6 @@ export function EditionsModal({ corso, onClose, onUpdateStato }) {
                     ))}
                 </div>
                 {error && <div className="text-red-600 mt-2">{error}</div>}
-            </div>
-        </div>
+        </MobileSheet>
     );
 }

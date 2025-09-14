@@ -1,20 +1,25 @@
 from uuid import uuid4
 import bcrypt
-from src.utils.db_utils import get_connection, MODE
-from src.utils.db_handler import DBHandler
-from fastapi import APIRouter, HTTPException, status
-from src.api.BaseModel import SearchCorsi, SearchEdizione, SearchMaterials
+from ..utils.db_utils import get_connection, MODE
+from ..utils.db_handler import DBHandler
+from fastapi import APIRouter, HTTPException, status, Depends
+from .BaseModel import SearchCorsi, SearchEdizione, SearchMaterials
 
 
-conn = get_connection(mode=MODE)
-
-db_handler = DBHandler(conn)
+# Database connection dependency for Render
+def get_db_handler():
+    conn = get_connection(mode=MODE)
+    db_handler = DBHandler(conn)
+    try:
+        yield db_handler
+    finally:
+        db_handler.close_connection()
 
 router = APIRouter()
 
 
 @router.get("/getCorsoLaurea")
-def getCorsoLaurea():
+def getCorsoLaurea(db_handler: DBHandler = Depends(get_db_handler)):
     message = "Lista nomi corsi Laurea"
     corsiLaurea = db_handler.run_query(
         "SELECT DISTINCT nome FROM Corso_di_Laurea",
@@ -29,7 +34,7 @@ def getCorsoLaurea():
     }
 
 @router.post("/getCorso")
-def getCorso(data: SearchCorsi):
+def getCorso(data: SearchCorsi, db_handler: DBHandler = Depends(get_db_handler)):
     message = "Lista nomi Corsi"
     corsi = db_handler.run_query(
         """
@@ -49,7 +54,7 @@ def getCorso(data: SearchCorsi):
     }
 
 @router.post("/getEdizione")
-def getEdizione(data: SearchEdizione):
+def getEdizione(data: SearchEdizione, db_handler: DBHandler = Depends(get_db_handler)):
     message = "Lista edizione corsi"
     edizioniCorsi = db_handler.run_query(
         """
@@ -68,7 +73,7 @@ def getEdizione(data: SearchEdizione):
     }
 
 @router.post("/getMaterials")
-async def get_materials(data: SearchMaterials):
+async def get_materials(data: SearchMaterials, db_handler: DBHandler = Depends(get_db_handler)):
     try:
         # Validazione logica dei parametri
         if data.edizioneCorso == 'all':
@@ -111,7 +116,7 @@ async def get_materials(data: SearchMaterials):
 
 
 @router.post("/getInfoCorso")
-def getInfoCorso(data: SearchMaterials):
+def getInfoCorso(data: SearchMaterials, db_handler: DBHandler = Depends(get_db_handler)):
     try:
         # Validazione logica dei parametri
         if data.edizioneCorso == 'all':
@@ -155,7 +160,7 @@ def getInfoCorso(data: SearchMaterials):
         raise HTTPException(status_code=500, detail=str(e))
     
 @router.post("/getReview")
-def getReview(data: SearchMaterials):
+def getReview(data: SearchMaterials, db_handler: DBHandler = Depends(get_db_handler)):
     try:
         # Validazione logica dei parametri
         if data.edizioneCorso == 'all':

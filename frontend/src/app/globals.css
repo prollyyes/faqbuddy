@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Ramaraja&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Condiment&display=swap');
 
 :root {
   --background: #ffffff;
@@ -26,8 +26,9 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-.ramaraja-regular {
-  font-family: "Ramaraja", serif;
-  font-weight: 700;
+.condiment-regular {
+  font-family: "Condiment", cursive;
+  font-weight: 400;
   font-style: normal;
 }
+

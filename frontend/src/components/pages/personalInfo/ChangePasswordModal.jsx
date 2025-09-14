@@ -1,4 +1,7 @@
-import React, { useState } from "react";
+'use client'
+import React, { useEffect, useState } from "react";
+import MobileSheet from "@/components/utils/MobileSheet";
+import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 
 const HOST = process.env.NEXT_PUBLIC_HOST;
 
@@ -8,8 +11,21 @@ export default function ChangePasswordModal({ open, onClose }) {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showOld, setShowOld] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(open);
 
-  if (!open) return null;
+  useEffect(() => {
+    if (open) setSheetOpen(true);
+  }, [open]);
+
+  const softClose = () => {
+    setSheetOpen(false);
+    setTimeout(() => onClose?.(), 240);
+  };
+
+  if (!open && !sheetOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,56 +59,80 @@ export default function ChangePasswordModal({ open, onClose }) {
       setSuccess("Password cambiata con successo!");
       setTimeout(() => {
         setSuccess("");
-        onClose();
-      }, 1200);
+        softClose();
+      }, 500);
     } catch (err) {
       setError("Errore: " + err.message);
     }
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm backdrop-brightness-75">
-      <div className="relative bg-white/90 p-6 rounded-lg shadow-2xl w-[22rem] max-w-full border-2 border-[#991B1B]">
-        <button
-          className="absolute top-2 right-2 text-gray-500 hover:text-red-700 text-xl"
-          onClick={onClose}
-          aria-label="Chiudi"
-        >
-          &times;
-        </button>
-        <h2 className="text-lg font-bold mb-4 text-[#991B1B]">Cambia password</h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <input
-            type="password"
-            placeholder="Vecchia password"
-            className="border rounded px-2 py-1"
-            value={oldPassword}
-            onChange={e => setOldPassword(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Nuova password"
-            className="border rounded px-2 py-1"
-            value={newPassword}
-            onChange={e => setNewPassword(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Conferma nuova password"
-            className="border rounded px-2 py-1"
-            value={confirm}
-            onChange={e => setConfirm(e.target.value)}
-          />
+    <MobileSheet open={sheetOpen} onClose={softClose} title="Cambia password" footer={
+      <button
+        type="submit"
+        form="change-password-form"
+        className="w-full bg-[#991B1B] text-white rounded-lg py-2 font-semibold hover:opacity-90"
+      >
+        Cambia password
+      </button>
+    }>
+        <form id="change-password-form" onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <div className="relative">
+            <input
+              type={showOld ? "text" : "password"}
+              placeholder="Vecchia password"
+              className="border rounded px-3 py-2 w-full pr-10"
+              value={oldPassword}
+              onChange={e => setOldPassword(e.target.value)}
+            />
+            <button
+              type="button"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
+              onClick={() => setShowOld(v => !v)}
+              aria-label={showOld ? "Nascondi password" : "Mostra password"}
+            >
+              {showOld ? <IoMdEyeOff size={20}/> : <IoMdEye size={20}/>} 
+            </button>
+          </div>
+
+          <div className="relative">
+            <input
+              type={showNew ? "text" : "password"}
+              placeholder="Nuova password"
+              className="border rounded px-3 py-2 w-full pr-10"
+              value={newPassword}
+              onChange={e => setNewPassword(e.target.value)}
+            />
+            <button
+              type="button"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
+              onClick={() => setShowNew(v => !v)}
+              aria-label={showNew ? "Nascondi password" : "Mostra password"}
+            >
+              {showNew ? <IoMdEyeOff size={20}/> : <IoMdEye size={20}/>} 
+            </button>
+          </div>
+
+          <div className="relative">
+            <input
+              type={showConfirm ? "text" : "password"}
+              placeholder="Conferma nuova password"
+              className="border rounded px-3 py-2 w-full pr-10"
+              value={confirm}
+              onChange={e => setConfirm(e.target.value)}
+            />
+            <button
+              type="button"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
+              onClick={() => setShowConfirm(v => !v)}
+              aria-label={showConfirm ? "Nascondi password" : "Mostra password"}
+            >
+              {showConfirm ? <IoMdEyeOff size={20}/> : <IoMdEye size={20}/>} 
+            </button>
+          </div>
           {error && <div className="text-red-600 text-sm">{error}</div>}
           {success && <div className="text-green-600 text-sm">{success}</div>}
-          <button
-            type="submit"
-            className="bg-[#991B1B] text-white rounded px-3 py-1 mt-3 hover:bg-red-800"
-          >
-            Cambia password
-          </button>
         </form>
-      </div>
-    </div>
+    </MobileSheet>
   );
 }

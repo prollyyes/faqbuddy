@@ -13,10 +13,11 @@ import clsx from 'clsx';
 // -----------------------------------------------------------------------------
 
 const variantClasses = {
-  default: 'bg-white text-[#822433] hover:bg-[#822433] hover:text-white border border-[#822433] active:bg-[#822433] active:text-white',
+  default: 'bg-[#822433] text-white font-bold hover:bg-[#a00028] border border-[#822433] active:bg-[#a00028] active:text-white',
   outline: 'border border-[#822433] text-[#822433] hover:bg-[#822433]/5 active:bg-[#822433]/10',
   ghost: 'text-[#822433] hover:bg-[#822433]/10 active:bg-[#822433]/20',
-  link: 'text-[#822433] underline-offset-4 hover:underline active:text-[#822433]/80'
+  link: 'text-[#822433] underline-offset-4 hover:underline active:text-[#822433]/80',
+  custom: '',
 };
 
 const sizeClasses = {

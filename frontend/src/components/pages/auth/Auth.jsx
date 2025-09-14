@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { SignupInsegnante } from './SignupInsegnante';
 import { SignupStudente } from './SignupStudente';
 import InputField from '@/components/utils/InputField';
+import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 
 const HOST = process.env.NEXT_PUBLIC_HOST;
 
@@ -145,6 +146,11 @@ export default function Auth() {
         }
       }
     } else {
+      // LOGIN
+      if (!formData.email || !formData.password) {
+        setError('Inserisci sia email che password');
+        return;
+      }
       try {
         const loginData = {
           email: formData.email,
@@ -194,7 +200,7 @@ export default function Auth() {
         )}
       </div>
 
-      <main className="flex-1 flex items-center justify-center pt-36 px-6">
+      <main className="flex-1 flex items-center justify-center px-6">
         <div className="w-full max-w-sm">
           <AnimatePresence mode="wait">
             <motion.div
@@ -205,9 +211,11 @@ export default function Auth() {
               transition={{ duration: 0.4 }}
               className="space-y-6"
             >
-              <h2 className="text-2xl font-semibold text-center">
-                {mode === 'login' ? 'Accedi al tuo account' : 'Crea un nuovo account'}
-              </h2>
+              <div className="text-center mb-6">
+                <h1 className="text-2xl font-bold text-[#822433]">
+                  {mode === 'login' ? 'Bentornato!' : ''}
+                </h1>
+              </div>
 
               <form className="space-y-4" onSubmit={handleSubmit}>
                 {error && (
@@ -275,7 +283,7 @@ export default function Auth() {
                       <InputField
                         type={showPassword ? 'text' : 'password'}
                         name="password"
-                        placeholder="Password"
+                        placeholder="Password"  
                         value={formData.password}
                         onChange={handleChange}
                         style={{ paddingRight: '2.5rem' }}
@@ -283,9 +291,10 @@ export default function Auth() {
                       <button
                         type="button"
                         onClick={() => setShowPassword(prev => !prev)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-[#822433] focus:outline-none"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-2xl text-[#822433] focus:outline-none focus:ring-2 focus:ring-[#822433] focus:bg-[#fbeaec] rounded-full"
+                        aria-label={showPassword ? "Nascondi password" : "Mostra password"}
                       >
-                        {showPassword ? 'Nascondi' : 'Mostra'}
+                        {showPassword ? <IoMdEye /> : <IoMdEyeOff />}
                       </button>
                     </div>
                     {mode === 'signup' && (
@@ -297,14 +306,16 @@ export default function Auth() {
                         onChange={handleChange}
                       />
                     )}
-                    <Button type="submit" className="w-full bg-[#822433] hover:bg-red-900 text-[#822433] rounded-xl py-3">
+                    <Button 
+                      type="default" 
+                      className="w-full hover:bg-red-900">
                       {mode === 'login' ? 'Accedi' : 'Registrati'}
                     </Button>
                   </>
                 )}
               </form>
 
-              <p className="text-center text-sm">
+              <p className="text-center text-sm italic">
                 {mode === 'login' ? "Non hai un account?" : 'Hai già un account?'}{' '}
                 <button
                   onClick={toggleMode}
