@@ -31,7 +31,7 @@ def addEdizioneCorso(edizioneCorso: AddEdizioneCorso, db_handler: DBHandler = De
     if not any(edizioneCorso.nomeCDL in row for row in corsiDL):
         raise HTTPException(status_code=400, detail="Il Corso di Laurea non è stato trovato.")
     
-    insegnanti = db_handler.execute_query("SELECT u.id, u.nome, u.cognome FROM Utente u JOIN Insegnanti i ON u.id = i.id")
+    insegnanti = db_handler.execute_query("SELECT u.id, u.nome, u.cognome FROM Insegnanti_Anagrafici u")
     insegnante_id = None
     for id_, nome, cognome in insegnanti:
         if edizioneCorso.nomeInsegnante == nome and edizioneCorso.cognomeInsegnante == cognome:
@@ -54,7 +54,7 @@ def addEdizioneCorso(edizioneCorso: AddEdizioneCorso, db_handler: DBHandler = De
         
 
     db_handler.execute_sql_insertion("""
-                INSERT INTO EdizioneCorso (id, insegnante, data, orario, esonero, mod_esame) 
+                INSERT INTO EdizioneCorso (id, insegnante_anagrafico, data, orario, esonero, mod_esame) 
                 VALUES (%s, %s, %s, %s, %s, %s)
                 """, params=(corso_id, insegnante_id, edizioneCorso.semestre.value, 
                              edizioneCorso.orario, edizioneCorso.esonero, 
@@ -89,7 +89,7 @@ def addCorso(corso: AddCorso, db_handler: DBHandler = Depends(get_db_handler)):
         INSERT INTO Corso (id_corso, nome, cfu, idoneità, prerequisiti, frequenza_obbligatoria)
         VALUES (%s, %s, %s, %s, %s, %s)
         """, params=(cdl_id, corso.nomeCorso, corso.cfu, corso.idoneita, 
-                     corso.prerequisiti, corso.fequenza_obbligatoria))
+                     corso.prerequisiti, corso.frequenza_obbligatoria))
     
     return {"message": "Corso aggiunto con successo"}
 
