@@ -13,6 +13,7 @@ backend/models
 #Token && Credentials google
 backend/src/token.json
 backend/src/credentials.json
+backend/token.json
 
 # environment
 venv/
