@@ -40,3 +40,6 @@ db/FAQBuddy.csv
 
 # rag
 debugging_pinecone.json
+
+#local db
+db/docker-compose.yaml

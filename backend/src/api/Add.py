@@ -7,7 +7,7 @@ from ..api.drive_utils import *
 
 # Database connection dependency for Render
 def get_db_handler():
-    conn = get_connection(mode=MODE)
+    conn = get_connection(mode="local")
     db_handler = DBHandler(conn)
     try:
         yield db_handler
@@ -195,9 +195,10 @@ def addEdizioneCorso_Piattaforma(data: AddEdizioneCorsoPiattaforma, db_handler: 
 
 @router.post("/addTesi")
 async def addTesi(
-    matricola: str = Form(...),
+    matricola: int = Form(...),
     parent_folder: str = Form("FAQBuddy"),
     child_folder: str = Form("Tesi"),
+    title: str = Form(...),
     file: UploadFile = File(...),
     db_handler: DBHandler = Depends(get_db_handler)
     ):
@@ -227,18 +228,23 @@ async def addTesi(
 
     data = await upload_file(file, parent_folder, child_folder, nome, cognome)
     tesi_id = data["file_id"]
-    db_handler.execute_sql_insertion("""
-                INSERT INTO Tesi (student_id, corso_laurea_id, file)
-                VALUES (%s, %s, %s)
-                """, params=(student_id, cdl_id, tesi_id))
+    print(tesi_id)
+    if tesi_id:
+        db_handler.execute_sql_insertion("""
+                    INSERT INTO Tesi (student_id, corso_laurea_id, titolo, file)
+                    VALUES (%s, %s, %s, %s)
+                    """, params=(student_id, cdl_id, title, tesi_id))
     
-    return {"message": "Tesi aggiunta con successo"}
+        return {"message": "Tesi aggiunta con successo"}
+    else:
+        raise HTTPException(status_code=400, detail="Errore nel caricamento al drive.")
     
 
 @router.post("/addMaterialeDidattico")
 async def addMaterialeDidattico(
         email : str = Form(...),
         nomeCorso : str = Form(...),
+        semestre: str = Form(...),
         tipo : str = Form(...),
         verificato : bool = Form(False),
         parent_folder: str = Form("FAQBuddy"),
@@ -252,6 +258,7 @@ async def addMaterialeDidattico(
     Parametri:
     - email: email dell'utente che carica il materiale.
     - nomeCorso: nome del corso a cui il materiale è associato.
+    - semestre: semestre del corso.
     - tipo: tipo di materiale didattico.
     - verificato: flag di verifica del materiale (default False).
     - parent_folder: cartella principale su Google Drive (default: "FAQBuddy").
@@ -272,21 +279,29 @@ async def addMaterialeDidattico(
     if not course_info:
         raise HTTPException(status_code=400, detail="Corso non trovato.")
     course_id = course_info[0][0]
+    print("SELECT id, data FROM EdizioneCorso WHERE id = %s AND data = %s", course_id, semestre)
+    edition_info = db_handler.run_query("SELECT id, data FROM EdizioneCorso WHERE id = %s AND data = %s", params=(course_id, semestre), fetch=True)
+    if not edition_info:
+        raise HTTPException(status_code=400, detail="Edizione del Corso non trovata.")
 
     data = await upload_file(file, parent_folder, child_folder, nome, cognome)
     file_id = data["file_id"]
-    db_handler.execute_sql_insertion("""
-                INSERT INTO Materiale_Didattico (
-                            Utente_id,
-                            course_id,
-                            path_file,
-                            tipo,
-                            verificato
-                            )
-                VALUES (%s, %s, %s, %s, %s)""",
-                params=(user_id, course_id, file_id, tipo, verificato))
-    
-    return {"message": "Materiale Didattico Aggiunto con successo."}
+    if file_id:
+        db_handler.execute_sql_insertion("""
+                    INSERT INTO Materiale_Didattico (
+                                Utente_id,
+                                edition_id,
+                                edition_data,
+                                path_file,
+                                tipo,
+                                verificato
+                                )
+                    VALUES (%s, %s, %s, %s, %s, %s)""",
+                    params=(user_id, course_id, semestre, file_id, tipo, verificato))
+        
+        return {"message": "Materiale Didattico Aggiunto con successo."}
+    else:
+        raise HTTPException(status_code=400, detail="Errore nel caricamento al drive.")
 
 @router.post("/addValutazione")
 def addValutazione(valutazione: AddValutazione, db_handler: DBHandler = Depends(get_db_handler)):
@@ -326,7 +341,6 @@ async def upload_file(
     child_folder: str = Form(...), # CV, Materiale_Didattico, Tesi
     nome: str = Form(...),
     cognome: str = Form(...),
-    db_handler: DBHandler = Depends(get_db_handler)
 ):
     """
     Carica un file su Google Drive in una cartella specifica.

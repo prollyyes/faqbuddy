@@ -208,7 +208,7 @@ class AddEdizioneCorsoPiattaforma(BaseModel):
     codice: str
 
 class AddValutazione(BaseModel):
-    matricola: str
+    matricola: int
     path_file: str
     voto: int = Field(ge=1, le=5)
     commento: Optional[str]
