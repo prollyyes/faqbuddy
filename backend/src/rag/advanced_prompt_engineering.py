@@ -2,12 +2,11 @@
 Advanced Prompt Engineering for State-of-the-Art RAG
 ====================================================
 
-This module implements advanced prompt engineering techniques for thesis-level quality:
-- Chain-of-Thought reasoning
-- Self-verification prompts
-- Context-aware instruction following
-- Multi-step reasoning
-- Source attribution and citation
+This module implements a hybrid, modular prompt system optimized for 7B models:
+- Small, invariant core system prompt for guard-rails
+- Targeted skill blocks per query type
+- Optional micro-blocks for specific functionality
+- Better accuracy, reduced token bloat, lower cross-talk
 """
 
 import re
@@ -40,21 +39,22 @@ class AdvancedPromptEngineer:
     """
     
     def __init__(self, config: Optional[PromptConfig] = None):
-        """Initialize the advanced prompt engineer."""
+        """Initialize the advanced prompt engineer with modular system."""
         self.config = config or PromptConfig()
         
-        # Advanced system prompts for different query types
-        self.system_prompts = {
-            "general": self._get_general_system_prompt(),
-            "factual": self._get_factual_system_prompt(),
-            "procedural": self._get_procedural_system_prompt(),
-            "comparative": self._get_comparative_system_prompt()
+        # Configuration for modular prompts
+        self.modular_config = {
+            "handle_ambiguity": True,
+            "use_self_verification": self.config.use_self_verification,
+            "prioritize_recency": True
         }
         
-        print("🧠 Initializing Advanced Prompt Engineer")
-        print(f"   Chain-of-Thought: {self.config.use_chain_of_thought}")
+        print("🧠 Initializing Advanced Prompt Engineer (Modular)")
+        print(f"   Modular system: ✅")
         print(f"   Self-Verification: {self.config.use_self_verification}")
         print(f"   Source Attribution: {self.config.use_source_attribution}")
+        print(f"   Ambiguity handling: {self.modular_config['handle_ambiguity']}")
+        print(f"   Recency prioritization: {self.modular_config['prioritize_recency']}")
     
     def _get_general_system_prompt(self) -> str:
         """Get the general system prompt with ChatGPT-like formatting."""
@@ -73,6 +73,11 @@ class AdvancedPromptEngineer:
 
     def _get_comparative_system_prompt(self) -> str:
         """Get system prompt for comparative queries."""
+        from utils.unified_system_prompt import get_unified_system_prompt
+        return get_unified_system_prompt()
+    
+    def _get_explanatory_system_prompt(self) -> str:
+        """Get system prompt for explanatory queries."""
         from utils.unified_system_prompt import get_unified_system_prompt
         return get_unified_system_prompt()
 
@@ -113,59 +118,44 @@ class AdvancedPromptEngineer:
                             query_type: Optional[str] = None,
                             query_analysis: Optional['QueryAnalysis'] = None) -> str:
         """
-        Build an advanced prompt with state-of-the-art techniques.
+        Build a modular prompt optimized for 7B models.
         
         Args:
             context_chunks: Retrieved context chunks
             query: User query
             query_type: Optional query type classification
-            query_analysis: Optional QueryAnalysis object for conditional CoT
+            query_analysis: Optional QueryAnalysis object for conditional features
             
         Returns:
-            Advanced prompt string
+            Modular prompt string optimized for accuracy and efficiency
         """
         # Classify query type if not provided
         if query_type is None:
             query_type = self.classify_query_type(query)
         
-        # Get appropriate system prompt
-        system_prompt = self.system_prompts[query_type]
-        
-        # Filter and rank chunks by relevance
-        relevant_chunks = self._filter_relevant_chunks(context_chunks, query)
-        
-        # Build context section
-        context_section = self._build_context_section(relevant_chunks)
-        
-        # Build reasoning section with conditional CoT usage
-        reasoning_section = ""
-        should_use_cot = self.config.use_chain_of_thought
-        
-        # If query analysis is provided, use conditional CoT based on requires_reasoning
+        # Update modular config based on query analysis
         if query_analysis is not None:
-            should_use_cot = self.config.use_chain_of_thought and query_analysis.requires_reasoning
-            print(f"🧠 Conditional CoT: {'ENABLED' if should_use_cot else 'DISABLED'} (requires_reasoning: {query_analysis.requires_reasoning})")
+            # Disable CoT in modular system - keep thinking internal
+            print(f"🧠 Modular CoT: DISABLED (keeping thinking internal for better outputs)")
         
-        if should_use_cot:
-            reasoning_section = self._build_reasoning_section(query, relevant_chunks)
+        # Use modular prompt system instead of monolithic approach
+        from utils.modular_prompts import build_modular_prompt, get_prompt_stats, validate_prompt_size
         
-        # Build verification section if self-verification is enabled
-        verification_section = ""
-        if self.config.use_self_verification:
-            verification_section = self._build_verification_section()
+        # Build the modular prompt
+        prompt = build_modular_prompt(
+            chunks=context_chunks,
+            query=query,
+            query_type=query_type,
+            config=self.modular_config
+        )
         
-        # Combine all sections
-        # Build the instruction content (everything except the question)
-        instruction_content = [
-            system_prompt,
-            context_section,
-            reasoning_section,
-            verification_section
-        ]
+        # Get prompt statistics for optimization
+        stats = get_prompt_stats(prompt)
+        print(f"📏 Modular prompt: {stats['estimated_tokens']} tokens, {stats['blocks_count']} blocks")
         
-        # Use proper Mistral instruction format
-        instruction = "\n\n".join(filter(None, instruction_content))
-        prompt = f"[INST] {instruction}\n\nDomanda:\n{query} [/INST]"
+        # Validate prompt size and warn if too large
+        if not validate_prompt_size(prompt, max_tokens=1200):
+            print(f"⚠️ Prompt exceeds recommended size ({stats['estimated_tokens']} tokens)")
         
         return prompt
 

@@ -142,17 +142,25 @@ class WebSearchEnhancer:
         has_sapienza = any(keyword.lower() in query_lower for keyword in self.sapienza_keywords)
         
         if not has_sapienza:
-            # Add Sapienza context based on query type
-            if any(word in query_lower for word in ['corso', 'insegnante', 'professore', 'docente']):
-                enhanced_query = f"{essential_query} Sapienza Università di Roma"
-            elif any(word in query_lower for word in ['iscrizione', 'ammissione', 'requisiti']):
+            # ALWAYS add Sapienza context - this was the issue!
+            # Add specific context based on query type, but always include Sapienza
+            if any(word in query_lower for word in ['corso', 'insegnante', 'professore', 'docente', 'materia', 'lezione']):
+                enhanced_query = f"{essential_query} Sapienza Università di Roma corso"
+            elif any(word in query_lower for word in ['iscrizione', 'ammissione', 'requisiti', 'immatricolazione']):
                 enhanced_query = f"{essential_query} Sapienza Università di Roma iscrizione"
-            elif any(word in query_lower for word in ['esame', 'esami', 'laurea']):
+            elif any(word in query_lower for word in ['esame', 'esami', 'laurea', 'diploma', 'tesi']):
                 enhanced_query = f"{essential_query} Sapienza Università di Roma esami"
+            elif any(word in query_lower for word in ['orario', 'aula', 'aule', 'sede', 'edificio']):
+                enhanced_query = f"{essential_query} Sapienza Università di Roma campus"
+            elif any(word in query_lower for word in ['tasse', 'quota', 'costo', 'prezzo', 'pagamento']):
+                enhanced_query = f"{essential_query} Sapienza Università di Roma tasse"
             else:
                 enhanced_query = f"{essential_query} Sapienza Università di Roma"
         else:
+            # Even if Sapienza is mentioned, ensure it's properly formatted
             enhanced_query = essential_query
+            
+        print(f"🔍 Web search enhanced query: '{query}' -> '{enhanced_query}'")
         
         return enhanced_query
     

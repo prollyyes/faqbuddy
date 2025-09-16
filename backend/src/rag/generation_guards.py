@@ -193,16 +193,16 @@ Rispondi usando solo le fonti sopra indicate:"""
         verification_score, is_acceptable = self.verify_answer_against_sources(answer, context)
         
         if not is_acceptable:
-            # Generate refusal message
-            refusal_answer = "Non sono sicuro dell'informazione disponibile. Per favore, riprova a formulare la domanda in modo diverso o contatta il dipartimento appropriato per informazioni più specifiche."
-            print("🛡️ Answer verification failed, returning refusal")
+            # Instead of refusing, return the original answer with a warning
+            print(f"🛡️ Answer verification failed (score: {verification_score:.3f}), but returning answer with warning")
             
             return {
-                "answer": refusal_answer,
+                "answer": answer,  # Return the actual answer, not a refusal
                 "verification_score": verification_score,
                 "is_verified": False,
                 "guards_enabled": True,
-                "refusal_reason": "low_verification_score"
+                "refusal_reason": "low_verification_score",
+                "warning": "Questa risposta potrebbe non essere completamente accurata. Verifica le informazioni con fonti ufficiali."
             }
         
         return {

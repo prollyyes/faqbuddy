@@ -77,17 +77,13 @@ const Chat = () => {
 
     const handleFragmentClick = (fragmentId) => {
         setSelectedFragment(fragmentId);
-        // Here you could show a modal or expand a section to show the fragment content
         console.log('Clicked fragment:', fragmentId);
     };
 
     const stopGeneration = async () => {
         if (!currentRequestId) {
-            console.log('No current request ID to stop');
             return;
         }
-        
-        console.log('Attempting to stop generation with request ID:', currentRequestId);
         
         try {
             const response = await fetch(`${HOST}/chat/stop`, {
@@ -98,12 +94,9 @@ const Chat = () => {
                 body: JSON.stringify({ request_id: currentRequestId }),
             });
             
-            console.log('Stop response status:', response.status);
             const result = await response.json();
-            console.log('Stop response result:', result);
             
             if (result.success) {
-                console.log('Generation stopped successfully');
                 setIsLoading(false);
                 setCurrentRequestId(null);
                 
@@ -121,8 +114,6 @@ const Chat = () => {
                     }
                     return newMessages;
                 });
-            } else {
-                console.error('Failed to stop generation:', result.message || result.error);
             }
         } catch (error) {
             console.error('Error stopping generation:', error);
@@ -131,7 +122,6 @@ const Chat = () => {
 
     const emergencyReset = async () => {
         try {
-            console.log('========= Emergency reset triggered');
             const response = await fetch(`${HOST}/chat/reset`, {
                 method: 'POST',
                 headers: {
@@ -139,18 +129,12 @@ const Chat = () => {
                 }
             });
             
-            console.log('Reset response status:', response.status);
             const result = await response.json();
-            console.log('Reset response result:', result);
             
             if (result.success) {
-                console.log('✅ Emergency reset successful');
-                
-                // Force clear loading state and current request
                 setIsLoading(false);
                 setCurrentRequestId(null);
                 
-                // Show success message
                 setMessages(prev => [...prev, {
                     text: '🔄 **Sistema ripristinato con successo!** Le risorse bloccate sono state liberate.',
                     sender: 'bot',
@@ -159,7 +143,6 @@ const Chat = () => {
                     isStreaming: false
                 }]);
             } else {
-                console.error('Reset failed:', result.message || result.error);
                 setMessages(prev => [...prev, {
                     text: '❌ **Errore durante il ripristino:** ' + (result.message || result.error),
                     sender: 'bot',
@@ -169,7 +152,6 @@ const Chat = () => {
                 }]);
             }
         } catch (error) {
-            console.error('Error during emergency reset:', error);
             setMessages(prev => [...prev, {
                 text: '❌ **Errore durante il ripristino:** ' + error.message,
                 sender: 'bot',
@@ -205,13 +187,78 @@ const Chat = () => {
         }]);
 
         try {
-            // Always use streaming - no fallback to prevent double requests
-            console.log('========= Starting streaming request...');
-            await sendMessageStreaming(currentMessage, streamingMessageIndex);
-            console.log('✅ Streaming request completed successfully');
+            // Use SIMPLE streaming approach that works with our fixed backend
+            console.log('🚀 Starting SIMPLE streaming request...');
+            const response = await fetch(`${HOST}/chat?streaming=true&include_metadata=true`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'text/event-stream',
+                },
+                body: JSON.stringify({ question: currentMessage }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            // Simple line-by-line streaming reader
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+            let accumulatedText = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || ''; // Keep incomplete line in buffer
+
+                for (const line of lines) {
+                    if (!line.startsWith('data: ')) continue;
+                    
+                    const jsonData = line.slice(6);
+                    if (jsonData === '[DONE]') break;
+
+                    try {
+                        const data = JSON.parse(jsonData);
+                        
+                        if (data.type === 'token' && data.token) {
+                            accumulatedText += data.token;
+                            setMessages(prev => {
+                                const newMessages = [...prev];
+                                newMessages[streamingMessageIndex] = {
+                                    ...newMessages[streamingMessageIndex],
+                                    text: accumulatedText,
+                                    isStreaming: true
+                                };
+                                return newMessages;
+                            });
+                        } else if (data.type === 'metadata' && data.finished) {
+                            console.log('✅ Streaming completed');
+                            break;
+                        }
+                    } catch (e) {
+                        console.warn('Failed to parse SSE data:', e);
+                    }
+                }
+            }
+
+            // Finalize the message
+            setMessages(prev => {
+                const newMessages = [...prev];
+                newMessages[streamingMessageIndex] = {
+                    ...newMessages[streamingMessageIndex],
+                    text: accumulatedText || 'No response received',
+                    isStreaming: false,
+                    isLoading: false
+                };
+                return newMessages;
+            });
         } catch (error) {
-            console.error('%%%%%%%  -> ERROR: Streaming failed:', error);
-            // Show error message to user instead of making another request
+            console.error('Streaming failed:', error);
             setMessages(prev => {
                 const newMessages = [...prev];
                 newMessages[streamingMessageIndex] = {
@@ -231,273 +278,229 @@ const Chat = () => {
 
     const sendMessageStreaming = async (question, messageIndex) => {
         let reader = null;
+        let abortController = new AbortController();
+        
         try {
-            console.log('========= Starting fetch request...');
             const response = await fetch(`${HOST}/chat?streaming=true`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'text/event-stream',
                 },
-                body: JSON.stringify({ 
-                    question
-                }),
+                body: JSON.stringify({ question }),
+                signal: abortController.signal,
             });
-
-            console.log('========= Fetch completed, response status:', response.status);
-            console.log('========= Response headers:', Object.fromEntries(response.headers.entries()));
 
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('========= HTTP error response body:', errorText);
                 throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
             }
 
-            console.log('========= Streaming response received, starting to read...');
-            
-            // Check if response.body exists and is readable
             if (!response.body) {
                 throw new Error('Response body is null - streaming not supported by server');
             }
             
-            if (!response.body.getReader) {
-                throw new Error('Response body does not support getReader - browser may not support streaming');
-            }
-            
-            try {
-                reader = response.body.getReader();
-                console.log('========= Reader obtained successfully');
-            } catch (readerError) {
-                console.error('========= Failed to get reader:', readerError);
-                throw new Error(`Failed to get stream reader: ${readerError.message}`);
-            }
-            
+            reader = response.body.getReader();
             const decoder = new TextDecoder();
             let accumulatedText = '';
             let sseBuffer = '';
+            let hasReceivedData = false;
 
-            let readCount = 0;
-            while (true) {
-                try {
-                    readCount++;
-                    console.log(`========= Reading chunk ${readCount}...`);
+            // Set a reasonable timeout for the stream
+            const streamTimeout = setTimeout(() => {
+                console.warn('Stream timeout - aborting connection');
+                abortController.abort();
+            }, 180000); // 3 minutes
+
+            try {
+                while (true) {
                     const { done, value } = await reader.read();
-                    console.log(`========= Read result - done: ${done}, value length:`, value ? value.length : 'null');
                     
                     if (done) {
-                        console.log('========= Stream ended normally');
                         break;
                     }
 
-                    // Safely decode the chunk
-                    try {
+                    if (value) {
+                        hasReceivedData = true;
                         const decodedChunk = decoder.decode(value, { stream: true });
                         sseBuffer += decodedChunk;
-                        console.log('========= Decoded chunk length:', decodedChunk.length);
-                        console.log('========= SSE buffer length:', sseBuffer.length);
-                    } catch (decodeError) {
-                        console.error('========= Decode error:', decodeError);
-                        throw new Error(`Stream decode error: ${decodeError.message}`);
                     }
-                } catch (readError) {
-                    console.error('========= Reader.read() error:', readError);
-                    console.error('========= Error type:', readError.constructor.name);
-                    console.error('========= Error message:', readError.message);
-                    
-                    // Special handling for "Error in input stream" - this is a browser-level issue
-                    if (readError.message.includes('Error in input stream')) {
-                        console.log('========= Detected "Error in input stream" - likely stream termination');
-                        // Break the loop instead of throwing - treat as end of stream
-                        break;
-                    }
-                    
-                    throw new Error(`Stream read error: ${readError.message}`);
-                }
-                let boundaryIndex;
-                while ((boundaryIndex = sseBuffer.indexOf('\n\n')) !== -1) {
-                    const eventChunk = sseBuffer.slice(0, boundaryIndex);
-                    sseBuffer = sseBuffer.slice(boundaryIndex + 2);
 
-                    const lines = eventChunk.split('\n');
-                    for (const line of lines) {
-                        if (!line.startsWith('data: ')) continue;
-                        const jsonString = line.slice(6);
-                        try {
-                            console.log('========= Parsing JSON:', jsonString);
-                            const data = JSON.parse(jsonString);
-                            console.log('========= Received streaming data:', data);
+                    // Process complete SSE events
+                    let boundaryIndex;
+                    while ((boundaryIndex = sseBuffer.indexOf('\n\n')) !== -1) {
+                        const eventChunk = sseBuffer.slice(0, boundaryIndex);
+                        sseBuffer = sseBuffer.slice(boundaryIndex + 2);
+
+                        const lines = eventChunk.split('\n');
+                        for (const line of lines) {
+                            if (!line.startsWith('data: ')) continue;
                             
-                            // Validate data structure
-                            if (typeof data !== 'object' || data === null) {
-                                console.warn('========= Invalid data structure received:', data);
-                                continue;
+                            const jsonString = line.slice(6);
+                            if (jsonString === '[DONE]') {
+                                // Stream completion signal
+                                clearTimeout(streamTimeout);
+                                return;
                             }
-                            if (data.type === 'request_id') {
-                                // Store the request ID for potential cancellation
-                                setCurrentRequestId(data.request_id);
-                                console.log('Request ID received:', data.request_id);
-                            } else if (data.type === 'thinking') {
-                                // Handle thinking section
-                                setMessages(prev => {
-                                    const newMessages = [...prev];
-                                    newMessages[messageIndex] = {
-                                        ...newMessages[messageIndex],
-                                        thinking: data.thinking || '',
-                                    };
-                                    return newMessages;
-                                });
-                            } else if (data.type === 'token') {
-                                // Safely handle token - convert to string and validate
-                                const token = String(data.token || '');
-                                console.log('========= Processing token:', token, 'Type:', typeof token);
-                                if (token && token !== 'undefined' && token !== 'null' && token.length > 0) {
-                                    accumulatedText += token;
-                                    console.log('========= Accumulated text length:', accumulatedText.length);
-                                }
-                                setMessages(prev => {
-                                    const newMessages = [...prev];
-                                    newMessages[messageIndex] = {
-                                        ...newMessages[messageIndex],
-                                        text: accumulatedText,
-                                        isStreaming: true
-                                    };
-                                    return newMessages;
-                                });
-                            } else if (data.type === 'cancelled') {
-                                // Handle cancellation
-                                setMessages(prev => {
-                                    const newMessages = [...prev];
-                                    newMessages[messageIndex] = {
-                                        ...newMessages[messageIndex],
-                                        text: accumulatedText + '\n\n*Generazione interrotta dall\'utente*',
-                                        isStreaming: false,
-                                        isStopped: true
-                                    };
-                                    return newMessages;
-                                });
-                                setIsLoading(false);
-                                setCurrentRequestId(null);
-                                return;
-                            } else if (data.type === 'metadata') {
-                                // Final metadata from RAG streaming - this means streaming is complete
-                                setMessages(prev => {
-                                    const newMessages = [...prev];
-                                    newMessages[messageIndex] = {
-                                        ...newMessages[messageIndex],
-                                        isStreaming: false,  // Safe to stop here - this is the final metadata
-                                        thinking: data.thinking || '',
-                                        metadata: {
-                                            chosen: 'RAG',
-                                            streaming: true,
-                                            confidence: data.confidence,
-                                            verified: data.verified
-                                        }
-                                    };
-                                    return newMessages;
-                                });
-                                setIsLoading(false);  // Also stop loading state
-                                setCurrentRequestId(null);  // Clear request ID
-                                return;
-                            } else if (data.type === 'complete') {
-                                // Completion signal - safe to stop streaming
-                                setMessages(prev => {
-                                    const newMessages = [...prev];
-                                    newMessages[messageIndex] = {
-                                        ...newMessages[messageIndex],
-                                        isStreaming: false,  // Safe to stop here - completion signal received
-                                        thinking: data.thinking || '',
-                                        metadata: {
-                                            chosen: data.chosen || 'RAG',
-                                            streaming: true
-                                        }
-                                    };
-                                    return newMessages;
-                                });
-                                setIsLoading(false);  // Also stop loading state
-                                setCurrentRequestId(null);  // Clear request ID
-                                return;
-                            } else if (data.type === 'error') {
-                                // Check if this is a warning-level error with fallback (T2SQL->RAG)
-                                if (data.severity === 'warning' && data.fallback) {
-                                    console.log('========= T2SQL fallback warning (non-fatal):', data.message);
-                                    // Don't throw - let the fallback (RAG) continue
-                                    // Optionally show a subtle notification that T2SQL failed but RAG is working
-                                } else {
-                                    // Fatal error - update the UI instead of throwing an exception
-                                    console.error('========= Fatal stream error received:', data.message);
+                            
+                            try {
+                                const data = JSON.parse(jsonString);
+                                
+                                if (data.type === 'request_id') {
+                                    setCurrentRequestId(data.request_id);
+                                } else if (data.type === 'thinking') {
                                     setMessages(prev => {
                                         const newMessages = [...prev];
-                                        const currentMsg = newMessages[messageIndex] || {};
                                         newMessages[messageIndex] = {
-                                            ...currentMsg,
-                                            text: accumulatedText + `\n\n**Errore:** ${data.message}`,
-                                            isStreaming: false,
-                                            isError: true,
+                                            ...newMessages[messageIndex],
+                                            thinking: data.thinking || '',
                                         };
                                         return newMessages;
                                     });
-                                    setIsLoading(false);
-                                    setCurrentRequestId(null);
-                                    return; // Stop processing the stream
+                                } else if (data.type === 'token') {
+                                    const token = String(data.token || '');
+                                    if (token && token !== 'undefined' && token !== 'null' && token.length > 0) {
+                                        accumulatedText += token;
+                                    }
+                                    setMessages(prev => {
+                                        const newMessages = [...prev];
+                                        newMessages[messageIndex] = {
+                                            ...newMessages[messageIndex],
+                                            text: accumulatedText,
+                                            isStreaming: true
+                                        };
+                                        return newMessages;
+                                    });
+                                } else if (data.type === 'cancelled') {
+                                    setMessages(prev => {
+                                        const newMessages = [...prev];
+                                        newMessages[messageIndex] = {
+                                            ...newMessages[messageIndex],
+                                            text: accumulatedText + '\n\n*Generazione interrotta dall\'utente*',
+                                            isStreaming: false,
+                                            isStopped: true
+                                        };
+                                        return newMessages;
+                                    });
+                                    clearTimeout(streamTimeout);
+                                    return;
+                                } else if (data.type === 'metadata') {
+                                    setMessages(prev => {
+                                        const newMessages = [...prev];
+                                        newMessages[messageIndex] = {
+                                            ...newMessages[messageIndex],
+                                            isStreaming: false,
+                                            thinking: data.thinking || '',
+                                            metadata: {
+                                                chosen: 'RAG',
+                                                streaming: true,
+                                                confidence: data.confidence,
+                                                verified: data.verified
+                                            }
+                                        };
+                                        return newMessages;
+                                    });
+                                    clearTimeout(streamTimeout);
+                                    return;
+                                } else if (data.type === 'complete') {
+                                    setMessages(prev => {
+                                        const newMessages = [...prev];
+                                        newMessages[messageIndex] = {
+                                            ...newMessages[messageIndex],
+                                            isStreaming: false,
+                                            thinking: data.thinking || '',
+                                            metadata: {
+                                                chosen: data.chosen || 'RAG',
+                                                streaming: true
+                                            }
+                                        };
+                                        return newMessages;
+                                    });
+                                    clearTimeout(streamTimeout);
+                                    return;
+                                } else if (data.type === 'error') {
+                                    if (data.severity === 'warning' && data.fallback) {
+                                        // Non-fatal error with fallback
+                                        continue;
+                                    } else {
+                                        // Fatal error
+                                        setMessages(prev => {
+                                            const newMessages = [...prev];
+                                            const currentMsg = newMessages[messageIndex] || {};
+                                            newMessages[messageIndex] = {
+                                                ...currentMsg,
+                                                text: accumulatedText + `\n\n**Errore:** ${data.message}`,
+                                                isStreaming: false,
+                                                isError: true,
+                                            };
+                                            return newMessages;
+                                        });
+                                        clearTimeout(streamTimeout);
+                                        return;
+                                    }
                                 }
+                            } catch (parseError) {
+                                console.warn('Error parsing SSE data:', parseError);
+                                // Continue processing other events
                             }
-                        } catch (parseError) {
-                            console.error('========= Error parsing streaming data:', parseError);
-                            console.error('========= Failed to parse JSON:', jsonString);
-                            console.error('========= Line that failed:', line);
-                            console.error('========= Parse error type:', parseError.name);
-                            console.error('========= Parse error message:', parseError.message);
-                        
-                            // Try to send an error token to the user instead of failing silently
-                            if (jsonString.length > 0) {
-                                try {
-                                    // Try to extract any readable text from the failed JSON
-                                    const errorData = {
-                                        type: 'token',
-                                        token: '[Parse Error]'
-                                    };
-                                    // Continue with this error token instead of crashing
-                                } catch (e) {
-                                    console.error('========= Failed to create error token:', e);
-                                }
-                            }
-                            
-                            // Continue processing other lines instead of breaking
-                            continue;
                         }
                     }
                 }
+            } finally {
+                clearTimeout(streamTimeout);
             }
-            
-            // If we reach here, the stream ended normally or due to "Error in input stream"
-            console.log('========= Stream reading completed');
-            console.log('========= Final accumulated text length:', accumulatedText.length);
-            
-            // DON'T automatically stop streaming here - wait for proper completion signals
-            // The backend should send 'complete' or 'metadata' to properly end streaming
-            console.log('========= Stream ended without completion signal - keeping streaming state active');
+
+            // If we get here without proper completion, finalize the message gracefully
+            if (hasReceivedData && accumulatedText.length > 0) {
+                setMessages(prev => {
+                    const newMessages = [...prev];
+                    newMessages[messageIndex] = {
+                        ...newMessages[messageIndex],
+                        text: accumulatedText,
+                        isStreaming: false,
+                        metadata: {
+                            chosen: 'RAG',
+                            streaming: true,
+                            note: 'Stream ended without completion signal'
+                        }
+                    };
+                    return newMessages;
+                });
+            }
+
         } catch (error) {
-            console.error('Streaming error:', error);
-            
-            // Only throw if it's not the "Error in input stream" that we're handling gracefully
-            if (!error.message.includes('Error in input stream')) {
-                throw error;
+            // Handle different types of errors gracefully
+            if (error.name === 'AbortError') {
+                console.warn('Stream was aborted (timeout or manual cancellation)');
+            } else if (error.message.includes('Error in input stream')) {
+                console.warn('Browser detected input stream error - connection likely terminated');
+            } else {
+                console.error('Streaming error:', error);
+                throw error; // Re-throw unexpected errors
             }
-            
-            console.log('========= Handled "Error in input stream" gracefully');
-        
         } finally {
-            // Ensure reader is always closed
+            // Clean up resources
             if (reader) {
                 try {
                     reader.releaseLock();
                 } catch (e) {
-                    console.warn('Error releasing reader lock:', e);
+                    // Ignore lock release errors
                 }
             }
+            
+            // Ensure we always finalize the streaming state
+            setMessages(prev => {
+                const newMessages = [...prev];
+                if (newMessages[messageIndex] && newMessages[messageIndex].isStreaming) {
+                    newMessages[messageIndex] = {
+                        ...newMessages[messageIndex],
+                        isStreaming: false
+                    };
+                }
+                return newMessages;
+            });
         }
     };
-
 
     const handleKeyPress = (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -598,13 +601,6 @@ const Chat = () => {
                                                 <ThinkingSection thinking={msg.thinking} />
                                             )}
                                         </div>
-                                        {/* Disabled "Scrivendo..." indicator to avoid conflicts with streaming */}
-                                        {false && msg.isStreaming && (
-                                            <div className="flex items-center mt-2">
-                                                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse mr-2"></div>
-                                                <span className="text-xs text-gray-500">Scrivendo...</span>
-                                            </div>
-                                        )}
                                         {msg.metadata && !msg.isStreaming && (
                                             <div className="text-xs mt-2 opacity-70">
                                                 <p>Metodo: {msg.metadata.chosen}</p>
@@ -614,26 +610,14 @@ const Chat = () => {
                                                 {msg.metadata.streaming && (
                                                     <p>Streaming: Attivato</p>
                                                 )}
+                                                {msg.metadata.note && (
+                                                    <p className="text-yellow-600">Note: {msg.metadata.note}</p>
+                                                )}
                                             </div>
                                         )}
                                     </div>
                                 </motion.div>
                             ))}
-                            {/* {isLoading && (
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="flex justify-start"
-                                >
-                                    <div className="bg-gray-100 p-3 rounded-lg">
-                                        <div className="flex space-x-1">
-                                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            )} */}
                         </div>
                     )}
                 </motion.div>

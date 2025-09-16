@@ -6,7 +6,7 @@ from text_2_SQL import TextToSQLConverter
 from rag.rag_adapter import RAGSystem
 from utils.db_utils import get_connection, MODE
 from fastapi import APIRouter, Query
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, Response
 import json
 import os
 import uuid
@@ -182,6 +182,9 @@ def run_t2sql(question: str) -> Dict[str, Any]:
                 }
             else:
                 print(f"⚠️ Attempt {attempt+1}: Query returned no results, retrying...")
+                # Track reason for failure to avoid raising with 'None'
+                if last_error is None:
+                    last_error = RuntimeError("Query returned no results")
                 attempt += 1
         except Exception as e:
             db.connection_rollback()
@@ -189,6 +192,9 @@ def run_t2sql(question: str) -> Dict[str, Any]:
             print(f"❌ Attempt {attempt+1}: Error executing SQL query, retrying... {e}")
             attempt += 1
     db.close_connection()
+    # Ensure we raise with a meaningful error instead of 'None'
+    if last_error is None:
+        last_error = RuntimeError("No valid SQL generated or no results returned")
     raise RuntimeError(f"T2SQL failed after {max_attempts} attempts: {last_error}")
 
 def handle_rag_fallback(question: str, ml_pred: str, proba: float, fallback: bool, final_pred: str, db) -> Dict[str, Any]:
@@ -341,6 +347,18 @@ def handle_t2sql_logic(question: str, streaming_hint: bool = False) -> Dict[str,
             }
         print("🔄 Falling back to RAG (non-streaming path)")
         return handle_rag_fallback(question, ml_pred, proba, fallback, final_pred, db)
+
+@router.options("/chat")
+def chat_options():
+    """Handle CORS preflight requests."""
+    return Response(
+        content="",
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Accept",
+        }
+    )
 
 @router.post("/chat")
 def unified_chat_endpoint(

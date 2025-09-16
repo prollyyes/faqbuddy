@@ -35,6 +35,31 @@ def clean_response(response: str) -> str:
     
     return response.strip()
 
+def extract_answer_section(response: str) -> str:
+    """
+    Extract only the answer section from responses that include thinking.
+    If the response has both thinking and answer sections, return only the answer.
+    """
+    import re
+    
+    # Look for the "📌 Risposta" section and extract everything after it
+    answer_match = re.search(r'📌\s*Risposta\s*\n(.*)', response, re.DOTALL | re.IGNORECASE)
+    if answer_match:
+        answer_section = answer_match.group(1).strip()
+        print(f"🎯 Extracted answer section from thinking format")
+        return answer_section
+    
+    # Look for "Risposta" without emoji
+    answer_match = re.search(r'(?:^|\n)\s*Risposta\s*\n(.*)', response, re.DOTALL | re.IGNORECASE)
+    if answer_match:
+        answer_section = answer_match.group(1).strip()
+        print(f"🎯 Extracted answer section (no emoji)")
+        return answer_section
+    
+    # If no thinking format is detected, return the whole response
+    print(f"🎯 No thinking format detected, returning full response")
+    return response
+
 def clean_response_streaming(response: str) -> str:
     """Clean system tokens from streaming response while preserving whitespace."""
     import re
@@ -59,32 +84,78 @@ def clean_response_streaming(response: str) -> str:
     # Don't strip whitespace for streaming - preserve original spacing
     return response
 
-def get_language_instruction(question: str) -> str:
-    """Detects the language of the question and returns a strong instruction for the LLM."""
-    try:
-        lang = detect(question)
-        if lang == 'it':
-            return "IMPORTANTE: Rispondi SEMPRE in italiano. Non usare mai l'inglese. Mantieni la conversazione in italiano."
-        elif lang == 'en':
-            return "IMPORTANT: Always answer in English. Never use Italian. Keep the conversation in English."
-        else:
-            # Default to Italian for FAQBuddy since it's an Italian university system
-            return "IMPORTANTE: Rispondi SEMPRE in italiano. Non usare mai l'inglese. Mantieni la conversazione in italiano."
-    except LangDetectException:
-        # Default to Italian for FAQBuddy
-        return "IMPORTANTE: Rispondi SEMPRE in italiano. Non usare mai l'inglese. Mantieni la conversazione in italiano."
 
 def generate_answer(context: str, question: str) -> str:
     if llm_mistral is None:
         if not ensure_mistral_loaded():
             return "⚠️ LLM generation is not available. Please install llama-cpp-python and ensure the Mistral model is available."
     
+    # Use simple system prompt for direct generation (context is already processed)
     from utils.unified_system_prompt import get_simple_system_prompt
     system_prompt = get_simple_system_prompt()
     prompt = f"[INST] {system_prompt}\n\nContesto:\n{context}\n\nDomanda:\n{question} [/INST]"
-    output = llm_mistral(prompt, max_tokens=1024, stop=["</s>", "[/INST]", "[INST]"], temperature=0.7, top_p=0.9)
-    raw_response = output["choices"][0]["text"].strip()
-    return clean_response(raw_response)
+    
+    print(f"🔍 DEBUG: Calling LLM with prompt length: {len(prompt)}")
+    print(f"🔍 DEBUG: Context length: {len(context)}, Question: {question[:100]}...")
+    
+    # Check if prompt is too long - if so, try with shorter context
+    if len(prompt) > 10000:
+        print(f"⚠️ DEBUG: Prompt very long ({len(prompt)} chars), trying with reduced context...")
+        # Try with just the first 3000 chars of context
+        short_context = context[:3000] + "\n\n[...contesto ridotto per limitazioni di lunghezza...]"
+        short_prompt = f"[INST] {system_prompt}\n\nContesto:\n{short_context}\n\nDomanda:\n{question} [/INST]"
+        print(f"🔍 DEBUG: Reduced prompt length: {len(short_prompt)}")
+        prompt = short_prompt
+    
+    try:
+        print(f"🔍 DEBUG: Model status - loaded: {llm_mistral is not None}")
+        if llm_mistral is None:
+            print("❌ DEBUG: Model is None!")
+            return "⚠️ Model not loaded"
+            
+        # First try a simple test generation to check if the model works
+        print(f"🔍 DEBUG: Testing model with simple prompt...")
+        test_output = llm_mistral("[INST] Saluta brevemente [/INST]", max_tokens=50, stop=["</s>"], temperature=0.7)
+        test_response = test_output["choices"][0]["text"] if "choices" in test_output else ""
+        print(f"🔍 DEBUG: Test response: {repr(test_response[:100])}")
+        
+        if not test_response.strip():
+            print("❌ DEBUG: Model fails even simple test - returning error")
+            return "⚠️ LLM model non è in grado di generare testo. Verificare configurazione model."
+        
+        # Now try the actual prompt
+        output = llm_mistral(prompt, max_tokens=2048, stop=["</s>", "[/INST]", "[INST]"], temperature=0.7, top_p=0.9)
+        print(f"🔍 DEBUG: LLM call completed successfully")
+        print(f"🔍 DEBUG: LLM output structure: {type(output)}, keys: {output.keys() if isinstance(output, dict) else 'not dict'}")
+        
+        if isinstance(output, dict) and "choices" in output and len(output["choices"]) > 0:
+            raw_response = output["choices"][0]["text"].strip()
+            print(f"🔍 DEBUG: Raw response length: {len(raw_response)}")
+            print(f"🔍 DEBUG: Raw response preview: {repr(raw_response[:200])}")
+            
+            cleaned_response = clean_response(raw_response)
+            print(f"🔍 DEBUG: Cleaned response length: {len(cleaned_response)}")
+            print(f"🔍 DEBUG: Cleaned response preview: {repr(cleaned_response[:200])}")
+            
+            # Extract only the "Risposta" section if thinking format is detected
+            final_response = extract_answer_section(cleaned_response)
+            print(f"🔍 DEBUG: Final response length: {len(final_response)}")
+            print(f"🔍 DEBUG: Final response preview: {repr(final_response[:200])}")
+            
+            if not final_response.strip():
+                print("⚠️ DEBUG: Response is empty after final processing!")
+                print(f"⚠️ DEBUG: Original raw response was: {repr(raw_response)}")
+                # Return cleaned response if final processing made it empty
+                return cleaned_response if cleaned_response.strip() else "⚠️ LLM generated empty response"
+            
+            return final_response
+        else:
+            print(f"❌ DEBUG: Unexpected output format: {output}")
+            return "⚠️ LLM output format error"
+            
+    except Exception as e:
+        print(f"❌ DEBUG: LLM generation failed: {e}")
+        return f"⚠️ LLM generation error: {str(e)}"
 
 def load_mistral_model():
     """Load the Mistral model if not already loaded."""
@@ -93,11 +164,20 @@ def load_mistral_model():
         print("✅ Mistral model already loaded")
         return True
     
-    # Force garbage collection to free any residual GPU memory
+    # Force garbage collection and unload Gemma if loaded to free GPU memory
     print("🧹 Cleaning GPU memory before loading Mistral...")
+    
+    # Try to unload Gemma model if it's loaded
+    try:
+        from utils.llm_gemma import unload_gemma_model
+        unload_gemma_model()
+        print("   Unloaded Gemma model to free GPU memory")
+    except Exception as e:
+        print(f"   Could not unload Gemma: {e}")
+    
     gc.collect()
     import time
-    time.sleep(1)  # Give time for GPU memory to be freed
+    time.sleep(2)  # Give more time for GPU memory to be freed
     
     try:
         from llama_cpp import Llama
@@ -111,12 +191,14 @@ def load_mistral_model():
             
             llm_mistral = Llama(
                 model_path=mistral_model_path,   
-                n_ctx=32768,                     # Set to max context to handle largest possible RAG prompts
-                n_batch=768,                     # 768–1024 is the sweet spot on 8GB VRAM === old: 896, then: 512
+                n_ctx=4096,                      # Reasonable context for 7B model (reduced from 32768)
+                n_batch=512,                     # Conservative batch size for stability
                 n_threads=PHYSICAL_CORES,        # Physical cores, not logical
-                n_gpu_layers=15,                 # Reduced from 18 to free VRAM for large prompt KV caches
-                f16_kv=True,                     # Better quality; turn off only if OOM === old: True  
-                verbose=False
+                n_gpu_layers=12,                 # Reduced to prevent GPU memory conflicts with Gemma
+                f16_kv=True,                     # Better quality
+                verbose=False,
+                use_mmap=True,                   # Enable memory mapping for better memory efficiency
+                use_mlock=False                  # Disable memory locking to save RAM
             )
             print("✅ Mistral model loaded successfully")
             return True
@@ -197,7 +279,7 @@ def generate_answer_streaming(context: str, question: str, request_id: str = Non
     # Use the streaming API
     print(f"🔄 Starting LLM stream with prompt length: {len(prompt)}")
     try:
-        stream = llm_mistral(prompt, max_tokens=1024, stop=["</s>", "[/INST]", "[INST]"], stream=True, temperature=0.7, top_p=0.9)
+        stream = llm_mistral(prompt, max_tokens=2048, stop=["</s>", "[/INST]", "[INST]"], stream=True, temperature=0.7, top_p=0.9)
     except Exception as e:
         print(f"❌ Failed to start LLM streaming: {e}")
         yield f"⚠️ Failed to start text generation: {str(e)}"
@@ -272,139 +354,43 @@ def generate_answer_streaming(context: str, question: str, request_id: str = Non
         yield f"⚠️ Streaming error: {str(e)}"
 
 def generate_answer_streaming_advanced(prompt: str, request_id: str = None) -> Generator[str, None, None]:
-    """
-    Generate an answer token by token using streaming with an advanced prompt.
-    This function accepts a pre-built prompt instead of building one from context + question.
-    
-    Args:
-        prompt: Pre-built prompt (from advanced prompt engineering)
-        request_id: Request ID for cancellation tracking
-        
-    Returns:
-        Generator that yields tokens as they are generated
-    """
-    print(f"🔄 LLM advanced streaming called with prompt length: {len(prompt)}")
-    
+    """Minimal advanced streaming: initialize llama-cpp stream and yield cleaned text only."""
     if llm_mistral is None:
         if not ensure_mistral_loaded():
-            print("❌ LLM model is None, cannot generate")
             yield "⚠️ LLM generation is not available. Please install llama-cpp-python and ensure the Mistral model is available."
             return
-    
-    # Use the streaming API with the advanced prompt
-    print(f"🔄 Starting LLM advanced stream with prompt length: {len(prompt)}")
-    print(f"🔍 PROMPT DEBUG - First 500 chars:")
-    print(f"'{prompt[:500]}...'")
-    print(f"🔍 PROMPT DEBUG - Last 200 chars:")
-    print(f"'...{prompt[-200:]}'")
     try:
-        print(f"🔍 MODEL PARAMS - Using standard stop tokens")
-        stream = llm_mistral(prompt, max_tokens=1024, stop=["</s>"], stream=True, temperature=0.2, top_p=0.9)
-        print(f"✅ LLM stream created successfully")
-        print(f"✅ Stream type: {type(stream)}")
-        print(f"✅ Stream has __iter__: {hasattr(stream, '__iter__')}")
-        print(f"✅ Stream has __next__: {hasattr(stream, '__next__')}")
-    except Exception as stream_init_error:
-        print(f"❌ Failed to initialize LLM stream: {stream_init_error}")
-        yield f"⚠️ Stream initialization failed: {str(stream_init_error)}"
+        stream = llm_mistral(
+            prompt,
+            max_tokens=2048,
+            stop=["</s>", "[/INST]"],
+            stream=True,
+            temperature=0.7,
+            top_p=0.9
+        )
+    except Exception as e:
+        yield f"⚠️ Stream initialization failed: {str(e)}"
         return
-    
-    chunk_count = 0
-    total_content = ""
-    try:
-        print(f"🔄 Starting to iterate over LLM stream...")
-        print(f"🔄 Stream object type: {type(stream)}")
-        print(f"🔄 Stream object: {stream}")
-        
-        iteration_count = 0
-        for chunk in stream:
-            iteration_count += 1
-            print(f"🔄 Iteration {iteration_count}: Received chunk {chunk_count + 1}")
-            chunk_count += 1
-            total_content += str(chunk.get('choices', [{}])[0].get('text', '')) if chunk.get('choices') else ''
-            print(f"   Advanced Chunk {chunk_count}: {chunk}")
-            print(f"   Total content so far: {len(total_content)} chars")
-            print(f"   Chunk type: {type(chunk)}")
-            print(f"   Chunk keys: {list(chunk.keys()) if isinstance(chunk, dict) else 'Not a dict'}")
-            
-            # Add safety check for chunk processing
-            if chunk_count > 1000:  # Prevent infinite loops
-                print(f"⚠️ WARNING: Too many chunks ({chunk_count}), stopping to prevent infinite loop")
-                break
-        
-            # Check for cancellation before processing each chunk
-            if request_id:
-                try:
-                    from utils.cancellation import is_request_cancelled
-                    if is_request_cancelled(request_id):
-                        print(f"======== LLM advanced streaming cancelled for request {request_id}")
-                        return
-                except ImportError:
-                    pass  # If we can't import, continue without cancellation check
-            
-            # Check if the chunk has the expected structure
-            if "choices" in chunk and len(chunk["choices"]) > 0:
-                choice = chunk["choices"][0]
-                print(f"   Advanced Choice structure: {choice}")
-                
-                # Check if the response is finished
-                if choice.get("finish_reason") is not None:
-                    print(f"   Response finished: {choice.get('finish_reason')}")
-                    break
-                
-                # Extract the text content - try different possible structures
-                text_content = ""
-                if "delta" in choice and "content" in choice["delta"]:
-                    text_content = choice["delta"]["content"]
-                    print(f"   Found content in delta: {repr(text_content)}")
+
+    import re as _re
+    for chunk in stream:
+        try:
+            choice = chunk.get("choices", [{}])[0]
+            text_content = ""
+            if isinstance(choice, dict):
+                if "delta" in choice and isinstance(choice["delta"], dict):
+                    text_content = choice["delta"].get("content", "")
                 elif "text" in choice:
-                    text_content = choice["text"]
-                    print(f"   Found content in text: {repr(text_content)}")
+                    text_content = choice.get("text", "")
                 elif "content" in choice:
-                    text_content = choice["content"]
-                    print(f"   Found content in content: {repr(text_content)}")
-                else:
-                    print(f"   No text content found in choice: {choice}")
-                
-                # Process all text content - don't filter out characters unnecessarily
-                if text_content:
-                    # Clean system tokens from streaming content while preserving whitespace
-                    cleaned_content = clean_response_streaming(text_content)
-                    print(f"   Cleaned content: {repr(cleaned_content)}")
-                    # Yield all content, even if it's just whitespace or single characters
-                    print(f"   ✅ Yielding advanced content: {repr(cleaned_content)}")
-                    yield cleaned_content
-                else:
-                    print(f"   ❌ No text content to yield")
-            else:
-                # Try alternative chunk structures (llama-cpp-python might use different format)
-                print(f"   Advanced Metadata Chunk doesn't have choices, trying alternative structure: {chunk}")
-                
-                # Check if chunk has direct text content
-                if "text" in chunk:
-                    text_content = chunk["text"]
-                    print(f"   Found direct text content: {repr(text_content)}")
-                    if text_content:
-                        cleaned_content = clean_response_streaming(text_content)
-                        yield cleaned_content
-                elif "content" in chunk:
-                    text_content = chunk["content"]
-                    print(f"   Found direct content: {repr(text_content)}")
-                    if text_content:
-                        cleaned_content = clean_response_streaming(text_content)
-                        yield cleaned_content
-                else:
-                    print(f"   No recognizable text content in advanced chunk: {chunk}")
-    except Exception as stream_error:
-        print(f"❌ Error during LLM advanced streaming: {stream_error}")
-        yield f"⚠️ Streaming error: {str(stream_error)}"
-    finally:
-        print(f"🔄 Advanced LLM streaming completed. Total chunks: {chunk_count}, Total content: {len(total_content)} chars")
-        
-        # Force cleanup if we only got 1 token - this indicates a premature termination
-        if chunk_count <= 1:
-            print(f"⚠️ WARNING: Only {chunk_count} chunk(s) generated - possible premature termination")
-            print(f"🧹 Forcing cleanup to prevent resource locks...")
+                    text_content = choice.get("content", "")
+            if text_content:
+                cleaned = clean_response_streaming(text_content)
+                # Strip an initial "Risposta:" if the model emits it at the very start of generation
+                cleaned = _re.sub(r'^\s*(risposta\s*:?)\s*', '', cleaned, flags=_re.IGNORECASE)
+                yield cleaned
+        except Exception:
+            continue
 
 def generate_answer_streaming_with_metadata(context: str, question: str, request_id: str = None) -> Generator[dict, None, None]:
     """
@@ -431,7 +417,7 @@ def generate_answer_streaming_with_metadata(context: str, question: str, request
     
     # Use the streaming API
     print(f"🔄 Starting LLM stream with metadata, prompt length: {len(prompt)}")
-    stream = llm_mistral(prompt, max_tokens=1024, stop=["</s>", "[/INST]", "[INST]"], stream=True, temperature=0.7, top_p=0.9)
+    stream = llm_mistral(prompt, max_tokens=2048, stop=["</s>", "[/INST]", "[INST]"], stream=True, temperature=0.7, top_p=0.9)
     
     # Buffer to collect the full response for thinking extraction
     full_response_buffer = ""

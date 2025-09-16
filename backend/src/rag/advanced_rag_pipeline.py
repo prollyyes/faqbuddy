@@ -144,7 +144,7 @@ class AdvancedRAGPipeline:
         print(f"   Retrieved {len(best_results)} documents")
         
         # Step 2.5: Web Search Enhancement (if enabled)
-        if False and self.web_search:  # TEMPORARILY DISABLED
+        if self.web_search:
             print("======= Step 2.5: Web search enhancement...")
             try:
                 web_results = self.web_search.search(question, max_results=3)
@@ -171,9 +171,36 @@ class AdvancedRAGPipeline:
         print(f"   Prompt length: {len(prompt)} characters")
         print(f"   Query type: {query_type}")
         
-        # Step 4: Answer Generation
+        # Step 4: Answer Generation using modular prompt
         print("======= Step 4: Generating answer...")
-        answer = generate_answer(prompt, question)
+        from utils.llm_mistral import ensure_mistral_loaded, clean_response, extract_answer_section
+        
+        # Ensure model is loaded
+        if not ensure_mistral_loaded():
+            answer = "⚠️ LLM generation is not available. Please install llama-cpp-python and ensure the Mistral model is available."
+        else:
+            # Re-import to get the updated global variable after loading
+            from utils.llm_mistral import llm_mistral
+            
+            if llm_mistral is None:
+                answer = "⚠️ Model loading failed after ensure_mistral_loaded"
+            else:
+                try:
+                    # The prompt is already complete from modular system, use it directly
+                    print(f"🔍 Using modular prompt directly (length: {len(prompt)})")
+                    output = llm_mistral(prompt, max_tokens=2048, stop=["</s>", "[/INST]"], temperature=0.7, top_p=0.9)
+                    
+                    if isinstance(output, dict) and "choices" in output and len(output["choices"]) > 0:
+                        raw_response = output["choices"][0]["text"].strip()
+                        cleaned_response = clean_response(raw_response)
+                        answer = extract_answer_section(cleaned_response)
+                        
+                        if not answer.strip():
+                            answer = cleaned_response if cleaned_response.strip() else "⚠️ LLM generated empty response"
+                    else:
+                        answer = "⚠️ LLM output format error"
+                except Exception as e:
+                    answer = f"⚠️ LLM generation error: {str(e)}"
         
         print(f"   Answer length: {len(answer)} characters")
         
@@ -331,7 +358,7 @@ class AdvancedRAGPipeline:
             return
         
         # Step 2.5: Web Search Enhancement (if enabled)
-        if False and self.web_search:  # TEMPORARILY DISABLED
+        if self.web_search:
             print("======= Step 2.5: Web search enhancement...")
             try:
                 web_results = self.web_search.search(question, max_results=3)
@@ -454,7 +481,7 @@ class AdvancedRAGPipeline:
             return
         
         # Step 2.5: Web Search Enhancement (if enabled)
-        if False and self.web_search:  # TEMPORARILY DISABLED
+        if self.web_search:
             print("======= Step 2.5: Web search enhancement...")
             try:
                 web_results = self.web_search.search(question, max_results=3)
@@ -491,42 +518,185 @@ class AdvancedRAGPipeline:
             print(f"🛑 Request cancelled before LLM generation: {request_id}")
             return
         
-        # Step 4: Streaming Answer Generation with Metadata
+        # Step 4: Streaming Answer Generation with Metadata using modular prompt
         print("======= Step 4: Generating streaming answer with metadata...")
         
-        # Use the advanced streaming LLM function that can handle complex prompts
-        from utils.llm_mistral import generate_answer_streaming_advanced
+        # Ensure Mistral model is loaded and use it directly with the modular prompt
+        from utils.llm_mistral import ensure_mistral_loaded, clean_response_streaming, extract_answer_section
         
-        # Stream the answer directly from the LLM using the advanced prompt
+        if not ensure_mistral_loaded():
+            yield {
+                "type": "error",
+                "message": "⚠️ LLM generation is not available. Please install llama-cpp-python and ensure the Mistral model is available."
+            }
+            return
+        
+        # Re-import to get the updated global variable after loading
+        from utils.llm_mistral import llm_mistral
+        
+        if llm_mistral is None:
+            yield {
+                "type": "error", 
+                "message": "⚠️ Model loading failed after ensure_mistral_loaded"
+            }
+            return
+        
+        # Stream directly from the modular prompt (same as CLI approach)
         token_count = 0
+        accumulated_text = ""
+        yielded_meaningful = False
         try:
-            for token in generate_answer_streaming_advanced(prompt, request_id):
-                # Check for cancellation before yielding each token
+            print(f"🔍 Starting modular streaming with prompt length: {len(prompt)}")
+            
+            # First test the model with a simple non-streaming call (like CLI does)
+            print(f"🔍 DEBUG: Testing model with simple prompt before streaming...")
+            test_output = llm_mistral("[INST] Saluta brevemente [/INST]", max_tokens=50, stop=["</s>"], temperature=0.7)
+            test_response = test_output["choices"][0]["text"] if "choices" in test_output and len(test_output["choices"]) > 0 else ""
+            print(f"🔍 DEBUG: Test response: {repr(test_response[:100])}")
+            
+            if not test_response.strip():
+                print("❌ DEBUG: Model fails even simple test - returning error")
+                yield {
+                    "type": "error",
+                    "message": "⚠️ LLM model non è in grado di generare testo. Verificare configurazione model."
+                }
+                return
+            
+            # Now try streaming with the modular prompt
+            print(f"🔍 DEBUG: Model test passed, starting streaming...")
+            
+            # EXPERIMENT: Test with simple prompt first to isolate the issue
+            print(f"🔍 DEBUG: Testing simple prompt in streaming mode...")
+            simple_test_prompt = "[INST] Rispondi brevemente: Come contattare la segreteria studenti? [/INST]"
+            
+            try:
+                # Test 1: Simple prompt streaming
+                test_stream = llm_mistral(simple_test_prompt, max_tokens=100, stop=["</s>", "[/INST]"], stream=True, temperature=0.7, top_p=0.9)
+                print(f"🔍 DEBUG: Simple test stream created: {type(test_stream)}")
+                
+                test_chunk_count = 0
+                for test_chunk in test_stream:
+                    test_chunk_count += 1
+                    print(f"🔍 DEBUG: Simple test chunk {test_chunk_count}: {test_chunk}")
+                    if test_chunk_count >= 3:  # Just test first few chunks
+                        break
+                
+                print(f"🔍 DEBUG: Simple test produced {test_chunk_count} chunks")
+                
+                # Test 2: Create streaming-compatible prompt (simpler format)
+                print(f"🔍 DEBUG: Creating streaming-compatible prompt...")
+                
+                # Extract key info from modular prompt but use simpler format
+                context_chunks = best_results[:5]  # Limit to top 5 for simplicity
+                context_text = "\n\n".join([
+                    f"Documento {i+1}: {chunk.get('text', '')[:300]}..."
+                    for i, chunk in enumerate(context_chunks)
+                ])
+                
+                streaming_prompt = f"""[INST] Sei FAQBuddy dell'Università La Sapienza di Roma. Rispondi in italiano usando le informazioni fornite.
+
+CONTESTO:
+{context_text}
+
+DOMANDA: {question}
+
+Rispondi in modo chiaro e professionale, citando i documenti come [Documento X]. [/INST]"""
+                
+                print(f"🔍 DEBUG: Streaming prompt length: {len(streaming_prompt)}")
+                stream = llm_mistral(streaming_prompt, max_tokens=2048, stop=["</s>", "[/INST]"], stream=True, temperature=0.7, top_p=0.9)
+                print(f"🔍 DEBUG: Streaming-compatible prompt stream created: {type(stream)}")
+                
+            except Exception as stream_error:
+                print(f"❌ DEBUG: Failed to create stream: {stream_error}")
+                yield {
+                    "type": "error",
+                    "message": f"Failed to create streaming response: {str(stream_error)}"
+                }
+                return
+            
+            chunk_counter = 0
+            print(f"🔍 DEBUG: About to enter stream iteration loop...")
+            
+            for chunk in stream:
+                chunk_counter += 1
+                print(f"🔍 DEBUG: Processing chunk {chunk_counter}: {chunk}")
+                
+                # Check for cancellation before processing each chunk
                 if request_id and is_request_cancelled(request_id):
                     print(f"🛑 Request cancelled during streaming: {request_id}")
                     return
                 
-                token_count += 1
-                yield {
-                    "type": "token",
-                    "token": token,
-                    "token_count": token_count,
-                    "confidence": 0.85,  # Default confidence for streaming
-                    "query_analysis": {
-                        "intent": str(query_analysis.intent.value),
-                        "complexity": str(query_analysis.complexity.value),
-                        "requires_reasoning": bool(query_analysis.requires_reasoning)
-                    },
-                    "retrieval_info": {
-                        "sources_count": len(best_results),
-                        "query_type": str(query_type)
-                    }
-                }
+                try:
+                    choice = chunk.get("choices", [{}])[0]
+                    text_content = ""
+                    
+                    if isinstance(choice, dict):
+                        if "delta" in choice and isinstance(choice["delta"], dict):
+                            text_content = choice["delta"].get("content", "")
+                        elif "text" in choice:
+                            text_content = choice.get("text", "")
+                        elif "content" in choice:
+                            text_content = choice.get("content", "")
+                    
+                    if text_content:
+                        print(f"🔍 Raw token received: {repr(text_content)}")
+                        
+                        # Clean the token using streaming-safe cleaning (preserves whitespace)
+                        cleaned_token = clean_response_streaming(text_content)
+                        print(f"🧹 After clean_response_streaming: {repr(cleaned_token)}")
+                        
+                        # Strip leading "Risposta:" prefix (case-insensitive) if it appears at the very beginning
+                        if cleaned_token and not yielded_meaningful:
+                            import re as _re
+                            original_token = cleaned_token
+                            cleaned_token = _re.sub(r'^\s*(risposta\s*:?)\s*', '', cleaned_token, flags=_re.IGNORECASE)
+                            if cleaned_token != original_token:
+                                print(f"🧹 Stripped 'Risposta:' prefix: {repr(original_token)} -> {repr(cleaned_token)}")
+                        
+                        # Apply answer extraction to remove thinking if present
+                        if accumulated_text == "":  # First token, check for thinking format
+                            accumulated_text += cleaned_token
+                            final_token = extract_answer_section(accumulated_text)
+                            if final_token != accumulated_text:  # Thinking was removed
+                                accumulated_text = final_token
+                                cleaned_token = final_token
+                                print(f"🎯 Extracted answer section from first streaming chunk: {repr(cleaned_token)}")
+                        else:
+                            accumulated_text += cleaned_token
+                        
+                        print(f"🎯 Final cleaned token: {repr(cleaned_token)}")
+                        
+                        # Yield ALL tokens, even if just whitespace (let frontend handle display)
+                        if cleaned_token:  # Only check if not empty string, allow whitespace
+                            token_count += 1
+                            yielded_meaningful = True
+                            print(f"✅ Yielding token {token_count}: {repr(cleaned_token)}")
+                            yield {
+                                "type": "token",
+                                "token": cleaned_token,
+                                "token_count": token_count,
+                                "confidence": 0.85,
+                                "query_analysis": {
+                                    "intent": str(query_analysis.intent.value),
+                                    "complexity": str(query_analysis.complexity.value),
+                                    "requires_reasoning": bool(query_analysis.requires_reasoning)
+                                },
+                                "retrieval_info": {
+                                    "sources_count": len(best_results),
+                                    "query_type": str(query_type)
+                                }
+                            }
+                        else:
+                            print(f"❌ Skipping empty token after cleaning")
+                except Exception as chunk_error:
+                    print(f"⚠️ Error processing chunk: {chunk_error}")
+                    continue
+                    
         except Exception as e:
-            print(f"❌ Error in LLM streaming: {e}")
+            print(f"❌ Error in modular streaming: {e}")
             yield {
                 "type": "error",
-                "message": f"LLM streaming failed: {str(e)}"
+                "message": f"Modular streaming failed: {str(e)}"
             }
             return
         
