@@ -1,20 +1,89 @@
 import os
-from llama_cpp import Llama
+import atexit
+import gc
 from langdetect import detect, DetectorFactory
 from langdetect.lang_detect_exception import LangDetectException
 
 # Seed the detector for consistent results
 DetectorFactory.seed = 0
 
-gemma_model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'models', 'gemma-3-4b-it-Q4_1.gguf'))
+# Initialize model variable - will be loaded on-demand
+llm_gemma = None
 
-llm_gemma = Llama(
-    model_path=gemma_model_path,
-    n_ctx=2048,
-    n_threads=6,
-    n_gpu_layers=-1,
-    verbose=False
-)
+def load_gemma_model():
+    """Load the Gemma model if not already loaded."""
+    global llm_gemma
+    if llm_gemma is not None:
+        print("✅ Gemma model already loaded")
+        return True
+    
+    try:
+        from llama_cpp import Llama
+        gemma_model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'models', 'gemma-3-4b-it-Q4_1.gguf'))
+        
+        if os.path.exists(gemma_model_path):
+            print("🔄 Loading Gemma model...")
+            
+            # Optimized settings for RTX 2060S
+            PHYSICAL_CORES = max(1, os.cpu_count() // 2)
+            
+            llm_gemma = Llama(
+                model_path=gemma_model_path,
+                n_ctx=2048,                      # Smaller context for T2SQL tasks
+                n_batch=512,                     # Smaller batch for Gemma
+                n_threads=PHYSICAL_CORES,        # Physical cores, not logical
+                n_gpu_layers=20,                 # Use all GPU layers for Gemma
+                f16_kv=True,                     # Better quality
+                verbose=False
+            )
+            print("✅ Gemma model loaded successfully")
+            return True
+        else:
+            print(f"❌ Gemma model not found at {gemma_model_path}")
+            return False
+    except Exception as e:
+        print(f"❌ Failed to load Gemma model: {e}")
+        return False
+
+def unload_gemma_model():
+    """Unload the Gemma model to free GPU memory."""
+    global llm_gemma
+    if llm_gemma is None:
+        print("ℹ️ Gemma model not loaded, nothing to unload")
+        return True
+    
+    try:
+        print("🔄 Unloading Gemma model...")
+        del llm_gemma
+        llm_gemma = None
+        print("✅ Gemma model unloaded successfully")
+        return True
+    except Exception as e:
+        print(f"❌ Failed to unload Gemma model: {e}")
+        return False
+
+def ensure_gemma_loaded():
+    """Ensure Gemma model is loaded, load it if not."""
+    if llm_gemma is not None:
+        return True
+    return load_gemma_model()
+
+def cleanup_gemma_resources():
+    """Clean up Gemma model resources to prevent semaphore leaks."""
+    global llm_gemma
+    if llm_gemma is not None:
+        try:
+            print("🧹 Cleaning up Gemma model resources...")
+            del llm_gemma
+            llm_gemma = None
+            gc.collect()
+            print("✅ Gemma model resources cleaned up")
+        except Exception as e:
+            print(f"⚠️ Error during Gemma cleanup: {e}")
+
+# Register cleanup function with graceful shutdown system
+# from utils.graceful_shutdown import register_cleanup_function  # DISABLED
+# register_cleanup_function(cleanup_gemma_resources)  # DISABLED
 
 def get_language_instruction(question: str) -> str:
     """Detects the language of the question and returns a strong instruction for the LLM."""
@@ -32,6 +101,10 @@ def get_language_instruction(question: str) -> str:
         return "IMPORTANTE: Rispondi SEMPRE in italiano. Non usare mai l'inglese. Mantieni la conversazione in italiano."
 
 def classify_question(question: str) -> str:
+    if llm_gemma is None:
+        if not ensure_gemma_loaded():
+            return "simple"  # Default fallback
+    
     prompt = (
         "Classifica la seguente domanda SOLO come 'simple' o 'complex'. "
         "Rispondi esclusivamente con una di queste due parole, senza spiegazioni, motivazioni o testo aggiuntivo.\n\n"
@@ -46,28 +119,3 @@ def classify_question(question: str) -> str:
         return "simple"
     return text.split()[0]
 
-def generate_answer(context: str, question: str) -> str:
-    language_instruction = get_language_instruction(question)
-    prompt = (
-        f"[INST] Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. Anche i professori usano la piattaforma, quindi mantieni un tono professionale ma amichevole. Non rispondere a domande generali non legate all'università. {language_instruction} IMPORTANTE: Rispondi sempre in formato Markdown per una migliore leggibilità. Usa titoli (# ##), elenchi puntati (-), grassetto (**testo**), corsivo (*testo*) e link quando appropriato. Contesto:\n{context}\n\nDomanda:\n{question} [/INST]"
-    )
-    output = llm_gemma(prompt, max_tokens=1024, stop=["</s>"])
-    return output["choices"][0]["text"].strip()
-
-def generate_answer_streaming(context: str, question: str) -> list:
-    """Generate an answer token by token."""
-    language_instruction = get_language_instruction(question)
-    prompt = f"[INST] Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. Anche i professori usano la piattaforma, quindi mantieni un tono professionale ma amichevole. Non rispondere a domande generali non legate all'università. {language_instruction} IMPORTANTE: Rispondi sempre in formato Markdown per una migliore leggibilità. Usa titoli (# ##), elenchi puntati (-), grassetto (**testo**), corsivo (*testo*) e link quando appropriato. Contesto:\n{context}\n\nDomanda:\n{question} [/INST]"
-    
-    # Use the streaming API
-    stream = llm_gemma(prompt, max_tokens=1024, stop=["</s>"], stream=True)
-    
-    tokens = []
-    for chunk in stream:
-        if chunk["choices"][0]["finish_reason"] is not None:
-            break
-        token = chunk["choices"][0]["delta"].get("content", "")
-        if token:
-            tokens.append(token)
-    
-    return tokens

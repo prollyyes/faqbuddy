@@ -14,8 +14,9 @@ def get_model():
     global _model
     if _model is None:
         print(f"Loading SentenceTransformer model: {EMBEDDING_MODEL_NAME}")
-        _model = SentenceTransformer(EMBEDDING_MODEL_NAME)
-        print("Model loaded successfully.")
+        # Force CPU to avoid GPU memory conflicts with LLM models
+        _model = SentenceTransformer(EMBEDDING_MODEL_NAME, device='cpu')
+        print("Model loaded successfully on CPU.")
     return _model
 
 def extract_hand_features(question):

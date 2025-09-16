@@ -7,8 +7,8 @@ import os
 
 # Constants for Pinecone index
 # Updated to use L12 index with 768 dimensions
-INDEX_NAME = "exams-index-mpnet"  # New index for all-MiniLM-L12-v2 embeddings
-NAMESPACE = "v7"
+INDEX_NAME = "exams-index-enhanced"  # Updated to use the correct enhanced index
+NAMESPACE = "contextual_db"  # Updated to use the correct advanced DB namespace
 
 load_dotenv()  # Load environment variables from .env file  
 

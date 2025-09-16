@@ -1,4 +1,4 @@
-from utils.llm_mistral import llm_mistral
+from api.model_manager import model_manager
 from typing import Optional
 
 
@@ -57,34 +57,55 @@ class TextToSQLConverter:
         return prompt
 
     def query_llm(self, prompt: str) -> str:
-        # Mistral LLM
-        result = llm_mistral(prompt, max_tokens=150, temperature=0.01)
+        # Ensure Gemma model is loaded
+        if not model_manager.load_gemma():
+            return "INVALID_QUERY"
+        
+        # Import llm_gemma after ensuring it's loaded
+        from utils.llm_gemma import llm_gemma
+        
+        # Gemma LLM for T2SQL (better for structured tasks)
+        result = llm_gemma(prompt, max_tokens=150, temperature=0.01)
         # Compatibilità output (dict o string)
         if isinstance(result, dict):
             sql_response = result["choices"][0]["text"].strip()
         else:
-            sql_response = result.strip() # why error?
+            sql_response = result.strip()
         return sql_response
 
     def clean_sql_response(self, sql_response: str) -> str:
         import re
-        # Cerca la query che inizia con SELECT e termina con ;
+        
+        print(f"🔍 T2SQL CLEANING - Raw response: {repr(sql_response)}")
+        
+        # First, try to find a complete SELECT query with semicolon
         match = re.search(r"(SELECT[\s\S]+?;)", sql_response, re.IGNORECASE)
         if match:
-            return match.group(1).strip()
-        # Se manca il punto e virgola, prendi tutte le righe che iniziano con SELECT o continuano la query
-        lines = []
-        recording = False
-        for line in sql_response.split('\n'):
-            if line.strip().lower().startswith('select'):
-                recording = True
-            if recording:
-                lines.append(line.strip())
-        if lines:
-            query = ' '.join(lines)
-            if not query.endswith(';'):
-                query += ';'
-            return query
+            clean_query = match.group(1).strip()
+            print(f"✅ T2SQL CLEANING - Found query with semicolon: {repr(clean_query)}")
+            return clean_query
+            
+        # Try to find SELECT query that ends at common delimiters (before prompt contamination)
+        # Look for SELECT...WHERE clause that ends before ### or similar prompt markers
+        match = re.search(r"(SELECT[^#]*?)(?:\s*###|\s*\n\s*###|\s*DOMANDA:|\s*SQL:|\s*$)", sql_response, re.IGNORECASE)
+        if match:
+            clean_query = match.group(1).strip()
+            if not clean_query.endswith(';'):
+                clean_query += ';'
+            print(f"✅ T2SQL CLEANING - Found query before prompt markers: {repr(clean_query)}")
+            return clean_query
+            
+        # Fallback: extract just the first line if it starts with SELECT
+        first_line = sql_response.split('\n')[0].strip()
+        if first_line.lower().startswith('select'):
+            # Remove any trailing prompt contamination from the first line
+            clean_first_line = re.sub(r'\s*###.*$', '', first_line).strip()
+            if not clean_first_line.endswith(';'):
+                clean_first_line += ';'
+            print(f"✅ T2SQL CLEANING - Using cleaned first line: {repr(clean_first_line)}")
+            return clean_first_line
+            
+        print(f"❌ T2SQL CLEANING - No valid SQL found")
         return "INVALID_QUERY"
 
     def from_sql_to_text(self, question: str, results: list) -> str:
@@ -137,12 +158,12 @@ class TextToSQLConverter:
             # Ricostruisci l'oggetto senza doppio articolo
             oggetto_finale = oggetto if articolo == "" else articolo + oggetto
     
-            # Extract values and format with markdown
+            # Extract values and format as markdown unordered list
             valori = []
             for row in results:
                 for k, v in row.items():
                     if v is not None and 'id' not in k.lower():
-                        valori.append(f"**{v}**")
+                        valori.append(f"- **{v}**")
                         break  # Take only the first non-ID field
             
             if valori:
@@ -152,21 +173,30 @@ class TextToSQLConverter:
         return None
     
     def sql_results_to_text_llm(self, question: str, results: list) -> str:
+        # Ensure Gemma model is loaded
+        if not model_manager.load_gemma():
+            return "Errore nel caricamento del modello per la conversione dei risultati."
+        
+        # Import llm_gemma after ensuring it's loaded
         from utils.llm_gemma import llm_gemma
+        
         prompt = (
             "Rispondi in italiano in modo sintetico e diretto alla seguente domanda, "
             "usando SOLO i dati forniti qui sotto. Non aggiungere spiegazioni o ringraziamenti.\n\n"
             "FORMATTAZIONE RICHIESTA:\n"
-            "- Se la risposta contiene una lista di elementi, usa markdown con **grassetto** per ogni elemento\n"
+            "- Se la risposta contiene una lista di elementi, usa una lista puntata markdown\n"
+            "- Ogni elemento deve essere su una riga separata con un trattino (-)\n"
             "- NON includere 'nome:' o altri prefissi di campo\n"
-            "- Usa solo il valore dell'elemento in grassetto\n"
-            "- Esempio: **Nome Corso 1**, **Nome Corso 2**, etc.\n\n"
+            "- Esempio:\n"
+            "  - Nome Corso 1\n"
+            "  - Nome Corso 2\n"
+            "  - Nome Corso 3\n\n"
             f"Domanda: {question}\n"
             f"Dati:\n{results}\n\n"
             "Risposta formattata:"
         )
         print("Fallback LLM")
-        output = llm_gemma(prompt, max_tokens=60, stop=["</s>"])
+        output = llm_gemma(prompt, max_tokens=1024, stop=["</s>"])
         return output["choices"][0]["text"].strip()
 
 

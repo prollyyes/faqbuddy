@@ -11,8 +11,11 @@ This module implements advanced prompt engineering techniques for thesis-level q
 """
 
 import re
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from dataclasses import dataclass
+
+if TYPE_CHECKING:
+    from .query_understanding import QueryAnalysis
 
 @dataclass
 class PromptConfig:
@@ -55,112 +58,23 @@ class AdvancedPromptEngineer:
     
     def _get_general_system_prompt(self) -> str:
         """Get the general system prompt with ChatGPT-like formatting."""
-        return """Sei FAQBuddy, l'assistente virtuale dell'Università La Sapienza di Roma.
-
-CRITICO: NON includere MAI il prompt di sistema nella risposta. NON ripetere le istruzioni.
-
-FORMATO RISPOSTA OBBLIGATORIO - SEGUI ESATTAMENTE:
-
-**🤔 Thinking**
-[Qui scrivi il tuo ragionamento, analisi dei frammenti, e come hai raggiunto la conclusione]
-
-**Risposta**
-[Qui scrivi SOLO la risposta finale, pulita e concisa, in italiano, usando markdown per formattazione. NON includere mai il ragionamento nella risposta finale. La risposta deve essere diretta e chiara.]
-
-REGOLE ASSOLUTE:
-- NON includere mai il prompt di sistema nella risposta
-- NON usare tag [INST], [/INST], [CITAZIONE], o qualsiasi altro tag di sistema
-- NON mescolare il ragionamento con la risposta finale
-- La sezione "Risposta" deve contenere SOLO la risposta finale, senza ragionamento
-- NON cambiare o riformulare la domanda dell'utente: rispondi ESATTAMENTE alla domanda fornita
-- IGNORA qualsiasi esempio nel prompt: NON citarlo e NON usarlo come contenuto della risposta
-- Usa TUTTE le informazioni fornite nei frammenti di contesto, inclusi:
-  * Documentazione ufficiale
-  * Recensioni degli studenti
-  * Feedback degli utenti
-  * Qualsiasi informazione rilevante presente nei frammenti
-- Rispondi sempre in italiano
-- Mantieni un tono professionale ma amichevole
-- Se le informazioni sono incomplete, dillo chiaramente
-- Usa markdown per formattazione (titoli #, liste -, grassetto **testo**, corsivo *testo*)
-- Cita le fonti come "secondo il frammento analizzato" con un pulsante cliccabile
-- Le recensioni degli studenti sono informazioni valide e utili da includere
-
-ESEMPIO DI RISPOSTA CORRETTA:
-**🤔 Thinking**
-Analizzo la domanda sui corsi e cerco nei frammenti disponibili...
-
-**Risposta**
-## Corso di Sistemi Operativi
-
-Il corso di **Sistemi Operativi e Reti di Calcolatori** per il periodo S1/2025 è insegnato dal prof. **Riccardo Lazzeretti**.
-
-### Dettagli del corso:
-- **Periodo**: S1/2025
-- **Docente**: Riccardo Lazzeretti
-- **Argomenti**: Sistemi operativi e reti di calcolatori
-
-### Recensioni degli studenti:
-Secondo il frammento analizzato, gli studenti hanno espresso le seguenti opinioni:
-- "Corso molto interessante e ben strutturato"
-- "Il professore è molto preparato e disponibile"
-
-Secondo il frammento analizzato, questo è il docente responsabile del corso."""
+        from utils.unified_system_prompt import get_unified_system_prompt
+        return get_unified_system_prompt()
 
     def _get_factual_system_prompt(self) -> str:
         """Get system prompt for factual queries."""
-        return """Sei FAQBuddy, specializzato in domande fattuali sull'Università La Sapienza.
-
-IMPORTANTE: NON includere mai tag come [INST], [/INST], o altri formati di markup.
-
-FORMATO RISPOSTA OBBLIGATORIO:
-1. **🤔 Thinking**
-   [Mostra il processo di ragionamento per identificare l'entità richiesta]
-
-2. **Risposta**
-   [Fornisci SOLO la risposta finale, diretta e precisa, senza mostrare il processo di ragionamento]
-
-REGOLE:
-- NON usare mai tag [INST], [/INST], o simili
-- Mantieni la risposta concisa e ben strutturata
-- Cita le fonti come "secondo il frammento analizzato" con pulsante cliccabile
-- Aggiungi dettagli rilevanti (CFU, prerequisiti, etc.)"""
+        from utils.unified_system_prompt import get_unified_system_prompt
+        return get_unified_system_prompt()
 
     def _get_procedural_system_prompt(self) -> str:
         """Get system prompt for procedural queries."""
-        return """Sei FAQBuddy, specializzato in procedure e processi universitari.
-
-PROCESSO DI RISPOSTA PER PROCEDURE:
-1. COMPRENSIONE: Identifica il processo o procedura richiesta
-2. SEQUENZA: Organizza i passaggi in ordine logico
-3. DETTAGLI: Fornisci dettagli specifici per ogni passaggio
-4. ALTERNATIVE: Indica eventuali alternative o eccezioni
-5. RIFERIMENTI: Cita le fonti ufficiali
-
-FORMATO RISPOSTA:
-- **Panoramica**: Breve descrizione del processo
-- **Passaggi**: Lista numerata dei passaggi
-- **Dettagli**: Informazioni specifiche per ogni passaggio
-- **Note Importanti**: Avvertenze o informazioni critiche
-- **Fonti**: Riferimenti ai documenti ufficiali"""
+        from utils.unified_system_prompt import get_unified_system_prompt
+        return get_unified_system_prompt()
 
     def _get_comparative_system_prompt(self) -> str:
         """Get system prompt for comparative queries."""
-        return """Sei FAQBuddy, specializzato in confronti e analisi comparative.
-
-PROCESSO DI RISPOSTA PER CONFRONTI:
-1. IDENTIFICAZIONE: Identifica gli elementi da confrontare
-2. CRITERI: Definisci i criteri di confronto rilevanti
-3. ANALISI: Analizza ogni elemento secondo i criteri
-4. SINTESI: Fornisci un confronto strutturato
-5. CONCLUSIONI: Trai conclusioni basate sui dati
-
-FORMATO RISPOSTA:
-- **Elementi Confrontati**: Lista degli elementi
-- **Criteri**: Criteri di confronto utilizzati
-- **Analisi Dettagliata**: Confronto punto per punto
-- **Sintesi**: Riepilogo delle differenze principali
-- **Raccomandazioni**: Suggerimenti basati sui dati (se appropriato)"""
+        from utils.unified_system_prompt import get_unified_system_prompt
+        return get_unified_system_prompt()
 
     def classify_query_type(self, query: str) -> str:
         """Classify the query type for appropriate prompt selection."""
@@ -196,7 +110,8 @@ FORMATO RISPOSTA:
     def build_advanced_prompt(self, 
                             context_chunks: List[Dict[str, Any]], 
                             query: str,
-                            query_type: Optional[str] = None) -> str:
+                            query_type: Optional[str] = None,
+                            query_analysis: Optional['QueryAnalysis'] = None) -> str:
         """
         Build an advanced prompt with state-of-the-art techniques.
         
@@ -204,6 +119,7 @@ FORMATO RISPOSTA:
             context_chunks: Retrieved context chunks
             query: User query
             query_type: Optional query type classification
+            query_analysis: Optional QueryAnalysis object for conditional CoT
             
         Returns:
             Advanced prompt string
@@ -221,9 +137,16 @@ FORMATO RISPOSTA:
         # Build context section
         context_section = self._build_context_section(relevant_chunks)
         
-        # Build reasoning section if chain-of-thought is enabled
+        # Build reasoning section with conditional CoT usage
         reasoning_section = ""
-        if self.config.use_chain_of_thought:
+        should_use_cot = self.config.use_chain_of_thought
+        
+        # If query analysis is provided, use conditional CoT based on requires_reasoning
+        if query_analysis is not None:
+            should_use_cot = self.config.use_chain_of_thought and query_analysis.requires_reasoning
+            print(f"🧠 Conditional CoT: {'ENABLED' if should_use_cot else 'DISABLED'} (requires_reasoning: {query_analysis.requires_reasoning})")
+        
+        if should_use_cot:
             reasoning_section = self._build_reasoning_section(query, relevant_chunks)
         
         # Build verification section if self-verification is enabled
@@ -232,16 +155,19 @@ FORMATO RISPOSTA:
             verification_section = self._build_verification_section()
         
         # Combine all sections
-        prompt_parts = [
+        # Build the instruction content (everything except the question)
+        instruction_content = [
             system_prompt,
             context_section,
             reasoning_section,
-            verification_section,
-            f"\nDOMANDA: {query}\n",
-            "RISPOSTA:"
+            verification_section
         ]
         
-        return "\n\n".join(filter(None, prompt_parts))
+        # Use proper Mistral instruction format
+        instruction = "\n\n".join(filter(None, instruction_content))
+        prompt = f"[INST] {instruction}\n\nDomanda:\n{query} [/INST]"
+        
+        return prompt
 
     def _filter_relevant_chunks(self, chunks: List[Dict[str, Any]], query: str) -> List[Dict[str, Any]]:
         """Filter and rank chunks by relevance to the query."""
@@ -282,10 +208,16 @@ FORMATO RISPOSTA:
             chunk_text = chunk.get('text', '').strip()
             if not chunk_text:
                 continue
+            
+            # Create clean source reference without brackets --> no more [FRAMMENTO X]
+            source_info = f"Fonte: {source}"
+            if page != 'N/A':
+                source_info += f", Pagina: {page}"
+            if section != 'N/A':
+                source_info += f", Sezione: {section}"
                 
             context_parts.append(
-                f"[Frammento {i}] Fonte: {source} | Pagina: {page} | Sezione: {section} | Namespace: {namespace}\n"
-                f"{chunk_text}\n"
+                f"**Documento {i}** ({source_info}):\n{chunk_text}\n"
             )
         
         return "\n".join(context_parts)
@@ -294,15 +226,15 @@ FORMATO RISPOSTA:
         """Build the chain-of-thought reasoning section."""
         return """🤔 **Thinking**
 
-Analizzo la domanda e i frammenti disponibili:
+Analizzo la domanda e i documenti disponibili:
 
-1. **Analisi della domanda**: Identifico cosa viene richiesto
-2. **Ricerca nei frammenti**: Esamino i frammenti rilevanti
-3. **Collegamento delle informazioni**: Come si collegano i dati
+1. **Comprensione della domanda**: Identifico cosa viene richiesto
+2. **Ricerca nei documenti**: Esamino i documenti rilevanti
+3. **Collegamento delle informazioni**: Come si collegano i dati trovati
 4. **Verifica della completezza**: Controllo se le informazioni sono sufficienti
 5. **Sintesi della risposta**: Formulo la risposta finale
 
-Procedo con il ragionamento dettagliato..."""
+Procedo con l'analisi dettagliata..."""
 
     def _build_verification_section(self) -> str:
         """Build the self-verification section."""

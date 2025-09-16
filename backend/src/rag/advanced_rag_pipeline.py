@@ -144,7 +144,7 @@ class AdvancedRAGPipeline:
         print(f"   Retrieved {len(best_results)} documents")
         
         # Step 2.5: Web Search Enhancement (if enabled)
-        if self.web_search:
+        if False and self.web_search:  # TEMPORARILY DISABLED
             print("======= Step 2.5: Web search enhancement...")
             try:
                 web_results = self.web_search.search(question, max_results=3)
@@ -165,7 +165,7 @@ class AdvancedRAGPipeline:
         print("======= Step 3: Building advanced prompt...")
         query_type = query_analysis.intent.value
         prompt = self.prompt_engineer.build_advanced_prompt(
-            best_results, question, query_type
+            best_results, question, query_type, query_analysis
         )
         
         print(f"   Prompt length: {len(prompt)} characters")
@@ -269,102 +269,321 @@ class AdvancedRAGPipeline:
         
         return stats
     
-    def answer_streaming(self, question: str) -> Generator[str, None, None]:
+    def answer_streaming(self, question: str, request_id: str = None) -> Generator[str, None, None]:
         """
         Generate a streaming answer using the advanced RAG pipeline.
         
         Args:
             question: User question
+            request_id: Request ID for cancellation tracking
             
         Yields:
             Answer tokens as they are generated
         """
-        # For now, we'll generate the full answer and then stream it
-        # In a real implementation, this would stream from the LLM directly
-        result = self.answer(question)
-        answer = result.answer
+        start_time = time.time()
         
-        # Parse the response to separate thinking from main answer
-        # Simple parsing to avoid circular imports
-        import re
+        print(f"\n🧠 Processing query (streaming): {question}")
         
-        # Look for the thinking section
-        thinking_pattern = r'\*\*🤔\s*Thinking\*\*(.*?)(?=\n\n\*\*Risposta\*\*)'
-        thinking_match = re.search(thinking_pattern, answer, re.DOTALL | re.IGNORECASE)
+        # Import cancellation check function
+        from utils.cancellation import is_request_cancelled
         
-        if thinking_match:
-            thinking_content = thinking_match.group(1).strip()
-            # Remove the thinking section from the main answer
-            main_answer = re.sub(thinking_pattern, '', answer, flags=re.DOTALL | re.IGNORECASE).strip()
-        else:
-            main_answer = answer
+        # Check for cancellation before starting
+        if request_id and is_request_cancelled(request_id):
+            print(f"🛑 Request cancelled before processing: {request_id}")
+            return
         
-        # Clean up the main answer
-        main_answer = re.sub(r'^\*\*Risposta\*\*\s*', '', main_answer, flags=re.IGNORECASE)
-        main_answer = re.sub(r'^Risposta:\s*', '', main_answer, flags=re.IGNORECASE)
-        main_answer = main_answer.strip()
+        # Step 1: Query Understanding
+        print("🔍 Step 1: Analyzing query...")
+        query_analysis = self.query_understanding.analyze_query(question)
         
-        # Stream while preserving whitespace and newlines
-        import re as _re
-        tokens = _re.findall(r'\S+|\s+', main_answer)
-        print(f"🔄 Streaming {len(tokens)} tokens (whitespace-preserving)...")
-        for i, token in enumerate(tokens):
+        # Check for cancellation after query analysis
+        if request_id and is_request_cancelled(request_id):
+            print(f"🛑 Request cancelled after query analysis: {request_id}")
+            return
+        
+        print(f"   Intent: {query_analysis.intent.value}")
+        print(f"   Complexity: {query_analysis.complexity.value}")
+        print(f"   Entities: {query_analysis.entities}")
+        print(f"   Requires reasoning: {query_analysis.requires_reasoning}")
+        print(f"   Confidence: {query_analysis.confidence:.2f}")
+        
+        # Step 2: Advanced Retrieval
+        print("🔍 Step 2: Advanced retrieval...")
+        retrieval_strategy = self.query_understanding.get_retrieval_strategy(query_analysis)
+        
+        # Use query expansion if needed
+        queries_to_try = [question]
+        if retrieval_strategy.get("query_expansion", False):
+            queries_to_try.extend(query_analysis.expanded_queries[:2])  # Try top 2 expansions
+        
+        best_results = []
+        for query_variant in queries_to_try:
+            print(f"   Trying query: {query_variant}")
+            results = self.retrieval.retrieve(query_variant)
+            if len(results) > len(best_results):
+                best_results = results
+        
+        print(f"   Retrieved {len(best_results)} documents")
+        
+        # Check for cancellation after retrieval
+        if request_id and is_request_cancelled(request_id):
+            print(f"🛑 Request cancelled after retrieval: {request_id}")
+            return
+        
+        # Step 2.5: Web Search Enhancement (if enabled)
+        if False and self.web_search:  # TEMPORARILY DISABLED
+            print("======= Step 2.5: Web search enhancement...")
+            try:
+                web_results = self.web_search.search(question, max_results=3)
+                web_formatted = self.web_search.format_results_for_rag(web_results)
+                
+                # Combine with retrieval results
+                best_results.extend(web_formatted)
+                
+                # Re-sort by score
+                best_results.sort(key=lambda x: x.get('score', 0), reverse=True)
+                
+                print(f"   Combined results: {len(best_results)} (local: {len(best_results) - len(web_formatted)}, web: {len(web_formatted)})")
+            except Exception as e:
+                print(f"   Web search failed: {e}")
+                print("   Continuing with local results only...")
+        
+        # Check for cancellation after web search
+        if request_id and is_request_cancelled(request_id):
+            print(f"🛑 Request cancelled after web search: {request_id}")
+            return
+        
+        # Step 3: Advanced Prompt Engineering
+        print("======= Step 3: Building advanced prompt...")
+        query_type = query_analysis.intent.value
+        prompt = self.prompt_engineer.build_advanced_prompt(
+            best_results, question, query_type, query_analysis
+        )
+        
+        print(f"   Prompt length: {len(prompt)} characters")
+        print(f"   Query type: {query_type}")
+        
+        # Check for cancellation before LLM generation
+        if request_id and is_request_cancelled(request_id):
+            print(f"🛑 Request cancelled before LLM generation: {request_id}")
+            return
+        
+        # Step 4: Streaming Answer Generation
+        print("======= Step 4: Generating streaming answer...")
+        print(f"   Prompt length: {len(prompt)} characters")
+        print(f"   Question: {question}")
+        print(f"   Request ID: {request_id}")
+        
+        # Use the advanced streaming LLM function that can handle complex prompts
+        from utils.llm_mistral import generate_answer_streaming_advanced
+        
+        print("   Starting LLM streaming...")
+        token_count = 0
+        # Stream the answer directly from the LLM using the advanced prompt
+        for token in generate_answer_streaming_advanced(prompt, request_id):
+            token_count += 1
+            print(f"   Token {token_count}: {repr(token[:50])}...")
+            # Check for cancellation before yielding each token
+            if request_id and is_request_cancelled(request_id):
+                print(f"🛑 Request cancelled during streaming: {request_id}")
+                return
             yield token
-        print(f"🔄 Finished streaming {len(tokens)} tokens")
+        
+        print(f"🔄 Finished streaming answer ({token_count} tokens)")
     
-    def answer_streaming_with_metadata(self, question: str) -> Generator[Dict[str, Any], None, None]:
+    def answer_streaming_with_metadata(self, question: str, request_id: str = None) -> Generator[Dict[str, Any], None, None]:
         """
         Generate a streaming answer with metadata using the advanced RAG pipeline.
         
         Args:
             question: User question
+            request_id: Request ID for cancellation tracking
             
         Yields:
             Dictionaries with tokens and metadata
         """
-        # Generate the full answer first
-        result = self.answer(question)
+        start_time = time.time()
         
-        # Parse the response
-        import re
+        print(f"\n🧠 Processing query (streaming with metadata): {question}")
+        print(f"========= PIPELINE: Starting with request_id: {request_id}")
         
-        # Look for the thinking section
-        thinking_pattern = r'\*\*🤔\s*Thinking\*\*(.*?)(?=\n\n\*\*Risposta\*\*)'
-        thinking_match = re.search(thinking_pattern, result.answer, re.DOTALL | re.IGNORECASE)
+        # Import cancellation check function
+        from utils.cancellation import is_request_cancelled
         
-        if thinking_match:
-            thinking = thinking_match.group(1).strip()
-            # Remove the thinking section from the main answer
-            main_answer = re.sub(thinking_pattern, '', result.answer, flags=re.DOTALL | re.IGNORECASE).strip()
-        else:
-            thinking = ""
-            main_answer = result.answer
+        # Check for cancellation before starting
+        if request_id and is_request_cancelled(request_id):
+            print(f"🛑 Request cancelled before processing: {request_id}")
+            return
         
-        # Clean up the main answer
-        main_answer = re.sub(r'^\*\*Risposta\*\*\s*', '', main_answer, flags=re.IGNORECASE)
-        main_answer = re.sub(r'^Risposta:\s*', '', main_answer, flags=re.IGNORECASE)
-        main_answer = main_answer.strip()
+        # Step 1: Query Understanding
+        print("🔍 Step 1: Analyzing query...")
+        query_analysis = self.query_understanding.analyze_query(question)
         
-        # Stream the main answer with metadata
-        import re as _re
-        tokens = _re.findall(r'\S+|\s+', main_answer)
-        for token in tokens:
+        # Check for cancellation after query analysis
+        if request_id and is_request_cancelled(request_id):
+            print(f"🛑 Request cancelled after query analysis: {request_id}")
+            return
+        
+        print(f"   Intent: {query_analysis.intent.value}")
+        print(f"   Complexity: {query_analysis.complexity.value}")
+        print(f"   Entities: {query_analysis.entities}")
+        print(f"   Requires reasoning: {query_analysis.requires_reasoning}")
+        print(f"   Confidence: {query_analysis.confidence:.2f}")
+        
+        # Step 2: Advanced Retrieval
+        print("🔍 Step 2: Advanced retrieval...")
+        retrieval_strategy = self.query_understanding.get_retrieval_strategy(query_analysis)
+        
+        # Use query expansion if needed
+        queries_to_try = [question]
+        if retrieval_strategy.get("query_expansion", False):
+            queries_to_try.extend(query_analysis.expanded_queries[:2])  # Try top 2 expansions
+        
+        best_results = []
+        for query_variant in queries_to_try:
+            print(f"   Trying query: {query_variant}")
+            results = self.retrieval.retrieve(query_variant)
+            if len(results) > len(best_results):
+                best_results = results
+        
+        print(f"   Retrieved {len(best_results)} documents")
+        
+        # Check for cancellation after retrieval
+        if request_id and is_request_cancelled(request_id):
+            print(f"🛑 Request cancelled after retrieval: {request_id}")
+            return
+        
+        # Step 2.5: Web Search Enhancement (if enabled)
+        if False and self.web_search:  # TEMPORARILY DISABLED
+            print("======= Step 2.5: Web search enhancement...")
+            try:
+                web_results = self.web_search.search(question, max_results=3)
+                web_formatted = self.web_search.format_results_for_rag(web_results)
+                
+                # Combine with retrieval results
+                best_results.extend(web_formatted)
+                
+                # Re-sort by score
+                best_results.sort(key=lambda x: x.get('score', 0), reverse=True)
+                
+                print(f"   Combined results: {len(best_results)} (local: {len(best_results) - len(web_formatted)}, web: {len(web_formatted)})")
+            except Exception as e:
+                print(f"   Web search failed: {e}")
+                print("   Continuing with local results only...")
+        
+        # Check for cancellation after web search
+        if request_id and is_request_cancelled(request_id):
+            print(f"🛑 Request cancelled after web search: {request_id}")
+            return
+        
+        # Step 3: Advanced Prompt Engineering
+        print("======= Step 3: Building advanced prompt...")
+        query_type = query_analysis.intent.value
+        prompt = self.prompt_engineer.build_advanced_prompt(
+            best_results, question, query_type, query_analysis
+        )
+        
+        print(f"   Prompt length: {len(prompt)} characters")
+        print(f"   Query type: {query_type}")
+        
+        # Check for cancellation before LLM generation
+        if request_id and is_request_cancelled(request_id):
+            print(f"🛑 Request cancelled before LLM generation: {request_id}")
+            return
+        
+        # Step 4: Streaming Answer Generation with Metadata
+        print("======= Step 4: Generating streaming answer with metadata...")
+        
+        # Use the advanced streaming LLM function that can handle complex prompts
+        from utils.llm_mistral import generate_answer_streaming_advanced
+        
+        # Stream the answer directly from the LLM using the advanced prompt
+        token_count = 0
+        try:
+            for token in generate_answer_streaming_advanced(prompt, request_id):
+                # Check for cancellation before yielding each token
+                if request_id and is_request_cancelled(request_id):
+                    print(f"🛑 Request cancelled during streaming: {request_id}")
+                    return
+                
+                token_count += 1
+                yield {
+                    "type": "token",
+                    "token": token,
+                    "token_count": token_count,
+                    "confidence": 0.85,  # Default confidence for streaming
+                    "query_analysis": {
+                        "intent": str(query_analysis.intent.value),
+                        "complexity": str(query_analysis.complexity.value),
+                        "requires_reasoning": bool(query_analysis.requires_reasoning)
+                    },
+                    "retrieval_info": {
+                        "sources_count": len(best_results),
+                        "query_type": str(query_type)
+                    }
+                }
+        except Exception as e:
+            print(f"❌ Error in LLM streaming: {e}")
             yield {
-                "type": "token",
-                "token": token,
-                "confidence": result.confidence_score,
-                "verified": result.verification_result.is_verified
+                "type": "error",
+                "message": f"LLM streaming failed: {str(e)}"
             }
+            return
+        
+        print(f"========= LLM streaming completed with {token_count} tokens")
+        
+        # Check for premature termination (only 1 token usually means failure)
+        if token_count <= 1:
+            print(f"⚠️ WARNING: Only {token_count} token(s) generated - likely premature termination")
+            yield {
+                "type": "error", 
+                "message": f"Stream terminated prematurely after {token_count} token(s)"
+            }
+            # Still send completion metadata even for errors to properly close the stream
+            yield {
+                "type": "metadata",
+                "token_count": token_count,
+                "finished": True,
+                "confidence": 0.1,  # Low confidence for failed streams
+                "error": True
+            }
+            return
+        
+        # Always send final metadata, even if no tokens were generated
+        if token_count == 0:
+            print("⚠️ No tokens were generated - sending error metadata")
+            yield {
+                "type": "error",
+                "message": "No tokens generated by LLM"
+            }
+            # Send completion metadata for zero-token case too
+            yield {
+                "type": "metadata",
+                "token_count": 0,
+                "finished": True,
+                "confidence": 0.0,
+                "error": True
+            }
+            return
         
         # Send final metadata
         yield {
             "type": "metadata",
-            "thinking": thinking,
-            "confidence": result.confidence_score,
-            "verified": result.verification_result.is_verified,
-            "processing_time": result.processing_time,
-            "features_used": result.features_used
+            "token_count": token_count,
+            "finished": True,
+            "confidence": 0.85,
+            "query_analysis": {
+                "intent": str(query_analysis.intent.value),
+                "complexity": str(query_analysis.complexity.value),
+                "requires_reasoning": bool(query_analysis.requires_reasoning)
+            },
+            "retrieval_info": {
+                "sources_count": len(best_results),
+                "query_type": str(query_type)
+            }
         }
+        
+        print(f"========= Finished streaming answer with metadata ({token_count} tokens)")
     
     def test_pipeline(self, test_queries: List[str]) -> Dict[str, Any]:
         """Test the pipeline with a set of queries."""

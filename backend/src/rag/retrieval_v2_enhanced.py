@@ -106,7 +106,9 @@ class EnhancedRetrievalV2:
         if self._cross_encoder is None and RERANKER_ENABLED:
             try:
                 print(f"🔄 Loading cross-encoder: {CROSS_ENCODER_MODEL}")
-                self._cross_encoder = CrossEncoder(CROSS_ENCODER_MODEL)
+                # Force CPU device to avoid conflicts with main LLM on GPU
+                print("RETRIEVER: Forcing CPU for cross-encoder to prevent GPU conflicts.")
+                self._cross_encoder = CrossEncoder(CROSS_ENCODER_MODEL, device='cpu')
                 print("✅ Cross-encoder loaded successfully")
             except Exception as e:
                 print(f"❌ Failed to load cross-encoder: {e}")

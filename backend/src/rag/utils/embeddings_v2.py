@@ -38,19 +38,10 @@ class EnhancedEmbeddings:
         self.model_name = get_embedding_model()
         self.instruction = get_embedding_instruction()
         
-        # Auto-detect device for Ubuntu/Linux
+        # Force CPU for embedding model to avoid GPU memory conflicts with LLM models
         if device == 'auto':
-            try:
-                import torch
-                if torch.cuda.is_available():
-                    self.device = 'cuda'
-                    print(f"🚀 Auto-detected CUDA device")
-                else:
-                    self.device = 'cpu'
-                    print(f"🖥️ Auto-detected CPU device")
-            except ImportError:
-                self.device = 'cpu'
-                print(f"🖥️ PyTorch not available, using CPU")
+            self.device = 'cpu'
+            print(f"🖥️ Forced CPU device for embedding model (to avoid GPU memory conflicts with LLM)")
         else:
             self.device = device
         

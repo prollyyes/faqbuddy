@@ -5,17 +5,12 @@ from typing import List, Dict
 # Config
 MAX_CHUNKS = 5
 MAX_TOKENS = 1200  # Adjust for your LLM context window (e.g., 4096 for GPT-3.5, but leave room for question/answer)
-SYSTEM_PROMPT = (
-    "Sei FAQBuddy, un assistente per un portale universitario che risponde a domande sull'università, i corsi, i professori, i materiali e qualsiasi problema che uno studente può avere. "
-    "Ti verranno forniti una domanda dell'utente e un insieme di frammenti di contesto da varie fonti (PDF, database, ecc.). "
-    "Ogni frammento include metadati (fonte, pagina, sezione, ecc.). "
-    "Usa SOLO il contesto fornito per rispondere e cita le fonti inline usando i metadati. "
-    "Se non conosci la risposta, dillo onestamente. "
-    "Non inventare informazioni, non fare allucinazioni. "
-    "IMPORTANTE: Rispondi SEMPRE in italiano, a meno che l'utente non chieda esplicitamente in inglese. "
-    "Mantieni un tono professionale ma amichevole. "
-    "Usa sempre il formato Markdown per una migliore leggibilità."
-)
+def get_system_prompt():
+    """Get the unified system prompt."""
+    from utils.unified_system_prompt import get_unified_system_prompt
+    return get_unified_system_prompt()
+
+SYSTEM_PROMPT = get_system_prompt()
 
 # Simple token count (approximate, by whitespace)
 def count_tokens(text):

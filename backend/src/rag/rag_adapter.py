@@ -42,7 +42,10 @@ class RAGSystem:
         confidence = result.confidence_score
         
         # Parse the response to separate thinking from main answer
+        print(f"========= RAG ADAPTER: Raw answer length: {len(answer)}")
+        print(f"========= RAG ADAPTER: Raw answer preview: {answer[:200]}...")
         parsed_response = self._parse_chatgpt_response(answer)
+        print(f"========= RAG ADAPTER: Parsed response: {parsed_response}")
         
         # Count sources by namespace
         namespace_counts = {}
@@ -75,22 +78,23 @@ class RAGSystem:
             "confidence_score": confidence
         }
 
-    def generate_response_streaming(self, question: str) -> Generator[str, None, None]:
+    def generate_response_streaming(self, question: str, request_id: str = None) -> Generator[str, None, None]:
         """
         Generate a streaming response using the RAGv2 pipeline.
         Yields tokens as they are generated for reduced perceived latency.
         """
         # Generate the streaming answer using the RAGv2 pipeline
-        for token in self.pipeline.answer_streaming(question):
+        for token in self.pipeline.answer_streaming(question, request_id):
             yield token
 
-    def generate_response_streaming_with_metadata(self, question: str) -> Generator[Dict[str, Any], None, None]:
+    def generate_response_streaming_with_metadata(self, question: str, request_id: str = None) -> Generator[Dict[str, Any], None, None]:
         """
         Generate a streaming response with metadata using the RAGv2 pipeline.
         Yields dictionaries with tokens and metadata for enhanced client experience.
         """
+        print(f"========= RAG ADAPTER: Starting streaming with request_id: {request_id}")
         # Generate the streaming answer with metadata using the RAGv2 pipeline
-        for chunk in self.pipeline.answer_streaming_with_metadata(question):
+        for chunk in self.pipeline.answer_streaming_with_metadata(question, request_id):
             # Add adapter-specific metadata for RAGv2
             if chunk.get("type") == "metadata":
                 chunk.update({
@@ -153,7 +157,11 @@ class RAGSystem:
             r'🤔\s*Thinking(.*?)(?=\n\n\*\*Risposta\*\*)',
             r'\*\*🤔\s*Thinking\*\*(.*?)(?=\n\n\*\*Risposta\*\*)',
             r'THINKING.*?(?=\n\n\*\*Risposta\*\*)',
-            r'RAGIONAMENTO.*?(?=\n\n\*\*Risposta\*\*)'
+            r'RAGIONAMENTO.*?(?=\n\n\*\*Risposta\*\*)',
+            # Also look for *** separator
+            r'🤔\s*\*\*Thinking\*\*(.*?)(?=\n\n\*\*\*\n\n\*\*Risposta\*\*)',
+            r'🤔\s*Thinking(.*?)(?=\n\n\*\*\*\n\n\*\*Risposta\*\*)',
+            r'\*\*🤔\s*Thinking\*\*(.*?)(?=\n\n\*\*\*\n\n\*\*Risposta\*\*)'
         ]
         
         thinking_content = ""
@@ -210,6 +218,12 @@ class RAGSystem:
         
         for indicator in reasoning_indicators:
             main_answer = re.sub(indicator, '', main_answer, flags=re.IGNORECASE)
+        
+        # Remove any remaining bracket tags that shouldn't be in the final answer
+        main_answer = re.sub(r'\[FRAGMENTO\s*\d+\]', '', main_answer, flags=re.IGNORECASE)
+        main_answer = re.sub(r'\[Frammento\s*\d+\]', '', main_answer, flags=re.IGNORECASE)
+        main_answer = re.sub(r'\[DOCUMENTO\s*\d+\]', '', main_answer, flags=re.IGNORECASE)
+        main_answer = re.sub(r'\[Documento\s*\d+\]', '', main_answer, flags=re.IGNORECASE)
         
         # Clean up extra whitespace
         main_answer = re.sub(r'\n\s*\n', '\n\n', main_answer)  # Normalize paragraph breaks

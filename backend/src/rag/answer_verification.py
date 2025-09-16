@@ -53,18 +53,17 @@ class AdvancedAnswerVerification:
         
         print("🔍 Initializing Advanced Answer Verification")
     
-    @property
-    def cross_encoder(self) -> Optional[CrossEncoder]:
-        """Lazy load cross-encoder for verification."""
+    def _get_cross_encoder(self):
+        """Lazy load the cross-encoder model to save resources."""
         if self._cross_encoder is None:
             try:
-                print("🔄 Loading cross-encoder for answer verification...")
-                self._cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
-                print("✅ Cross-encoder loaded for verification")
-            except Exception as e:
-                print(f"❌ Failed to load cross-encoder: {e}")
-                self._cross_encoder = None
-        
+                from sentence_transformers.cross_encoder import CrossEncoder
+                # Force CPU device to avoid conflicts with main LLM on GPU
+                print("VERIFIER: Forcing CPU for cross-encoder to prevent GPU conflicts.")
+                self._cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2', device='cpu')
+            except ImportError:
+                print("⚠️ sentence-transformers is not installed. Cross-encoder reranking is disabled.")
+                return None
         return self._cross_encoder
     
     def verify_answer(self, 
@@ -179,9 +178,9 @@ class AdvancedAnswerVerification:
                 overlap_ratio = overlap / len(claim_words) if claim_words else 0
                 
                 # Use cross-encoder for more sophisticated matching if available
-                if self.cross_encoder and overlap_ratio > 0.2:
+                if self._get_cross_encoder() and overlap_ratio > 0.2:
                     try:
-                        score = self.cross_encoder.predict([(claim, source_text)])
+                        score = self._get_cross_encoder().predict([(claim, source_text)])
                         if score[0] > 0.3:  # Lower threshold for support
                             is_supported = True
                             break
