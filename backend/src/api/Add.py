@@ -302,7 +302,6 @@ async def addMaterialeDidattico(
     if not course_info:
         raise HTTPException(status_code=400, detail="Corso non trovato.")
     course_id = course_info[0][0]
-    print("SELECT id, data FROM EdizioneCorso WHERE id = %s AND data = %s", course_id, semestre)
     edition_info = db_handler.run_query("SELECT id, data FROM EdizioneCorso WHERE id = %s AND data = %s", params=(course_id, semestre), fetch=True)
     if not edition_info:
         raise HTTPException(status_code=400, detail="Edizione del Corso non trovata.")

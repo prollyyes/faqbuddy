@@ -12,7 +12,8 @@ def handle_db_errors(func):
         @wraps(func)
         async def async_wrapper(*args, **kwargs):
             try:
-                return func(*args, **kwargs)
+                # Await the coroutine to avoid returning a coroutine object
+                return await func(*args, **kwargs)
             except HTTPException as http_exc:
                 raise http_exc
             except errors.UniqueViolation:
