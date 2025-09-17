@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, UploadFile, Form, File, Depends
 from ..api.BaseModel import *
 from psycopg2 import errors
 from ..api.drive_utils import *
+from ..utils.handle_db_errors import handle_db_errors
 
 # Database connection dependency for Render
 def get_db_handler():
@@ -17,6 +18,7 @@ def get_db_handler():
 router = APIRouter()
 
 @router.post("/addEdizioneCorso")
+@handle_db_errors
 def addEdizioneCorso(edizioneCorso: AddEdizioneCorso, db_handler: DBHandler = Depends(get_db_handler)):
     """
     Aggiunge una nuova edizione di un corso.
@@ -51,20 +53,24 @@ def addEdizioneCorso(edizioneCorso: AddEdizioneCorso, db_handler: DBHandler = De
     if corso_id is None:
         #TODO crea corso
         raise HTTPException(status_code=400, detail="Corso inesistente.")
-        
-
-    db_handler.execute_sql_insertion("""
-                INSERT INTO EdizioneCorso (id, insegnante_anagrafico, data, orario, esonero, mod_esame) 
-                VALUES (%s, %s, %s, %s, %s, %s)
-                """, params=(corso_id, insegnante_id, edizioneCorso.semestre.value, 
-                             edizioneCorso.orario, edizioneCorso.esonero, 
-                             edizioneCorso.mod_Esame))
     
-    return {"message": "Edizione Corso aggiunta con successo"}
+    edizione_exists = db_handler.run_query("SELECT * FROM EdizioneCorso e WHERE e.id = %s AND e.data = %s",params=(corso_id, edizioneCorso.semestre.value), fetch=True)
+    if not edizione_exists:
+        db_handler.execute_sql_insertion("""
+                    INSERT INTO EdizioneCorso (id, insegnante_anagrafico, data, orario, esonero, mod_esame) 
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    """, params=(corso_id, insegnante_id, edizioneCorso.semestre.value, 
+                                edizioneCorso.orario, edizioneCorso.esonero, 
+                                edizioneCorso.mod_Esame))
+        return {"message": "Edizione Corso aggiunta con successo"}
 
+    else:
+        raise HTTPException(status_code=400, detail="L'edizione del corso esiste già.")
+    
 
 
 @router.post("/addCorso")
+@handle_db_errors
 def addCorso(corso: AddCorso, db_handler: DBHandler = Depends(get_db_handler)):
     """
     Aggiunge un nuovo corso associato a un corso di laurea.
@@ -85,15 +91,20 @@ def addCorso(corso: AddCorso, db_handler: DBHandler = Depends(get_db_handler)):
     if cdl_id is None:
         raise HTTPException(status_code=400, detail="Corso di Laurea non trovato.")
     
-    db_handler.execute_sql_insertion("""
-        INSERT INTO Corso (id_corso, nome, cfu, idoneità, prerequisiti, frequenza_obbligatoria)
-        VALUES (%s, %s, %s, %s, %s, %s)
-        """, params=(cdl_id, corso.nomeCorso, corso.cfu, corso.idoneita, 
-                     corso.prerequisiti, corso.frequenza_obbligatoria))
-    
-    return {"message": "Corso aggiunto con successo"}
+    corso_exists = db_handler.run_query("SELECT * FROM Corso c WHERE c.nome = %s",params=(corso.nomeCorso,),fetch=True)
+    if not corso_exists:
+        db_handler.execute_sql_insertion("""
+            INSERT INTO Corso (id_corso, nome, cfu, idoneità, prerequisiti, frequenza_obbligatoria)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            """, params=(cdl_id, corso.nomeCorso, corso.cfu, corso.idoneita, 
+                        corso.prerequisiti, corso.frequenza_obbligatoria))
+        
+        return {"message": "Corso aggiunto con successo"}
+    else:
+        raise HTTPException(status_code=400, detail="Il Corso esiste già.")
 
 @router.post("/addCorsoSeguito")
+@handle_db_errors
 def addCorsoSeguito(seguito: AddCorsoSeguito, db_handler: DBHandler = Depends(get_db_handler)): 
     """
     Aggiunge un corso seguito da uno studente.
@@ -129,15 +140,21 @@ def addCorsoSeguito(seguito: AddCorsoSeguito, db_handler: DBHandler = Depends(ge
     if not edizione_data:
         raise HTTPException(status_code=400, detail="Edizione del Corso non trovata.")
     edizione_data = edizione_data[0][0]
-    db_handler.execute_sql_insertion("""
-                                    INSERT INTO Corsi_seguiti (student_id, edition_id, edition_data, stato, voto)
-                                    VALUES (%s, %s, %s, %s, %s)
-                                     """, params=(student_id, corso_id, edizione_data, seguito.stato, seguito.voto))
-    
-    return {"message": "Corso Seguito aggiunto con successo"}
+
+    already_following = db_handler.run_query("SELECT * FROM Corsi_seguiti c WHERE c.student_id = %s AND c.edition_id = %s AND c.edition_data = %s", params=(student_id, corso_id, edizione_data), fetch=True)
+    if not already_following:
+        db_handler.execute_sql_insertion("""
+                                        INSERT INTO Corsi_seguiti (student_id, edition_id, edition_data, stato, voto)
+                                        VALUES (%s, %s, %s, %s, %s)
+                                        """, params=(student_id, corso_id, edizione_data, seguito.stato, seguito.voto))
+        
+        return {"message": "Corso Seguito aggiunto con successo"}
+    else:
+        raise HTTPException(status_code=400, detail="Lo studente risulta già iscritto all'edizione del corso.")
 
 
 @router.post("/addPiattaforma")
+@handle_db_errors
 def addPiattaforma(piattaforma: AddPiattaforma, db_handler: DBHandler = Depends(get_db_handler)):
     """
     Aggiunge una nuova piattaforma.
@@ -151,14 +168,19 @@ def addPiattaforma(piattaforma: AddPiattaforma, db_handler: DBHandler = Depends(
     if not piattaforma.nome:
         raise HTTPException(status_code=400, detail="Nome della piattaforma invalido.")
     
-    db_handler.execute_sql_insertion("""
-                        INSERT INTO Piattaforme (nome)
-                        VALUES (%s)
-                        """, params=(piattaforma.nome,))
-    
-    return {"message": "Piattaforma aggiunta con successo"}
+    piattaforma_exists = db_handler.run_query("SELECT * FROM Piattaforme p WHERE p.nome = %s", params=(piattaforma.nome,),fetch=True)
+    if not piattaforma_exists:
+        db_handler.execute_sql_insertion("""
+                            INSERT INTO Piattaforme (nome)
+                            VALUES (%s)
+                            """, params=(piattaforma.nome,))
+        
+        return {"message": "Piattaforma aggiunta con successo"}
+    else:
+        raise HTTPException(status_code=400, detail="Piattaforma già presente nel database.")
 
 @router.post("/addEdizioneCorsoPiattaforma")
+@handle_db_errors
 def addEdizioneCorso_Piattaforma(data: AddEdizioneCorsoPiattaforma, db_handler: DBHandler = Depends(get_db_handler)):
     """
     Associa una piattaforma a una specifica edizione di un corso.
@@ -182,18 +204,19 @@ def addEdizioneCorso_Piattaforma(data: AddEdizioneCorsoPiattaforma, db_handler: 
     
     edizione_id = edizione_corso_info[0][0]
     edizione_data = edizione_corso_info[0][1]
-
-    try:
+    
+    edizione_linked_piattaforma = db_handler.run_query("SELECT * FROM EdizioneCorso_Piattaforme e WHERE e.edizione_id = %s AND e.edizione_data = %s AND e.piattaforma_nome = %s",params=(edizione_id, edizione_data, data.nomePiattaforma),fetch=True)
+    if not edizione_linked_piattaforma:
         db_handler.execute_sql_insertion("""
             INSERT INTO EdizioneCorso_Piattaforme (edizione_id, edizione_data, piattaforma_nome, codice)
             VALUES (%s, %s, %s, %s)
         """, params=(edizione_id, edizione_data, data.nomePiattaforma, data.codice))
-    except errors.UniqueViolation:
+        return {"message": "Piattaforma per l'Edzione del Corso aggiunta con successo"}
+    else:
         raise HTTPException(status_code=409, detail="Questa piattaforma è già associata a questa edizione di corso.")
-    
-    return {"message": "Piattaforma per l'Edzione del Corso aggiunta con successo"}
 
 @router.post("/addTesi")
+@handle_db_errors
 async def addTesi(
     matricola: int = Form(...),
     parent_folder: str = Form("FAQBuddy"),
@@ -228,7 +251,6 @@ async def addTesi(
 
     data = await upload_file(file, parent_folder, child_folder, nome, cognome)
     tesi_id = data["file_id"]
-    print(tesi_id)
     if tesi_id:
         db_handler.execute_sql_insertion("""
                     INSERT INTO Tesi (student_id, corso_laurea_id, titolo, file)
@@ -241,6 +263,7 @@ async def addTesi(
     
 
 @router.post("/addMaterialeDidattico")
+@handle_db_errors
 async def addMaterialeDidattico(
         email : str = Form(...),
         nomeCorso : str = Form(...),
@@ -304,6 +327,7 @@ async def addMaterialeDidattico(
         raise HTTPException(status_code=400, detail="Errore nel caricamento al drive.")
 
 @router.post("/addValutazione")
+@handle_db_errors
 def addValutazione(valutazione: AddValutazione, db_handler: DBHandler = Depends(get_db_handler)):
     """
     Aggiunge una valutazione a un materiale didattico da parte di uno studente.
