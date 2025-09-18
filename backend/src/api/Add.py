@@ -306,6 +306,12 @@ async def addMaterialeDidattico(
     if not edition_info:
         raise HTTPException(status_code=400, detail="Edizione del Corso non trovata.")
 
+    verified = db_handler.run_query("SELECT * FROM Utente u JOIN Insegnanti_Registrati i ON u.id = i.id WHERE u.email = %s", params=(email,), fetch=True)
+    if verified:
+        verificato = True
+    else:
+        verificato = False
+        
     data = await upload_file(file, parent_folder, child_folder, nome, cognome)
     file_id = data["file_id"]
     if file_id:
