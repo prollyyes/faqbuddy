@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import Button from '@/components/utils/Button';
+import TileButton from '@/components/utils/TileButton';
 
 const HOST = process.env.NEXT_PUBLIC_HOST;
 
@@ -217,12 +218,37 @@ export default function UploadMaterials() {
               onClick={(e) => e.stopPropagation()}
             >
               <h3 className="text-lg font-bold mb-2">Dettagli materiale</h3>
-              <p className="text-sm mb-4">
-                <strong>Tipo:</strong> {uploadType}
-                {profile?.corso_laurea && (
-                  <> — <strong>CDL:</strong> {profile.corso_laurea}</>
-                )}
-              </p>
+              <div className="mb-4 p-3 border border-[#f0d6db] rounded-lg">
+                <div className="flex flex-wrap items-center gap-2 text-sm">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-[#822433] text-[#822433] bg-white font-semibold">
+                    {uploadType || '—'}
+                  </span>
+                  {profile?.corso_laurea && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-[#f0d6db] bg-white">
+                      CDL: {profile.corso_laurea}
+                    </span>
+                  )}
+                  {uploadType !== 'tesi' && (
+                    selectedCourseEdition ? (
+                      <>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-[#f0d6db] bg-white">
+                          Corso: {selectedCourseEdition.nome}
+                        </span>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-[#f0d6db] bg-white">
+                          Edizione: {selectedCourseEdition.edition_data}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-xs text-[#822433]/80">Nessun corso selezionato</span>
+                    )
+                  )}
+                  {selectedFile && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-[#f0d6db] bg-white">
+                      File: <span className="ml-1 font-medium">{selectedFile.name}</span>
+                    </span>
+                  )}
+                </div>
+              </div>
 
               <div className="space-y-3">
                 {uploadType === 'tesi' ? (
@@ -289,7 +315,7 @@ export default function UploadMaterials() {
               <div className="mt-5 flex justify-end gap-2">
                 <button
                   onClick={handleCancel}
-                  className="px-4 py-2 text-sm border border-[#822433] text-[#822433] rounded hover:bg-[#f7e8ec] transition"
+                  className="px-4 py-2 text-sm border border-[#822433] rounded bg-[#822433] text-white hover:bg-white hover:text-[#822433] transition"
                   disabled={isUploading}
                 >
                   Annulla
@@ -309,11 +335,61 @@ export default function UploadMaterials() {
 
         {/* Bottoni per tipo di materiale */}
         <div className="grid grid-cols-2 gap-4 pt-4">
-          <Button onClick={() => handleUploadTypeClick('tesi')} variant="default" size="md">Tesi</Button>
-          <Button onClick={() => handleUploadTypeClick('slide')} variant="default" size="md">Slide</Button>
-          <Button onClick={() => handleUploadTypeClick('esercizi')} variant="default" size="md">Esercizi</Button>
-          <Button onClick={() => handleUploadTypeClick('libro')} variant="default" size="md">Libro</Button>
-          <Button onClick={() => handleUploadTypeClick('appunti')} variant="default" size="md">Appunti</Button>
+          <TileButton
+            label="Tesi"
+            imgRedSrc="/images/logo_tesi_red.png"
+            imgWhiteSrc="/images/logo_tesi_white.png"
+            onClick={() => handleUploadTypeClick('tesi')}
+            heightClass="h-24"
+            paddingYClass="py-3"
+            textSizeClass="text-sm"
+            iconSizeHoverClass="w-16 h-16"
+            iconSizeIdleClass="w-10 h-10"
+          />
+          <TileButton
+            label="Slide"
+            imgRedSrc="/images/logo_slide_red.png"
+            imgWhiteSrc="/images/logo_slide_white.png"
+            onClick={() => handleUploadTypeClick('slide')}
+            heightClass="h-24"
+            paddingYClass="py-3"
+            textSizeClass="text-sm"
+            iconSizeHoverClass="w-18 h-14"
+            iconSizeIdleClass="w-10 h-10"
+          />
+          <TileButton
+            label="Esercizi"
+            imgRedSrc="/images/logo_esercizi_red.png"
+            imgWhiteSrc="/images/logo_esercizi_white.png"
+            onClick={() => handleUploadTypeClick('esercizi')}
+            heightClass="h-24"
+            paddingYClass="py-3"
+            textSizeClass="text-sm"
+            iconSizeHoverClass="w-14 h-14"
+            iconSizeIdleClass="w-10 h-10"
+          />
+          <TileButton
+            label="Libro"
+            imgRedSrc="/images/logo_libro_red.png"
+            imgWhiteSrc="/images/logo_libro_white.png"
+            onClick={() => handleUploadTypeClick('libro')}
+            heightClass="h-24"
+            paddingYClass="py-3"
+            textSizeClass="text-sm"
+            iconSizeHoverClass="w-16 h-16"
+            iconSizeIdleClass="w-10 h-10"
+          />
+          <TileButton
+            label="Appunti"
+            imgRedSrc="/images/logo_appunti_red.png"
+            imgWhiteSrc="/images/logo_appunti_white.png"
+            onClick={() => handleUploadTypeClick('appunti')}
+            heightClass="h-24"
+            paddingYClass="py-3"
+            textSizeClass="text-sm"
+            iconSizeHoverClass="w-14 h-14"
+            iconSizeIdleClass="w-10 h-10"
+          />
         </div>
       </motion.div>
     </div>
