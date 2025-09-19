@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Button from '@/components/utils/Button';
 import Link from 'next/link';
 import { FiArrowRight } from "react-icons/fi";
+import CardDeck from '@/components/utils/CardDeck';
 
 
 /* ------------------------------------------------------------------
@@ -41,21 +42,26 @@ const steps = [
 
 export default function Tutorial() {
   const [index, setIndex] = useState(0);
+  const [deckDirection, setDeckDirection] = useState(null);
   const isLast = index === steps.length - 1;
 
   /**
    * Go to next step unless we are already on the final screen.
    */
   const handleNext = () => {
+    setDeckDirection(1);
     setIndex(current => (current < steps.length - 1 ? current + 1 : current));
+    setTimeout(() => setDeckDirection(null), 320);
   };
 
   const handleSkip = () => {
+    setDeckDirection(1);
     setIndex(steps.length-1)
+    setTimeout(() => setDeckDirection(null), 320);
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-between pt-20 py-6 px-4 bg-white gap-6">
+  <div className="min-h-screen flex flex-col items-center justify-between pt-12 pb-24 px-4 bg-white gap-6 relative">
       {/* Non mi piace questo bottone piazzato cosi */}
       {/* <div className="absolute top-25 right-8">
         <button 
@@ -68,73 +74,47 @@ export default function Tutorial() {
       {/* ---------------------------------------------------------- */}
       {/* Animated Step Content                                     */}
       {/* ---------------------------------------------------------- */}
-    <AnimatePresence mode="wait" initial={false}>
-        <motion.section
-            key={index}
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-            onDragEnd={(e, info) => {
-            if (info.offset.x < -50 && index < steps.length - 1) {
-                handleNext();
-            } else if (info.offset.x > 50 && index > 0) {
-                setIndex(current => current - 1);
-            }
-            }}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4 }}
-            className="flex-1 flex flex-col items-center justify-center text-center space-y-4 px-2"
-        >
-            <motion.div
-            className="w-64 h-64 rounded-2xl flex items-center justify-center overflow-hidden"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            >
-            <img
-                src={steps[index].image}
-                alt={`Step ${index + 1}`}
-                className="object-contain w-full h-full"
-            />
-            </motion.div>
-
-            <h2 className="text-2xl font-semibold text-black">{steps[index].title}</h2>
-            <p className="text-sm text-black max-w-xs">{steps[index].description}</p>
-        </motion.section>
-    </AnimatePresence>
+  <div className="w-full flex-1 flex flex-col items-center justify-center">
+      <div className="w-full max-w-2xl">
+      <CardDeck
+        items={steps.map((s, idx)=>({ id: idx, title: s.title, subtitle: s.description, content: '', image: s.image }))}
+        index={index}
+        controlledDirection={deckDirection}
+        onIndexChange={(newIndex) => {
+          const dir = newIndex - index;
+          setDeckDirection(dir);
+          setIndex(newIndex);
+          setTimeout(() => setDeckDirection(null), 320);
+        }}
+      />
+      </div>
+  </div>
 
       {/* ---------------------------------------------------------- */}
       {/* Dots Indicator                                            */}
       {/* ---------------------------------------------------------- */}
-      <div className="flex gap-2 mb-4 mt-1">
-        {steps.map((_, i) => (
-          <span
-            key={i}
-            className={`w-2.5 h-2.5 rounded-full ${i === index ? 'bg-[#822433]' : 'bg-black'}`}
-          />
-        ))}
-      </div>
+      {/* no dots; keep UI focused on cards */}
 
       {/* ---------------------------------------------------------- */}
       {/* Action Button                                             */}
       {/* ---------------------------------------------------------- */}
-      <div className="w-full mb-2 mt-auto">
-        {isLast ? (
-          <Link href="/auth" className="w-full block">
-            <Button className={`w-full bg-[#822433] hover:bg-red-900 text-[#822433] rounded-xl text-lg font-medium`}>
-              Get Started
-            </Button>
-          </Link>
-        ) : (
-          <Button
-            onClick={handleNext}
-            className={`w-full py-3  bg-[#822433] hover:bg-red-900 text-[#822433] rounded-xl text-lg font-medium`}
+      <AnimatePresence>
+        {isLast && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.25 }}
+            className="w-full max-w-2xl px-4 md:px-0 fixed bottom-8 left-1/2 -translate-x-1/2"
           >
-            Next
-          </Button>
+            <Link href="/auth" className="w-full block">
+              <Button size="lg" className={`w-full rounded-xl text-xl`}>
+                Get Started
+              </Button>
+            </Link>
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
     </div>
   );
 }
