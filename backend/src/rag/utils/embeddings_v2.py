@@ -118,6 +118,11 @@ class EnhancedEmbeddings:
         embeddings = self.encode([text], **kwargs)
         return embeddings[0]
     
+    @property
+    def embedding_dimension(self) -> int:
+        """Get the embedding dimension."""
+        return self.model.get_sentence_embedding_dimension()
+    
     def get_average_latency(self) -> float:
         """Get average encoding latency in milliseconds."""
         if not self.latency_stats:

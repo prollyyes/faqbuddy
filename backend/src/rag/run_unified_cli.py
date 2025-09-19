@@ -165,7 +165,7 @@ def process_question_with_switcher(question: str) -> dict:
         else:
             final_pred = ml_pred.strip().lower()
             fallback = False
-            print(f"✅ High confidence ({proba:.3f} >= {threshold}), final prediction: '{final_pred}'")
+            print(f"✅ High confidence ({proba:.3f} >= {threshold}), final tprediction: '{final_pred}'")
         
         # 4. Routing decision
         if final_pred == "simple":
@@ -181,6 +181,19 @@ def process_question_with_switcher(question: str) -> dict:
             except Exception as e:
                 print(f"======= T2SQL failed: {e}")
                 print("======= Falling back to RAG...")
+                
+                # Preload Mistral model immediately upon T2SQL failure for better performance
+                print(f"🔄 Preloading Mistral model for RAG fallback...")
+                try:
+                    from utils.llm_mistral import ensure_mistral_loaded
+                    model_loaded = ensure_mistral_loaded()
+                    if model_loaded:
+                        print(f"✅ Mistral model preloaded successfully for RAG")
+                    else:
+                        print(f"⚠️ Mistral model preload failed, will load on-demand")
+                except Exception as preload_error:
+                    print(f"⚠️ Mistral preload error: {preload_error}, will load on-demand")
+                
                 result = handle_rag_logic(question)
                 result.update({
                     "ml_model": ml_pred,
@@ -202,6 +215,19 @@ def process_question_with_switcher(question: str) -> dict:
     except Exception as e:
         print(f"======= Error in switcher logic: {e}")
         print("======= Emergency fallback to RAG...")
+        
+        # Preload Mistral model for emergency fallback
+        print(f"🔄 Preloading Mistral model for emergency RAG fallback...")
+        try:
+            from utils.llm_mistral import ensure_mistral_loaded
+            model_loaded = ensure_mistral_loaded()
+            if model_loaded:
+                print(f"✅ Mistral model preloaded successfully for emergency RAG")
+            else:
+                print(f"⚠️ Mistral model preload failed, will load on-demand")
+        except Exception as preload_error:
+            print(f"⚠️ Mistral preload error: {preload_error}, will load on-demand")
+        
         result = handle_rag_logic(question)
         result.update({
             "ml_model": "error",

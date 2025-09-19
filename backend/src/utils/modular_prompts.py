@@ -58,6 +58,14 @@ BLOCK_GENERAL = """Istruzioni per domande generali:
 - Organizza per sezioni logiche; priorità alle informazioni più rilevanti.
 - Struttura: introduzione + sezioni tematiche + risorse/contatti utili."""
 
+BLOCK_STUDY = """Istruzioni per appunti di studio:
+- Priorità agli appunti degli studenti quando disponibili: sono preziosi per esami e comprensione pratica.
+- Integra appunti ufficiali con quelli studenteschi per una visione completa.
+- Evidenzia punti chiave, formule, definizioni e esempi utili per lo studio.
+- Se presenti difficoltà/dubbi negli appunti, spiegali chiaramente.
+- Suggerisci metodi di studio e collegamenti tra concetti quando rilevanti.
+- Struttura: concetti fondamentali + dettagli/esempi + suggerimenti per lo studio + risorse aggiuntive."""
+
 # ============================================================================
 # MICRO-BLOCKS - Conditional functionality (≤ 120 tokens each)
 # ============================================================================
@@ -88,26 +96,54 @@ BLOCK_RECENCY = """Priorità contenuti:
 - Segnala esplicitamente informazioni datate o potenzialmente obsolete.
 - Per regolamenti: indica anno di riferimento."""
 
+BLOCK_STUDY_SUPPORT = """Supporto allo studio:
+- Evidenzia formule, definizioni chiave e concetti fondamentali in **grassetto**.
+- Propone esempi pratici quando disponibili negli appunti.
+- Suggerisce collegamenti logici tra argomenti correlati.
+- Se rilevi errori o imprecisioni negli appunti, segnalalo gentilmente."""
+
 # ============================================================================
 # SKILL BLOCK SELECTOR
 # ============================================================================
 
-def select_skill_block(query_type: str) -> str:
+def select_skill_block(query_type: str, chunks: list = None) -> str:
     """
-    Select the appropriate skill block based on query type.
+    Select the appropriate skill block based on query type and content.
     
     Args:
         query_type: The classified query type
+        chunks: Retrieved chunks to check for student notes
         
     Returns:
         Corresponding skill block string
     """
+    # Check if we have student notes in the retrieved content
+    has_student_notes = False
+    if chunks:
+        for chunk in chunks:
+            # Check if chunk is from student notes namespace or contains study-related metadata
+            metadata = chunk.get("metadata", {})
+            source = metadata.get("source", "").lower()
+            namespace = metadata.get("namespace", "").lower()
+            
+            # Detect student notes by source patterns or namespace
+            if any(indicator in source for indicator in ["appunti", "notes", "studenti", "student"]) or \
+               any(indicator in namespace for indicator in ["notes", "study", "student"]):
+                has_student_notes = True
+                break
+    
+    # If we have student notes and the query is explanatory/general, use study block
+    if has_student_notes and query_type in ["explanatory", "general", "factual"]:
+        print(f"📚 STUDY MODE: Detected student notes, using specialized study prompt")
+        return BLOCK_STUDY
+    
     skill_blocks = {
         "factual": BLOCK_FACTUAL,
         "procedural": BLOCK_PROCEDURAL,
         "comparative": BLOCK_COMPARATIVE,
         "explanatory": BLOCK_EXPLANATORY,
         "general": BLOCK_GENERAL,
+        "study": BLOCK_STUDY,
         "informational": BLOCK_EXPLANATORY,  # fallback
         "navigational": BLOCK_PROCEDURAL,   # fallback
     }
@@ -118,12 +154,13 @@ def select_skill_block(query_type: str) -> str:
 # MICRO-BLOCK SELECTOR  
 # ============================================================================
 
-def select_micro_blocks(config: dict) -> list:
+def select_micro_blocks(config: dict, has_student_notes: bool = False) -> list:
     """
-    Select appropriate micro-blocks based on configuration.
+    Select appropriate micro-blocks based on configuration and content type.
     
     Args:
         config: Configuration dictionary with feature flags
+        has_student_notes: Whether student notes are present in the content
         
     Returns:
         List of micro-block strings to include
@@ -142,6 +179,11 @@ def select_micro_blocks(config: dict) -> list:
     
     if config.get("prioritize_recency", True):
         micro_blocks.append(BLOCK_RECENCY)
+    
+    # Add study support block when student notes are present
+    if has_student_notes:
+        micro_blocks.append(BLOCK_STUDY_SUPPORT)
+        print(f"📚 STUDY MODE: Added study support micro-block")
     
     return micro_blocks
 
@@ -221,15 +263,32 @@ def build_modular_prompt(
             "prioritize_recency": True
         }
     
-    # Select appropriate skill block
-    skill_block = select_skill_block(query_type)
+    # Detect student notes in chunks
+    has_student_notes = False
+    if chunks:
+        for chunk in chunks:
+            metadata = chunk.get("metadata", {})
+            source = metadata.get("source", "").lower()
+            namespace = metadata.get("namespace", "").lower()
+            
+            if any(indicator in source for indicator in ["appunti", "notes", "studenti", "student"]) or \
+               any(indicator in namespace for indicator in ["notes", "study", "student"]):
+                has_student_notes = True
+                break
     
-    # Select micro-blocks based on config
-    micro_blocks = select_micro_blocks(config)
+    # Select appropriate skill block (with chunks to detect student notes)
+    skill_block = select_skill_block(query_type, chunks)
+    
+    # Select micro-blocks based on config and content type
+    micro_blocks = select_micro_blocks(config, has_student_notes)
     
     # Build instruction blocks
     instruction_blocks = [CORE_PROMPT, skill_block] + micro_blocks
     instruction = "\n\n".join(instruction_blocks)
+    
+    # Log study mode activation
+    if has_student_notes:
+        print(f"📚 STUDY MODE: Final prompt includes {len(instruction_blocks)} blocks (including study enhancements)")
     
     # Build context section
     context_section = build_context_section(chunks)

@@ -38,7 +38,7 @@ PDF_DOCUMENT_KEYWORDS = [
     'pagamento', 'iscrizione', 'immatricolazione', 'graduatoria', 'concorso', 
     'ammissione', 'trasferimento', 'rinuncia', 'sospensione', 'riattivazione', 
     'cambio', 'opzione', 'curriculum', 'come', 'quando', 'dove', 'perché', 
-    'quanto', 'quale'  # Removed 'chi' - it's too general
+    'quanto', 'quale', 'appunti', 'note'  # Removed 'chi' - it's too general
 ]
 
 # Keywords that suggest database/structured content (lists, contacts, etc.)
@@ -383,13 +383,28 @@ class EnhancedRetrievalV2:
             
             self.retrieval_stats["bm25_time"] = time.time() - start_time
             
-            print(f"📚 BM25 fallback: {len(bm25_results)} results in {self.retrieval_stats['bm25_time']:.3f}s")
+            print(f"📚 BM25 hybrid search: {len(bm25_results)} results in {self.retrieval_stats['bm25_time']:.3f}s")
             
             return bm25_results
             
         except Exception as e:
-            print(f"❌ BM25 fallback failed: {e}")
+            print(f"❌ BM25 hybrid search failed: {e}")
             return []
+    
+    def bm25_hybrid_search(self, query: str, all_chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        BM25 hybrid search to complement dense retrieval with keyword matching.
+        
+        This is the main BM25 implementation that combines with Pinecone results.
+        
+        Args:
+            query: Search query
+            all_chunks: All available chunks
+            
+        Returns:
+            BM25 retrieval results
+        """
+        return self.bm25_fallback(query, all_chunks)  # Delegate to existing implementation
     
     def manage_context_tokens(self, results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
@@ -440,11 +455,28 @@ class EnhancedRetrievalV2:
         else:
             reranked_results = dense_results
         
-        # Step 3: BM25 fallback (if enabled and no good results)
-        if BM25_FALLBACK and all_chunks and len(reranked_results) < 3:
-            print("🔄 Few results from dense retrieval, trying BM25 fallback...")
-            bm25_results = self.bm25_fallback(query, all_chunks)
-            reranked_results.extend(bm25_results)
+        # Step 3: BM25 hybrid enhancement (if enabled)
+        if BM25_FALLBACK and all_chunks:
+            print("🔄 Performing BM25 hybrid retrieval...")
+            bm25_results = self.bm25_hybrid_search(query, all_chunks)
+            # Combine and deduplicate results
+            combined_results = reranked_results + bm25_results
+            # Remove duplicates based on ID
+            seen_ids = set()
+            unique_results = []
+            for result in combined_results:
+                result_id = result.get('id', '')
+                if result_id and result_id not in seen_ids:
+                    seen_ids.add(result_id)
+                    unique_results.append(result)
+                elif not result_id:  # Handle BM25 results without IDs
+                    unique_results.append(result)
+            
+            # Re-sort combined results by score
+            reranked_results = sorted(unique_results, key=lambda x: x.get('score', 0), reverse=True)
+            print(f"📚 Hybrid results: {len(reranked_results)} total (Pinecone + BM25)")
+        elif BM25_FALLBACK and not all_chunks:
+            print("⚠️ BM25 enabled but no chunks provided for hybrid retrieval")
         
         # Step 4: Context token management
         final_results = self.manage_context_tokens(reranked_results)

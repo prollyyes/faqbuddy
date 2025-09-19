@@ -64,14 +64,30 @@ class TextToSQLConverter:
         # Import llm_gemma after ensuring it's loaded
         from utils.llm_gemma import llm_gemma
         
-        # Gemma LLM for T2SQL (better for structured tasks)
-        result = llm_gemma(prompt, max_tokens=150, temperature=0.01)
-        # Compatibilità output (dict o string)
-        if isinstance(result, dict):
-            sql_response = result["choices"][0]["text"].strip()
-        else:
-            sql_response = result.strip()
-        return sql_response
+        # Check if llm_gemma is None
+        if llm_gemma is None:
+            return "INVALID_QUERY"
+        
+        try:
+            # Gemma LLM for T2SQL (better for structured tasks)
+            result = llm_gemma(prompt, max_tokens=150, temperature=0.01)
+            
+            # Handle None result
+            if result is None:
+                return "INVALID_QUERY"
+            
+            # Compatibilità output (dict o string)
+            if isinstance(result, dict):
+                if "choices" in result and len(result["choices"]) > 0:
+                    sql_response = result["choices"][0]["text"].strip()
+                else:
+                    return "INVALID_QUERY"
+            else:
+                sql_response = result.strip()
+            return sql_response
+        except Exception as e:
+            print(f"❌ Error in query_llm: {e}")
+            return "INVALID_QUERY"
 
     def clean_sql_response(self, sql_response: str) -> str:
         import re
@@ -180,6 +196,10 @@ class TextToSQLConverter:
         # Import llm_gemma after ensuring it's loaded
         from utils.llm_gemma import llm_gemma
         
+        # Check if llm_gemma is None
+        if llm_gemma is None:
+            return "Errore: modello non disponibile per la conversione dei risultati."
+        
         prompt = (
             "Rispondi in italiano in modo sintetico e diretto alla seguente domanda, "
             "usando SOLO i dati forniti qui sotto. Non aggiungere spiegazioni o ringraziamenti.\n\n"
@@ -195,9 +215,26 @@ class TextToSQLConverter:
             f"Dati:\n{results}\n\n"
             "Risposta formattata:"
         )
-        print("Fallback LLM")
-        output = llm_gemma(prompt, max_tokens=1024, stop=["</s>"])
-        return output["choices"][0]["text"].strip()
+        
+        try:
+            print("Fallback LLM")
+            output = llm_gemma(prompt, max_tokens=1024, stop=["</s>"])
+            
+            # Handle None result
+            if output is None:
+                return "Errore nella generazione della risposta."
+            
+            # Handle different output formats
+            if isinstance(output, dict):
+                if "choices" in output and len(output["choices"]) > 0:
+                    return output["choices"][0]["text"].strip()
+                else:
+                    return "Errore nel formato della risposta del modello."
+            else:
+                return str(output).strip()
+        except Exception as e:
+            print(f"❌ Error in sql_results_to_text_llm: {e}")
+            return f"Errore nella conversione dei risultati: {str(e)}"
 
 
     def is_sql_safe(self, sql_query: str) -> bool:

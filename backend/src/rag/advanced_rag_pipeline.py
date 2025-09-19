@@ -73,6 +73,26 @@ class AdvancedRAGPipeline:
         pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
         self.retrieval = EnhancedRetrievalV2(pc, INDEX_NAME)
         
+        # Initialize chunker for BM25 hybrid retrieval
+        self.chunker = None
+        try:
+            from .utils.schema_aware_chunker import SchemaAwareChunker
+            from .utils.generate_chunks import ChunkGenerator
+            from .config import is_feature_enabled, BM25_FALLBACK
+            
+            if BM25_FALLBACK:  # Only initialize if BM25 is enabled
+                if is_feature_enabled("schema_aware_chunking"):
+                    print("🔄 Initializing schema-aware chunker for BM25 hybrid retrieval...")
+                    self.chunker = SchemaAwareChunker()
+                else:
+                    print("🔄 Initializing chunk generator for BM25 hybrid retrieval...")
+                    self.chunker = ChunkGenerator()
+            else:
+                print("📚 BM25 hybrid retrieval disabled")
+        except ImportError as e:
+            print(f"⚠️ Could not initialize chunker for BM25 hybrid retrieval: {e}")
+            self.chunker = None
+        
         # Initialize web search enhancer (if enabled)
         self.web_search = None
         if WEB_SEARCH_ENHANCEMENT:
@@ -95,11 +115,41 @@ class AdvancedRAGPipeline:
             "complexity_levels": {}
         }
         
+        # Preload Mistral model to prevent generation delays
+        print("🔄 Preloading Mistral model...")
+        try:
+            from utils.llm_mistral import ensure_mistral_loaded
+            model_loaded = ensure_mistral_loaded()
+            if model_loaded:
+                print("   Mistral model: ✅ (preloaded)")
+            else:
+                print("   Mistral model: ⚠️ (failed to preload, will load on-demand)")
+        except Exception as e:
+            print(f"   Mistral model: ⚠️ (preload error: {e}, will load on-demand)")
+        
         print("✅ Advanced RAG Pipeline initialized")
         print(f"   Query understanding: ✅")
         print(f"   Advanced prompt engineering: ✅")
         print(f"   Answer verification: ✅")
         print(f"   Enhanced retrieval: ✅")
+        print(f"   BM25 hybrid retrieval: {'✅' if self.chunker else '❌'}")
+
+    def _get_chunks_for_hybrid_search(self) -> List[Dict[str, Any]]:
+        """Get chunks for BM25 hybrid retrieval."""
+        if not self.chunker:
+            return []
+        
+        try:
+            if hasattr(self.chunker, 'get_all_chunks'):
+                return self.chunker.get_all_chunks()
+            elif hasattr(self.chunker, 'get_chunks'):
+                return self.chunker.get_chunks()
+            else:
+                print("⚠️ Chunker doesn't have expected methods")
+                return []
+        except Exception as e:
+            print(f"⚠️ Error getting chunks for BM25 hybrid search: {e}")
+            return []
     
     def answer(self, question: str) -> AdvancedRAGResult:
         """
@@ -129,6 +179,11 @@ class AdvancedRAGPipeline:
         print("🔍 Step 2: Advanced retrieval...")
         retrieval_strategy = self.query_understanding.get_retrieval_strategy(query_analysis)
         
+        # Get chunks for BM25 hybrid retrieval (if enabled)
+        chunks_for_hybrid = self._get_chunks_for_hybrid_search()
+        if chunks_for_hybrid:
+            print(f"   📚 Loaded {len(chunks_for_hybrid)} chunks for BM25 hybrid retrieval")
+        
         # Use query expansion if needed
         queries_to_try = [question]
         if retrieval_strategy.get("query_expansion", False):
@@ -137,7 +192,7 @@ class AdvancedRAGPipeline:
         best_results = []
         for query_variant in queries_to_try:
             print(f"   Trying query: {query_variant}")
-            results = self.retrieval.retrieve(query_variant)
+            results = self.retrieval.retrieve(query_variant, chunks_for_hybrid)
             if len(results) > len(best_results):
                 best_results = results
         
@@ -338,6 +393,11 @@ class AdvancedRAGPipeline:
         print("🔍 Step 2: Advanced retrieval...")
         retrieval_strategy = self.query_understanding.get_retrieval_strategy(query_analysis)
         
+        # Get chunks for BM25 hybrid retrieval (if enabled)
+        chunks_for_hybrid = self._get_chunks_for_hybrid_search()
+        if chunks_for_hybrid:
+            print(f"   📚 Loaded {len(chunks_for_hybrid)} chunks for BM25 hybrid retrieval")
+        
         # Use query expansion if needed
         queries_to_try = [question]
         if retrieval_strategy.get("query_expansion", False):
@@ -346,7 +406,7 @@ class AdvancedRAGPipeline:
         best_results = []
         for query_variant in queries_to_try:
             print(f"   Trying query: {query_variant}")
-            results = self.retrieval.retrieve(query_variant)
+            results = self.retrieval.retrieve(query_variant, chunks_for_hybrid)
             if len(results) > len(best_results):
                 best_results = results
         
@@ -461,6 +521,11 @@ class AdvancedRAGPipeline:
         print("🔍 Step 2: Advanced retrieval...")
         retrieval_strategy = self.query_understanding.get_retrieval_strategy(query_analysis)
         
+        # Get chunks for BM25 hybrid retrieval (if enabled)
+        chunks_for_hybrid = self._get_chunks_for_hybrid_search()
+        if chunks_for_hybrid:
+            print(f"   📚 Loaded {len(chunks_for_hybrid)} chunks for BM25 hybrid retrieval")
+        
         # Use query expansion if needed
         queries_to_try = [question]
         if retrieval_strategy.get("query_expansion", False):
@@ -469,7 +534,7 @@ class AdvancedRAGPipeline:
         best_results = []
         for query_variant in queries_to_try:
             print(f"   Trying query: {query_variant}")
-            results = self.retrieval.retrieve(query_variant)
+            results = self.retrieval.retrieve(query_variant, chunks_for_hybrid)
             if len(results) > len(best_results):
                 best_results = results
         

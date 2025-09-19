@@ -1,0 +1,111 @@
+[
+  {
+    "query_id": "q_1",
+    "question": "Quali corsi insegna il prof Lenzerini?",
+    "ground_truth_answer": "Basi di Dati",
+    "relevant_chunk_ids": [],
+    "relevant_sections": [
+      "Corsi",
+      "Offerta Formativa"
+    ],
+    "is_table_query": true,
+    "query_type": "list",
+    "confidence": 0.8
+  },
+  {
+    "query_id": "q_2",
+    "question": "Come si chiama di nome il prof Lenzerini?",
+    "ground_truth_answer": "Maurizio",
+    "relevant_chunk_ids": [],
+    "relevant_sections": [],
+    "is_table_query": false,
+    "query_type": "procedural",
+    "confidence": 0.8
+  },
+  {
+    "query_id": "q_3",
+    "question": "Quali sono i corsi insegnati da Ottolino?",
+    "ground_truth_answer": "Sistemi Operativi",
+    "relevant_chunk_ids": [],
+    "relevant_sections": [
+      "Corsi",
+      "Offerta Formativa"
+    ],
+    "is_table_query": true,
+    "query_type": "list",
+    "confidence": 0.8
+  },
+  {
+    "query_id": "q_4",
+    "question": "Quale corso insegna Califano?",
+    "ground_truth_answer": "Sistemi Dinamici",
+    "relevant_chunk_ids": [],
+    "relevant_sections": [],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.8
+  },
+  {
+    "query_id": "q_5",
+    "question": "Chi è il professore che insegna Sistemi Operativi?",
+    "ground_truth_answer": "Ottolino",
+    "relevant_chunk_ids": [],
+    "relevant_sections": [],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.8
+  },
+  {
+    "query_id": "q_6",
+    "question": "Ci sono corsi insegnati da più di un professore?",
+    "ground_truth_answer": "No",
+    "relevant_chunk_ids": [],
+    "relevant_sections": [
+      "Corsi",
+      "Offerta Formativa"
+    ],
+    "is_table_query": true,
+    "query_type": "factual",
+    "confidence": 0.8
+  },
+  {
+    "query_id": "q_7",
+    "question": "Da quanti crediti è il corso di Basi di Dati?",
+    "ground_truth_answer": "6",
+    "relevant_chunk_ids": [],
+    "relevant_sections": [],
+    "is_table_query": false,
+    "query_type": "calculation",
+    "confidence": 0.8
+  },
+  {
+    "query_id": "q_8",
+    "question": "Da quanti crediti è il corso di Sistemi Operativi?",
+    "ground_truth_answer": "9",
+    "relevant_chunk_ids": [],
+    "relevant_sections": [],
+    "is_table_query": false,
+    "query_type": "calculation",
+    "confidence": 0.8
+  },
+  {
+    "query_id": "q_9",
+    "question": "Da quanti crediti è il corso di Sistemi Dinamici?",
+    "ground_truth_answer": "9",
+    "relevant_chunk_ids": [],
+    "relevant_sections": [],
+    "is_table_query": false,
+    "query_type": "calculation",
+    "confidence": 0.8
+  },
+  {
+    "query_id": "q_10",
+    "question": "Cosa insegna Gabriele Proietti Mattia?",
+    "ground_truth_answer": "Complementi di Programmazione",
+    "relevant_chunk_ids": [],
+    "relevant_sections": [],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.8
+  }
+]

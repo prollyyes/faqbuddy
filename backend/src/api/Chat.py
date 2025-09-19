@@ -509,6 +509,18 @@ def unified_chat_endpoint(
                                 yield f"data: {json.dumps({'type': 'error', 'message': 'T2SQL failed, switching to RAG'})}\n\n"
                     # RAG path (with metadata)
                     print(f"========= SWITCHING TO RAG with request_id: {request_id}")
+                    
+                    # Preload Mistral model immediately upon T2SQL failure for better performance
+                    print(f"🔄 Preloading Mistral model for RAG fallback...")
+                    try:
+                        model_loaded = model_manager.load_mistral()
+                        if model_loaded:
+                            print(f"✅ Mistral model preloaded successfully for RAG")
+                        else:
+                            print(f"⚠️ Mistral model preload failed, will load on-demand")
+                    except Exception as preload_error:
+                        print(f"⚠️ Mistral preload error: {preload_error}, will load on-demand")
+                    
                     try:
                         rag_stream = call_rag_system(question, streaming=True, include_metadata=True, request_id=request_id)
                         print(f"========= RAG stream obtained successfully")

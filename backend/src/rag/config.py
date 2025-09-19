@@ -21,7 +21,7 @@ INSTRUCTOR_XL_EMBEDDINGS = os.getenv("INSTRUCTOR_XL_EMBEDDINGS", "true").lower()
 
 # Task 3: Retrieval pipeline improvements
 RERANKER_ENABLED = os.getenv("RERANKER_ENABLED", "true").lower() == "true"
-BM25_FALLBACK = os.getenv("BM25_FALLBACK", "true").lower() == "true"  # Keep BM25 as fallback
+BM25_FALLBACK = os.getenv("BM25_FALLBACK", "true").lower() == "true"  # Keep BM25
 
 # Task 4: Graph-RAG
 GRAPH_RAG = os.getenv("GRAPH_RAG", "true").lower() == "true"
