@@ -96,15 +96,15 @@ export default function CardDeck({ items = [], index: controlledIndex = 0, onInd
               exit="exit"
               transition={{ type: 'spring', stiffness: 160, damping: 18, mass: 0.9 }}
             >
-              <div className="bg-white w-full max-w-2xl h-full rounded-2xl shadow-lg overflow-hidden flex flex-col">
+              <div className="bg-white w-full max-w-2xl h-full rounded-2xl shadow-2xl overflow-hidden flex flex-col">
                 {item.image && (
-                  <div className="w-full flex-1 h-0 bg-gray-100 flex items-center justify-center">
+                  <div className="w-full flex-1 h-0 bg-neutral-100 flex items-center justify-center">
                     <img src={item.image} alt={item.title} className="object-contain h-full w-full" />
                   </div>
                 )}
                 <div className="p-6">
-                  <h3 className="text-lg font-bold mb-1">{item.title}</h3>
-                  {item.subtitle && <div className="text-sm text-gray-500 mb-2">{item.subtitle}</div>}
+                  <h3 className="text-lg font-bold mb-1 text-black">{item.title}</h3>
+                  {item.subtitle && <div className="text-sm text-black mb-2">{item.subtitle}</div>}
                   {item.content && <div className="text-sm text-gray-700">{item.content}</div>}
                 </div>
               </div>
@@ -115,9 +115,9 @@ export default function CardDeck({ items = [], index: controlledIndex = 0, onInd
 
       {/* Stack shadow/peek for next two cards */}
       <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-        <div className="w-full max-w-md h-0">
+        <div className="w-full max-w-md h-0 pointer-events-none">
           {items.slice(index+1, index+3).map((it, i) => (
-            <div key={it.id || i} className={`absolute left-0 right-0 mx-auto w-full max-w-md rounded-2xl bg-white shadow-md`} style={{transform: `translateY(${12 + i*8}px) scale(${1 - 0.03*(i+1)})`, zIndex: 40 - i}} />
+            <div key={it.id || i} className={`absolute left-0 right-0 mx-auto w-full max-w-md rounded-2xl bg-white shadow-xl`} style={{transform: `translateY(${12 + i*8}px) scale(${1 - 0.03*(i+1)})`, zIndex: 40 - i}} />
           ))}
         </div>
       </div>
@@ -127,23 +127,37 @@ export default function CardDeck({ items = [], index: controlledIndex = 0, onInd
         {items.map((_, i) => {
           const isActive = i === index
           const isLastActive = isActive && i === items.length - 1
+
+          const handleClick = () => {
+            if (i === index) return
+            setDirection(i > index ? 1 : -1)
+            onIndexChange?.(i)
+          }
+
           if (isLastActive) {
             return (
-              <div
+              <button
                 key={i}
-                className="rounded-full bg-gray-700 flex items-center justify-center"
+                onClick={handleClick}
+                className="rounded-full bg-gray-700 flex items-center justify-center cursor-pointer"
                 style={{ width: '10px', height: '10px' }}
+                aria-label={`Go to slide ${i + 1}`}
               >
                 <IoCheckmarkSharp className="text-[9px] text-white" />
-              </div>
+              </button>
             )
           }
           return (
-            <div key={i} className={`relative h-2 rounded-full overflow-hidden ${isActive ? 'w-12 bg-gray-200' : 'w-2 bg-gray-300'} transition-[width,background-color] duration-200`}>
+            <button
+              key={i}
+              onClick={handleClick}
+              className={`relative h-2 rounded-full overflow-hidden ${isActive ? 'w-12 bg-gray-200' : 'w-2 bg-gray-300'} transition-[width,background-color] duration-200 cursor-pointer`}
+              aria-label={`Go to slide ${i + 1}`}
+            >
               {isActive && (
                 <div className="absolute left-0 top-0 h-2 bg-gray-500" style={{ width: `${progress * 100}%` }} />
               )}
-            </div>
+            </button>
           )
         })}
       </div>
