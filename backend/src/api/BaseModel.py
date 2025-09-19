@@ -1,5 +1,6 @@
-from pydantic import BaseModel, EmailStr
-from typing import List, Optional
+from pydantic import BaseModel, EmailStr, Field
+from typing import List, Optional, Union
+from enum import Enum
 import uuid
 
 class LoginRequest(BaseModel):
@@ -162,3 +163,52 @@ class SearchMaterials(BaseModel):
     edizioneCorso: str
     nomeCorso: Optional[str] = None
     dataEdizione: Optional[str] = None
+
+#Add.py
+class Semestre(BaseModel):
+    value: str = Field(pattern=r"^S[12]/[0-9]{4}$")
+
+class AddEdizioneCorso(BaseModel):
+    nomeCDL: str
+    nomeCorso: str
+    nomeInsegnante: str
+    cognomeInsegnante: str
+    semestre: Semestre
+    orario: Optional[str]
+    esonero: bool
+    mod_Esame: str
+
+class AddCorso(BaseModel):
+    nomeCorsoLaurea: str
+    nomeCorso: str
+    cfu: int
+    idoneita: bool
+    prerequisiti: Optional[str]
+    frequenza_obbligatoria: Optional[str]
+
+class AttendStatus(str, Enum):
+    attivo = 'attivo'
+    completato = 'completato'
+    abbandonato = 'abbandonato'
+
+class AddCorsoSeguito(BaseModel):
+    matricolaStudente: str
+    nomeCorso: str
+    semestre: Semestre
+    stato: AttendStatus
+    voto: Optional[int] = Field(default=None, ge=18, le=31)
+
+class AddPiattaforma(BaseModel):
+    nome: str
+
+class AddEdizioneCorsoPiattaforma(BaseModel):
+    nomeCorso: str
+    semestre: Semestre
+    nomePiattaforma: str
+    codice: str
+
+class AddValutazione(BaseModel):
+    matricola: int
+    path_file: str
+    voto: int = Field(ge=1, le=5)
+    commento: Optional[str]
