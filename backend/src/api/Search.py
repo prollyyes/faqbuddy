@@ -91,7 +91,7 @@ async def get_materials(data: SearchMaterials, db_handler: DBHandler = Depends(g
         if data.edizioneCorso == 'all':
             materiali = db_handler.run_query(
                 """
-                SELECT md.path_file, md.tipo, md.verificato, md.rating_medio
+                SELECT md.path_file, md.tipo, md.verificato, md.rating_medio, md.edition_id, md.edition_data
                 FROM Materiale_Didattico md
                 JOIN EdizioneCorso ed ON md.edition_id = ed.id AND md.edition_data = ed.data
                 JOIN Corso c ON c.id = ed.id
@@ -103,7 +103,7 @@ async def get_materials(data: SearchMaterials, db_handler: DBHandler = Depends(g
         else:
             materiali = db_handler.run_query(
                 """
-                SELECT md.path_file, md.tipo, md.verificato, md.rating_medio
+                SELECT md.path_file, md.tipo, md.verificato, md.rating_medio, md.edition_id, md.edition_data
                 FROM Materiale_Didattico md
                 WHERE md.edition_id = %s AND md.edition_data = %s
                 """,
