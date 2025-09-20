@@ -5,7 +5,7 @@ import Button from "@/components/utils/Button";
 import BackButton from "@/components/utils/BackButton";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import SwipeWrapperHome from "../wrappers/SwipeWrapperHome";
+import SwipeWrapperHome from "@/components/wrappers/SwipeWrapperHome";
 
 export default function MaterialsPage() {
   const router = useRouter();

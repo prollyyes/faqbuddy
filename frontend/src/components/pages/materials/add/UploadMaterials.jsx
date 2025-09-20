@@ -4,6 +4,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import Button from '@/components/utils/Button';
 import TileButton from '@/components/utils/TileButton';
+import MobileSheet from '@/components/utils/MobileSheet';
+
+const typeDescriptions = {
+  tesi: 'Condividi la tua tesi e aiuta chi sta preparando la propria discussione.',
+  slide: 'Carica le slide aggiornate per supportare gli altri durante il corso.',
+  esercizi: 'Pubblica esercizi e soluzioni per rendere lo studio più efficace.',
+  libro: 'Suggerisci libri o dispense che hai trovato indispensabili.',
+  appunti: 'Condividi i tuoi appunti per accelerare il ripasso della community.',
+  default: 'Completa i dettagli e carica materiale utile per il tuo corso.'
+};
 
 const HOST = process.env.NEXT_PUBLIC_HOST;
 
@@ -12,11 +22,21 @@ export default function UploadMaterials() {
   const [uploadType, setUploadType] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [profile, setProfile] = useState(null); // { nome, cognome, email, matricola, corso_laurea }
   const [courses, setCourses] = useState([]); // merged current + completed
   const [selectedCourseEdition, setSelectedCourseEdition] = useState(null); // { nome, edition_data }
   const [thesisTitle, setThesisTitle] = useState('');
   const fileInputRef = useRef(null);
+  const closeTimeoutRef = useRef(null);
+
+  const typeLabel = uploadType
+    ? uploadType.charAt(0).toUpperCase() + uploadType.slice(1)
+    : 'Seleziona un tipo';
+  const typeDescription = uploadType ? (typeDescriptions[uploadType] || typeDescriptions.default) : typeDescriptions.default;
+  const teacherName = selectedCourseEdition
+    ? [selectedCourseEdition.docente_nome, selectedCourseEdition.docente_cognome].filter(Boolean).join(' ')
+    : '';
 
   // Non servono più dropdown per laurea/corso: recuperiamo info da /profile
   useEffect(() => {
@@ -37,6 +57,15 @@ export default function UploadMaterials() {
       }
     };
     preloadProfile();
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+        closeTimeoutRef.current = null;
+      }
+    };
   }, []);
 
   const fetchProfile = async () => {
@@ -107,14 +136,34 @@ export default function UploadMaterials() {
       if (type !== 'tesi') {
         await fetchCoursesForUser();
       }
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+        closeTimeoutRef.current = null;
+      }
       setIsModalOpen(true);
+      setSheetOpen(true);
     })();
   };
 
-  const handleCancel = () => {
+  const resetModalState = () => {
     setSelectedFile(null);
     setUploadType('');
-    setIsModalOpen(false);
+    setSelectedCourseEdition(null);
+    setThesisTitle('');
+  };
+
+  const handleCloseModal = (force = false) => {
+    if (isUploading && !force) return;
+    setSheetOpen(false);
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    closeTimeoutRef.current = setTimeout(() => {
+      setIsModalOpen(false);
+      resetModalState();
+      closeTimeoutRef.current = null;
+    }, 240);
   };
 
   const handleUpload = async () => {
@@ -176,11 +225,7 @@ export default function UploadMaterials() {
       }
 
       // Reset UI
-      setSelectedFile(null);
-      setUploadType('');
-      setIsModalOpen(false);
-      setSelectedCourseEdition(null);
-      setThesisTitle('');
+      handleCloseModal(true);
     } catch (error) {
       console.error('Upload error:', error);
       alert(error.message || 'Errore durante il caricamento del file');
@@ -204,69 +249,74 @@ export default function UploadMaterials() {
 
         {/* Niente dropdown: si usa il profilo e i corsi dell'utente */}
 
-        {/* Modal per completare i dati */}
         {isModalOpen && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-white/0"
-            onClick={handleCancel}
+          <MobileSheet
+            open={sheetOpen}
+            onClose={handleCloseModal}
+            title="Dettagli materiale"
+            hideTopBorder
           >
-            <motion.div
-              initial={{ opacity: 0, y: 16, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.22, ease: 'easeOut' }}
-              className="bg-white w-full max-w-xl rounded-lg shadow-lg p-6 text-[#822433] border border-[#f0d6db]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h3 className="text-lg font-bold mb-2">Dettagli materiale</h3>
-              <div className="mb-4 p-3 border border-[#f0d6db] rounded-lg">
-                <div className="flex flex-wrap items-center gap-2 text-sm">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-[#822433] text-[#822433] bg-white font-semibold">
-                    {uploadType || '—'}
-                  </span>
-                  {profile?.corso_laurea && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-[#f0d6db] bg-white">
-                      CDL: {profile.corso_laurea}
-                    </span>
-                  )}
-                  {uploadType !== 'tesi' && (
-                    selectedCourseEdition ? (
-                      <>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-[#f0d6db] bg-white">
-                          Corso: {selectedCourseEdition.nome}
-                        </span>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-[#f0d6db] bg-white">
-                          Edizione: {selectedCourseEdition.edition_data}
-                        </span>
-                      </>
-                    ) : (
-                      <span className="text-xs text-[#822433]/80">Nessun corso selezionato</span>
-                    )
-                  )}
-                  {selectedFile && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-[#f0d6db] bg-white">
-                      File: <span className="ml-1 font-medium">{selectedFile.name}</span>
-                    </span>
-                  )}
-                </div>
+            <div className="space-y-6 text-[#822433]">
+              <div
+                className={`rounded-2xl p-5 transition-colors ${uploadType
+                  ? 'bg-gradient-to-r from-[#fde4e8] via-[#f9d5dc] to-[#f6c7d0] text-[#681422]'
+                  : 'bg-gray-100 border border-dashed border-[#d9d9d9] text-[#822433]/70'}`}
+              >
+                {/* <p className="text-xs uppercase tracking-[0.2em] font-semibold">Tipo materiale</p> */}
+                <p className="text-2xl font-bold mt-1">{typeLabel}</p>
+                <p className="text-sm mt-2 leading-relaxed max-w-xl">{typeDescription}</p>
               </div>
 
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {profile?.corso_laurea && (
+                  <div className="rounded-xl border border-[#f0d6db] bg-white/80 px-4 py-3 shadow-sm">
+                    <p className="text-[11px] uppercase tracking-wide text-[#b6485b]">Corso di laurea</p>
+                    <p className="text-sm font-semibold mt-1">{profile.corso_laurea}</p>
+                  </div>
+                )}
+                {selectedCourseEdition && (
+                  <div className="rounded-xl border border-[#f0d6db] bg-white/80 px-4 py-3 shadow-sm">
+                    <p className="text-[11px] uppercase tracking-wide text-[#b6485b]">Corso</p>
+                    <p className="text-sm font-semibold mt-1">{selectedCourseEdition.nome}</p>
+                    <p className="text-xs text-[#a35d6b]">Edizione {selectedCourseEdition.edition_data}</p>
+                  </div>
+                )}
+                {teacherName && (
+                  <div className="rounded-xl border border-[#f0d6db] bg-white/80 px-4 py-3 shadow-sm">
+                    <p className="text-[11px] uppercase tracking-wide text-[#b6485b]">Docente</p>
+                    <p className="text-sm font-semibold mt-1">{teacherName}</p>
+                  </div>
+                )}
+                {selectedFile && (
+                  <div className="rounded-xl border border-[#f0d6db] bg-white/80 px-4 py-3 shadow-sm">
+                    <p className="text-[11px] uppercase tracking-wide text-[#b6485b]">File selezionato</p>
+                    <p className="text-sm font-semibold mt-1 break-all">{selectedFile.name}</p>
+                  </div>
+                )}
+                {uploadType && uploadType !== 'tesi' && !selectedCourseEdition && (
+                  <div className="rounded-xl border border-dashed border-[#f0d6db] bg-white/60 px-4 py-3 text-sm text-[#a25966]">
+                    Scegli un corso dall'elenco per collegare il materiale all'edizione corretta.
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-2xl border border-[#f0d6db] bg-white px-4 py-4 shadow-sm space-y-3">
                 {uploadType === 'tesi' ? (
-                  <div>
-                    <label className="block text-sm font-semibold">Titolo</label>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-[#681422]">Titolo della tesi</label>
                     <input
                       type="text"
-                      className="w-full border border-[#822433] rounded-md px-3 py-2 text-black focus:outline-none focus:ring-2 focus:ring-[#c85a71] transition"
+                      className="w-full border border-[#f0d6db] rounded-xl px-3 py-2 text-black focus:outline-none focus:ring-2 focus:ring-[#c85a71]/60 transition"
                       value={thesisTitle}
                       onChange={(e) => setThesisTitle(e.target.value)}
-                      placeholder="Titolo della tesi"
+                      placeholder={'Es. "Analisi dei sistemi distribuiti"'}
                     />
                   </div>
                 ) : (
-                  <div>
-                    <label className="block text-sm font-semibold">Seleziona corso ed edizione</label>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-[#681422]">Associa un corso</label>
                     <select
-                      className="w-full border border-[#822433] rounded-md px-3 py-2 text-black focus:outline-none focus:ring-2 focus:ring-[#c85a71] transition cursor-pointer"
+                      className="w-full border border-[#f0d6db] rounded-xl px-3 py-2 text-black focus:outline-none focus:ring-2 focus:ring-[#c85a71]/60 transition cursor-pointer"
                       value={selectedCourseEdition ? `${selectedCourseEdition.edition_id}__${selectedCourseEdition.edition_data}` : ''}
                       onChange={(e) => {
                         const key = e.target.value;
@@ -284,53 +334,60 @@ export default function UploadMaterials() {
                       ))}
                     </select>
                     {courses.length === 0 && (
-                      <p className="text-sm mt-2 text-[#822433]">Nessun corso disponibile</p>
+                      <p className="text-xs text-[#a25966]">Non risultano corsi associati. Completa prima un corso o aggiorna il profilo.</p>
                     )}
                   </div>
                 )}
-
-                <div>
-                  <label className="block text-sm font-semibold">Seleziona file</label>
-                  <input
-                    ref={fileInputRef}
-                    id="modalFileInput"
-                    type="file"
-                    onChange={handleFileChange}
-                    accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.ppt,.pptx"
-                    className="hidden"
-                  />
-                  <Button
-                    onClick={() => fileInputRef.current?.click()}
-                    variant="default"
-                    size="md"
-                  >
-                    Seleziona file
-                  </Button>
-                  {selectedFile && (
-                    <p className="text-xs mt-2 text-[#822433]">File selezionato: <span className="font-semibold">{selectedFile.name}</span></p>
-                  )}
-                </div>
               </div>
 
-              <div className="mt-5 flex justify-end gap-2">
+              <div className="rounded-2xl border-2 border-dashed border-[#f0d6db] bg-white px-4 py-5 text-center shadow-sm">
+                <p className="text-sm font-semibold text-[#681422]">Carica il tuo file</p>
+                <p className="text-xs text-[#a25966] mt-1">Supportiamo PDF, documenti Office, immagini e presentazioni.</p>
+                <input
+                  ref={fileInputRef}
+                  id="modalFileInput"
+                  type="file"
+                  onChange={handleFileChange}
+                  accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.ppt,.pptx"
+                  className="hidden"
+                />
+                <div className="mt-3 flex justify-center">
+                  <Button
+                    onClick={() => fileInputRef.current?.click()}
+                    variant="outline"
+                    size="md"
+                    className="min-w-[160px]"
+                  >
+                    Scegli file
+                  </Button>
+                </div>
+                {selectedFile ? (
+                  <p className="text-xs text-[#681422] mt-3">Pronto a caricare: <span className="font-semibold break-all">{selectedFile.name}</span></p>
+                ) : (
+                  <p className="text-xs text-[#a25966] mt-3">Nessun file selezionato</p>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2 sm:flex-row sm:justify-end sm:items-center">
                 <button
-                  onClick={handleCancel}
-                  className="px-4 py-2 text-sm border border-[#822433] rounded bg-[#822433] text-white hover:bg-white hover:text-[#822433] transition"
+                  onClick={handleCloseModal}
+                  className="w-full sm:w-auto px-4 py-2 bg-white text-[#681422] rounded-lg shadow-sm hover:bg-[#fbe9ec] transition disabled:opacity-60"
                   disabled={isUploading}
+                  type="button"
                 >
                   Annulla
                 </button>
-                <Button
+                <button
                   onClick={handleUpload}
                   disabled={isUploading || !selectedFile || (uploadType !== 'tesi' && !selectedCourseEdition) || (uploadType === 'tesi' && !thesisTitle.trim())}
-                  variant="default"
-                  size="md"
+                  className="w-full sm:w-auto px-4 py-2 bg-[#991B1B] text-white rounded-lg shadow-md hover:bg-[#7e1414] transition disabled:opacity-60 disabled:shadow-none"
+                  type="button"
                 >
-                  {isUploading ? 'Caricamento...' : 'Carica'}
-                </Button>
+                  {isUploading ? 'Caricamento...' : 'Carica materiale'}
+                </button>
               </div>
-            </motion.div>
-          </div>
+            </div>
+          </MobileSheet>
         )}
 
         {/* Bottoni per tipo di materiale */}

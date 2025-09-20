@@ -8,12 +8,12 @@ from ..utils.handle_db_errors import handle_db_errors
 
 # Database connection dependency for Render
 def get_db_handler():
-    conn = get_connection(mode="local")
+    conn = get_connection(mode=MODE)
     db_handler = DBHandler(conn)
     try:
         yield db_handler
     finally:
-	    db_handler.close_connection()
+        db_handler.close_connection()
 
 router = APIRouter()
 
@@ -326,7 +326,7 @@ async def addMaterialeDidattico(
                                 )
                     VALUES (%s, %s, %s, %s, %s, %s)""",
                     params=(user_id, course_id, semestre, file_id, tipo, verificato))
-        
+
         return {"message": "Materiale Didattico Aggiunto con successo."}
     else:
         raise HTTPException(status_code=400, detail="Errore nel caricamento al drive.")

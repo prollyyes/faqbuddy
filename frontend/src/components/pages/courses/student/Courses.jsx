@@ -77,6 +77,11 @@ export default function CorsiPage() {
   const [studentReviews, setStudentReviews] = useState([]);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewCourse, setReviewCourse] = useState(null);
+  const actionCourseHasReview = actionCourse
+    ? studentReviews.some(
+        r => r.edition_id === actionCourse.edition_id && r.edition_data === actionCourse.edition_data
+      )
+    : false;
 
   const handleOpenReviewModal = (corso) => {
     setReviewCourse(corso);
@@ -351,14 +356,9 @@ export default function CorsiPage() {
           <AddActionModal
             onClose={() => setShowAddActionModal(false)}
             onReview={() => {
-              setShowAddActionModal(false);
               handleOpenReviewModal(actionCourse);
             }}
-            onMaterial={() => {
-              setShowAddActionModal(false);
-              // Qui puoi aprire la modale per l'upload dei materiali
-              alert("Funzionalità aggiungi materiale non ancora implementata!");
-            }}
+            canAddReview={!actionCourseHasReview}
           />
         )}
         
@@ -446,6 +446,7 @@ export default function CorsiPage() {
                           className="w-9 h-9 flex items-center justify-center bg-[#991B1B] text-white rounded-full hover:bg-red-800 text-xl shadow"
                           onClick={e => { e.stopPropagation(); handleOpenActionModal(corso); }}
                           title="Aggiungi"
+                          aria-label="Aggiungi recensione"
                         >
                           +
                         </button>
