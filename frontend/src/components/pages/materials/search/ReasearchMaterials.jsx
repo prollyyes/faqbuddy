@@ -178,8 +178,8 @@ export default function ReasearchMaterials() {
     const tipo = item.tipo ?? item[1];
     const rating = item.rating_medio ?? item[3] ?? 'n/d';
     const verificato = item.verificato ?? item[2];
-    const editionFromItem = item.edition_data ?? item[4];
-    const courseFromItem = item.nome ?? item.course_name ?? item[5];
+    const editionFromItem = item.edition_data ?? item[5];
+    const courseFromItem = item.nome ?? item.course_name ?? item[6];
     const editionText = editionFromItem || fallbackEdition || 'edizione';
     const courseText = courseFromItem || fallbackCourse || 'corso';
     const displayName = `${tipo || 'Materiale'} · ${courseText} (${editionText})`;

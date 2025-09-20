@@ -2,7 +2,6 @@ import React from 'react';
 import { FaStar } from 'react-icons/fa';
 
 function MaterialsPreview({ items, hasSearched, onShowItem, buildMaterialData }) {
-
   return (
     <div className="space-y-2">
       {items.map((item, idx) => {
@@ -26,7 +25,6 @@ function MaterialsPreview({ items, hasSearched, onShowItem, buildMaterialData })
 }
 
 function InfoPreview({ items, hasSearched, onShowItem }) {
-
   return (
     <div className="space-y-2">
       {items.map((record, idx) => {
@@ -65,8 +63,9 @@ function InfoPreview({ items, hasSearched, onShowItem }) {
     </div>
   );
 }
-function ReviewsPreview({ items, hasSearched, onShowItem }) {
 
+
+function ReviewsPreview({ items, hasSearched, onShowItem }) {
   return (
     <div className="space-y-2">
       {items.map((record, idx) => {
