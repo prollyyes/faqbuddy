@@ -1,20 +1,12 @@
 import React from 'react';
 import { FaStar } from 'react-icons/fa';
 
-function MaterialsPreview({ items, hasSearched, onShowAll, onShowItem, buildMaterialData, courseName, editionLabel }) {
-  if (!items.length) {
-    return hasSearched ? (
-      <p className="text-sm text-[#a25966]">Nessun materiale trovato.</p>
-    ) : (
-      <p className="text-sm text-[#a25966]">Imposta i filtri e premi Cerca.</p>
-    );
-  }
+function MaterialsPreview({ items, hasSearched, onShowItem, buildMaterialData }) {
 
-  const preview = items.slice(0, 3);
   return (
     <div className="space-y-2">
-      {preview.map((item, idx) => {
-        const data = buildMaterialData(item, courseName, editionLabel, idx);
+      {items.map((item, idx) => {
+        const data = buildMaterialData(item, idx);
         return (
           <button
             key={idx}
@@ -29,37 +21,25 @@ function MaterialsPreview({ items, hasSearched, onShowAll, onShowItem, buildMate
           </button>
         );
       })}
-      {items.length > 3 && (
-        <button type="button" className="w-full text-xs text-[#822433] underline" onClick={onShowAll}>
-          Apri elenco completo
-        </button>
-      )}
     </div>
   );
 }
 
-function InfoPreview({ items, hasSearched, onShowAll, onShowItem }) {
-  if (!items.length) {
-    return hasSearched ? (
-      <p className="text-sm text-[#a25966]">Nessuna informazione trovata.</p>
-    ) : (
-      <p className="text-sm text-[#a25966]">Esegui una ricerca per vedere i dati.</p>
-    );
-  }
+function InfoPreview({ items, hasSearched, onShowItem }) {
 
-  const preview = items.slice(0, 2);
   return (
     <div className="space-y-2">
-      {preview.map((record, idx) => {
+      {items.map((record, idx) => {
         const data = Array.isArray(record) ? record : Object.values(record);
+        // data[0]=nomeCorso, data[1]=edizione, data[2]=docenteNome, data[3]=docenteCognome, see /getInfoCorso in backend
         return (
           <button
             key={idx}
             className="w-full text-left rounded-xl border border-[#f0d6db] bg-white px-4 py-3 shadow-sm hover:shadow-md transition active:scale-[0.99]"
             onClick={() =>
               onShowItem({
-                titolo: data[0],
-                categoria: data[1],
+                nomeCorso: data[0],
+                edizione: data[1],
                 docenteNome: data[2],
                 docenteCognome: data[3],
                 email: data[4],
@@ -73,35 +53,23 @@ function InfoPreview({ items, hasSearched, onShowAll, onShowItem }) {
               })
             }
           >
-            <p className="text-sm font-semibold">{data[0]}</p>
+            <p className="text-sm font-semibold">
+              {data[0]} <span className="text-xs text-[#a25966]">({data[1]})</span>
+            </p>
             <p className="mt-2 text-xs text-[#a25966]">
               {data[2] || data[3] ? `${data[2] ?? ''} ${data[3] ?? ''}`.trim() : 'Docente non disponibile'}
             </p>
           </button>
         );
       })}
-      {items.length > 2 && (
-        <button type="button" className="w-full text-xs text-[#822433] underline" onClick={onShowAll}>
-          Apri elenco completo
-        </button>
-      )}
     </div>
   );
 }
+function ReviewsPreview({ items, hasSearched, onShowItem }) {
 
-function ReviewsPreview({ items, hasSearched, onShowAll, onShowItem }) {
-  if (!items.length) {
-    return hasSearched ? (
-      <p className="text-sm text-[#a25966]">Nessuna review trovata.</p>
-    ) : (
-      <p className="text-sm text-[#a25966]">Attiva il filtro Review e premi Cerca.</p>
-    );
-  }
-
-  const preview = items.slice(0, 3);
   return (
     <div className="space-y-2">
-      {preview.map((record, idx) => {
+      {items.map((record, idx) => {
         const descrizione = record.descrizione ?? record[0];
         const voto = record.voto ?? record[1];
         return (
@@ -119,11 +87,6 @@ function ReviewsPreview({ items, hasSearched, onShowAll, onShowItem }) {
           </button>
         );
       })}
-      {items.length > 3 && (
-        <button type="button" className="w-full text-xs text-[#822433] underline" onClick={onShowAll}>
-          Apri elenco completo
-        </button>
-      )}
     </div>
   );
 }

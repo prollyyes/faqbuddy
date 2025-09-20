@@ -4,6 +4,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { FaStar } from 'react-icons/fa';
+import { IoMdDownload } from "react-icons/io";
+import { BsEyeglasses } from "react-icons/bs";
 import Button from '@/components/utils/Button';
 import MobileSheet from '@/components/utils/MobileSheet';
 import { ReviewsPreview, MaterialsPreview, InfoPreview } from './Preview';
@@ -131,15 +133,6 @@ function FilterPanel({
   );
 }
 
-function SectionHeader({ title}) {
-  return (
-    <div className="flex items-center justify-between">
-      <h2 className="text-lg font-semibold">{title}</h2>
-    </div>
-  );
-}
-
-
 export default function ReasearchMaterials() {
   const [laureaOptions, setLaureaOptions] = useState([]);
   const [courseOptions, setCourseOptions] = useState([]);
@@ -151,8 +144,8 @@ export default function ReasearchMaterials() {
   const [selectedEditionDate, setSelectedEditionDate] = useState('');
 
   const [includeMaterials, setIncludeMaterials] = useState(true);
-  const [includeInfo, setIncludeInfo] = useState(false);
-  const [includeReviews, setIncludeReviews] = useState(false);
+  const [includeInfo, setIncludeInfo] = useState(true);
+  const [includeReviews, setIncludeReviews] = useState(true);
 
   const [materials, setMaterials] = useState([]);
   const [info, setInfo] = useState([]);
@@ -161,6 +154,7 @@ export default function ReasearchMaterials() {
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetPayload, setSheetPayload] = useState(null);
+  const [sectionFilter, setSectionFilter] = useState('materials');
 
   const activeFilters = useMemo(
     () => [
@@ -176,15 +170,20 @@ export default function ReasearchMaterials() {
     [courseOptions]
   );
 
-  const buildMaterialData = (item, courseName, editionLabel, index) => {
+  const fallbackCourseName = selectedCourse || null;
+  const fallbackEditionLabel = selectedEdition === 'all' ? null : selectedEditionDate;
+
+  const buildMaterialData = (item, fallbackCourse, fallbackEdition, index) => {
     const path = item.path_file ?? item[0];
     const tipo = item.tipo ?? item[1];
     const rating = item.rating_medio ?? item[3] ?? 'n/d';
     const verificato = item.verificato ?? item[2];
-    const editionText = editionLabel || 'edizione';
-    const courseText = courseName || 'corso';
+    const editionFromItem = item.edition_data ?? item[4];
+    const courseFromItem = item.nome ?? item.course_name ?? item[5];
+    const editionText = editionFromItem || fallbackEdition || 'edizione';
+    const courseText = courseFromItem || fallbackCourse || 'corso';
     const displayName = `${tipo || 'Materiale'} · ${courseText} (${editionText})`;
-    return { path, tipo, rating, verificato, displayName };
+    return { path, tipo, rating, verificato, edition: editionText, course: courseText, displayName, index };
   };
 
   const handleLaureaFocus = async () => {
@@ -317,6 +316,12 @@ export default function ReasearchMaterials() {
     setSheetOpen(true);
   };
 
+  useEffect(() => {
+    if (sectionFilter === 'materials' && !includeMaterials) setSectionFilter('all');
+    if (sectionFilter === 'info' && !includeInfo) setSectionFilter('all');
+    if (sectionFilter === 'review' && !includeReviews) setSectionFilter('all');
+  }, [includeMaterials, includeInfo, includeReviews, sectionFilter]);
+
   const closeSheet = () => {
     setSheetOpen(false);
     setTimeout(() => setSheetPayload(null), 240);
@@ -354,10 +359,12 @@ export default function ReasearchMaterials() {
     if (sheetPayload.mode === 'list') {
       const { type, items } = sheetPayload;
       if (type === 'materiali') {
+        const fallbackCourse = sheetPayload.fallbackCourse ?? fallbackCourseName;
+        const fallbackEdition = sheetPayload.fallbackEdition ?? fallbackEditionLabel;
         return (
           <div className="space-y-2">
             {items.map((item, idx) => {
-              const data = buildMaterialData(item);
+              const data = buildMaterialData(item, fallbackCourse, fallbackEdition, idx);
               return (
                 <button
                   key={idx}
@@ -438,6 +445,7 @@ export default function ReasearchMaterials() {
       }
     }
 
+    // Quando apro la Modale mobile per un singolo elemento, faccio un check del tipo e creo la modale di conseguenza
     if (sheetPayload.mode === 'item') {
       if (sheetPayload.type === 'materiale') {
         const { data } = sheetPayload;
@@ -448,7 +456,32 @@ export default function ReasearchMaterials() {
               <li>Tipo: <span className="font-medium">{data.tipo}</span></li>
               <li>Rating: <span className="font-medium">{data.rating ?? 'n/d'}</span></li>
               <li>Verificato: <span className="font-medium">{data.verificato ? 'sì' : 'no'}</span></li>
+              <li>Corso: <span className="font-medium">{data.course}</span></li>
+              <li>Edizione: <span className="font-medium">{data.edition}</span></li>
             </ul>
+            
+            {/* Download materiale */}
+            {/* Lo posso anche scaricare dopo la visualizzazione */}
+            {/* <a
+              href={`https://drive.google.com/uc?export=download&id=${data.path}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-[#822433] text-white text-2xl mt-2 shadow hover:bg-[#a25966] transition"
+              download
+              title="Scarica materiale"
+            >
+              <IoMdDownload />
+            </a> */}
+              {/* Visualizzazione rapida */}
+            <a
+              href={`https://drive.google.com/file/d/${data.path}/view`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-[#822433] text-white text-2xl shadow hover:bg-[#822433] transition"
+              title="Visualizza materiale"
+            >
+              <IoMdDownload />
+            </a>
           </div>
         );
       }
@@ -456,9 +489,10 @@ export default function ReasearchMaterials() {
         const { data } = sheetPayload;
         return (
           <div className="space-y-3 text-sm text-[#822433]">
-            <p className="text-base font-semibold">{data.titolo}</p>
+            <p className="text-base font-semibold">
+              {data.nomeCorso} <span className="text-xs text-[#a25966]">({data.edizione})</span>
+            </p>
             <ul className="space-y-1">
-              <li>Categoria: <span className="font-medium">{data.categoria || '—'}</span></li>
               <li>Docente: <span className="font-medium">{`${data.docenteNome ?? ''} ${data.docenteCognome ?? ''}`.trim() || '—'}</span></li>
               <li>Email: <span className="font-medium break-all">{data.email || '—'}</span></li>
               <li>CFU: <span className="font-medium">{data.cfu ?? '—'}</span></li>
@@ -534,48 +568,58 @@ export default function ReasearchMaterials() {
         />
 
         <section className="space-y-8">
-          {includeMaterials && (
+          <div className="mt-2 flex justify-center">
+            <div className="inline-flex bg-gray-100 rounded-full p-1 text-sm">
+              <button
+                className={`px-3 py-1 rounded-full ${sectionFilter === 'materials' ? 'bg-white shadow text-[#822433]' : 'text-gray-500'} ${!includeMaterials ? 'opacity-40' : ''}`}
+                onClick={() => setSectionFilter('materials')}
+                disabled={!includeMaterials}
+              >
+                Materiali {materials.length ? `(${materials.length})` : ''}
+              </button>
+              <button
+                className={`px-3 py-1 rounded-full ${sectionFilter === 'info' ? 'bg-white shadow text-[#822433]' : 'text-gray-500'} ${!includeInfo ? 'opacity-40' : ''}`}
+                onClick={() => setSectionFilter('info')}
+                disabled={!includeInfo}
+              >
+                Info {info.length ? `(${info.length})` : ''}
+              </button>
+              <button
+                className={`px-3 py-1 rounded-full ${sectionFilter === 'review' ? 'bg-white shadow text-[#822433]' : 'text-gray-500'} ${!includeReviews ? 'opacity-40' : ''}`}
+                onClick={() => setSectionFilter('review')}
+                disabled={!includeReviews}
+              >
+                Review {reviews.length ? `(${reviews.length})` : ''}
+              </button>
+            </div>
+          </div>
+
+          {includeMaterials && sectionFilter === 'materials' && (
             <article className="space-y-3">
-              <SectionHeader
-                title="Materiali"
-              />
               <MaterialsPreview
                 items={materials}
                 hasSearched={hasSearched}
-                onShowAll={() => openSheet({ mode: 'list', type: 'materiali', items: materials, courseName: selectedCourse, editionLabel: selectedEdition === 'all' ? 'tutte le edizioni' : selectedEditionDate })}
                 onShowItem={(data) => openSheet({ mode: 'item', type: 'materiale', data })}
-                buildMaterialData={(item, idx) =>
-                  buildMaterialData(item, selectedCourse, selectedEdition === 'all' ? 'tutte le edizioni' : selectedEditionDate, idx)
-                }
-                courseName={selectedCourse}
-                editionLabel={selectedEdition === 'all' ? 'tutte le edizioni' : selectedEditionDate}
+                buildMaterialData={(item, idx) => buildMaterialData(item, fallbackCourseName, fallbackEditionLabel, idx)}
               />
             </article>
           )}
 
-          {includeInfo && (
+          {includeInfo && sectionFilter === 'info' && (
             <article className="space-y-3">
-              <SectionHeader
-                title="Informazioni corso"
-              />
               <InfoPreview
                 items={info}
                 hasSearched={hasSearched}
-                onShowAll={() => openSheet({ mode: 'list', type: 'info', items: info })}
                 onShowItem={(data) => openSheet({ mode: 'item', type: 'info', data })}
               />
             </article>
           )}
 
-          {includeReviews && (
+          {includeReviews && sectionFilter === 'review' && (
             <article className="space-y-3">
-              <SectionHeader
-                title="Review"
-              />
               <ReviewsPreview
                 items={reviews}
                 hasSearched={hasSearched}
-                onShowAll={() => openSheet({ mode: 'list', type: 'review', items: reviews })}
                 onShowItem={(data) => openSheet({ mode: 'item', type: 'review', data })}
               />
             </article>
