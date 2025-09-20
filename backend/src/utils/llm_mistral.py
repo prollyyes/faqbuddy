@@ -29,6 +29,11 @@ def clean_response(response: str) -> str:
     response = re.sub(r'\[/answer\]', '', response, flags=re.IGNORECASE)
     response = re.sub(r'\[answer\]', '', response, flags=re.IGNORECASE)
     
+    # Remove weird correction tags that sometimes appear
+    response = re.sub(r'\[COR\]|\[/COR\]', '', response)
+    response = re.sub(r'\[CORR\]|\[/CORR\]', '', response)
+    response = re.sub(r'\[CORRECTION\]|\[/CORRECTION\]', '', response)
+    
     # Remove common unwanted prefixes
     response = re.sub(r'^Risposta:\s*', '', response, flags=re.IGNORECASE)
     response = re.sub(r'^Assistant:\s*', '', response, flags=re.IGNORECASE)
@@ -46,18 +51,48 @@ def extract_answer_section(response: str) -> str:
     answer_match = re.search(r'📌\s*Risposta\s*\n(.*)', response, re.DOTALL | re.IGNORECASE)
     if answer_match:
         answer_section = answer_match.group(1).strip()
-        print(f"🎯 Extracted answer section from thinking format")
+        print(f"[TARGET] Extracted answer section from thinking format")
         return answer_section
     
-    # Look for "Risposta" without emoji
-    answer_match = re.search(r'(?:^|\n)\s*Risposta\s*\n(.*)', response, re.DOTALL | re.IGNORECASE)
-    if answer_match:
-        answer_section = answer_match.group(1).strip()
-        print(f"🎯 Extracted answer section (no emoji)")
-        return answer_section
+    # Look for "Risposta" without emoji (more flexible patterns)
+    answer_patterns = [
+        r'(?:^|\n)\s*Risposta\s*:?\s*\n(.*)',
+        r'(?:^|\n)\s*\*\*Risposta\*\*\s*:?\s*\n(.*)',
+        r'(?:^|\n)\s*Answer\s*:?\s*\n(.*)',
+        r'(?:^|\n)\s*Response\s*:?\s*\n(.*)'
+    ]
     
-    # If no thinking format is detected, return the whole response
-    print(f"🎯 No thinking format detected, returning full response")
+    for pattern in answer_patterns:
+        answer_match = re.search(pattern, response, re.DOTALL | re.IGNORECASE)
+        if answer_match:
+            answer_section = answer_match.group(1).strip()
+            print(f"[TARGET] Extracted answer section using pattern: {pattern[:30]}...")
+            return answer_section
+    
+    # Check for unwanted self-generation patterns and truncate
+    import re
+    unwanted_patterns = [
+        r'\n\s*Domanda\s*:',  # Stop at "Domanda:"
+        r'\n\s*Question\s*:',  # Stop at "Question:"
+        r'\n\s*Esempio\s*:',   # Stop at "Esempio:" if it's generating more examples
+        r'\n\s*Per\s+esempio\s*:',  # Stop at "Per esempio:"
+    ]
+    
+    original_length = len(response)
+    for pattern in unwanted_patterns:
+        match = re.search(pattern, response, re.IGNORECASE)
+        if match:
+            # Truncate at the unwanted pattern
+            response = response[:match.start()].strip()
+            print(f"======== Truncated response at unwanted pattern '{pattern}' (removed {original_length - len(response)} chars)")
+            break
+    
+    # If the response seems cut off, warn about it
+    if len(response) > 100 and (response.endswith("Se si dispone") or response.endswith("nome") or not response.strip().endswith('.') and not response.strip().endswith('?') and not response.strip().endswith('!')):
+        print(f"[WARN] Response appears to be truncated: {len(response)} chars, ending with: {repr(response[-50:])}")
+    
+    # If no thinking format is detected, return the cleaned response
+    print(f"[TARGET] No thinking format detected, returning full response ({len(response)} chars)")
     return response
 
 def clean_response_streaming(response: str) -> str:
@@ -88,84 +123,85 @@ def clean_response_streaming(response: str) -> str:
 def generate_answer(context: str, question: str) -> str:
     if llm_mistral is None:
         if not ensure_mistral_loaded():
-            return "⚠️ LLM generation is not available. Please install llama-cpp-python and ensure the Mistral model is available."
+            return "[WARN] LLM generation is not available. Please install llama-cpp-python and ensure the Mistral model is available."
     
     # Use simple system prompt for direct generation (context is already processed)
     from utils.unified_system_prompt import get_simple_system_prompt
     system_prompt = get_simple_system_prompt()
     prompt = f"[INST] {system_prompt}\n\nContesto:\n{context}\n\nDomanda:\n{question} [/INST]"
     
-    print(f"🔍 DEBUG: Calling LLM with prompt length: {len(prompt)}")
-    print(f"🔍 DEBUG: Context length: {len(context)}, Question: {question[:100]}...")
+    print(f"[SEARCH] DEBUG: Calling LLM with prompt length: {len(prompt)}")
+    print(f"[SEARCH] DEBUG: Context length: {len(context)}, Question: {question[:100]}...")
     
     # Check if prompt is too long - if so, try with shorter context
     if len(prompt) > 10000:
-        print(f"⚠️ DEBUG: Prompt very long ({len(prompt)} chars), trying with reduced context...")
+        print(f"[WARN] DEBUG: Prompt very long ({len(prompt)} chars), trying with reduced context...")
         # Try with just the first 3000 chars of context
         short_context = context[:3000] + "\n\n[...contesto ridotto per limitazioni di lunghezza...]"
         short_prompt = f"[INST] {system_prompt}\n\nContesto:\n{short_context}\n\nDomanda:\n{question} [/INST]"
-        print(f"🔍 DEBUG: Reduced prompt length: {len(short_prompt)}")
+        print(f"[SEARCH] DEBUG: Reduced prompt length: {len(short_prompt)}")
         prompt = short_prompt
     
     try:
-        print(f"🔍 DEBUG: Model status - loaded: {llm_mistral is not None}")
+        print(f"[SEARCH] DEBUG: Model status - loaded: {llm_mistral is not None}")
         if llm_mistral is None:
-            print("❌ DEBUG: Model is None!")
-            return "⚠️ Model not loaded"
+            print("[ERROR] DEBUG: Model is None!")
+            return "[WARN] Model not loaded"
             
         # First try a simple test generation to check if the model works
-        print(f"🔍 DEBUG: Testing model with simple prompt...")
+        print(f"[SEARCH] DEBUG: Testing model with simple prompt...")
         test_output = llm_mistral("[INST] Saluta brevemente [/INST]", max_tokens=50, stop=["</s>"], temperature=0.7)
         test_response = test_output["choices"][0]["text"] if "choices" in test_output else ""
-        print(f"🔍 DEBUG: Test response: {repr(test_response[:100])}")
+        print(f"[SEARCH] DEBUG: Test response: {repr(test_response[:100])}")
         
         if not test_response.strip():
-            print("❌ DEBUG: Model fails even simple test - returning error")
-            return "⚠️ LLM model non è in grado di generare testo. Verificare configurazione model."
+            print("[ERROR] DEBUG: Model fails even simple test - returning error")
+            return "[WARN] LLM model non è in grado di generare testo. Verificare configurazione model."
         
-        # Now try the actual prompt
-        output = llm_mistral(prompt, max_tokens=2048, stop=["</s>", "[/INST]", "[INST]"], temperature=0.7, top_p=0.9)
-        print(f"🔍 DEBUG: LLM call completed successfully")
-        print(f"🔍 DEBUG: LLM output structure: {type(output)}, keys: {output.keys() if isinstance(output, dict) else 'not dict'}")
+        # Added stop sequences to prevent unwanted self-generation
+        stop_sequences = ["</s>", "[/INST]", "[INST]", "\nDomanda:", "\nQuestion:"]
+        output = llm_mistral(prompt, max_tokens=4096, stop=stop_sequences, temperature=0.7, top_p=0.9)
+        print(f"[SEARCH] DEBUG: LLM call completed successfully")
+        print(f"[SEARCH] DEBUG: LLM output structure: {type(output)}, keys: {output.keys() if isinstance(output, dict) else 'not dict'}")
         
         if isinstance(output, dict) and "choices" in output and len(output["choices"]) > 0:
             raw_response = output["choices"][0]["text"].strip()
-            print(f"🔍 DEBUG: Raw response length: {len(raw_response)}")
-            print(f"🔍 DEBUG: Raw response preview: {repr(raw_response[:200])}")
+            print(f"[SEARCH] DEBUG: Raw response length: {len(raw_response)}")
+            print(f"[SEARCH] DEBUG: Raw response preview: {repr(raw_response[:200])}")
             
             cleaned_response = clean_response(raw_response)
-            print(f"🔍 DEBUG: Cleaned response length: {len(cleaned_response)}")
-            print(f"🔍 DEBUG: Cleaned response preview: {repr(cleaned_response[:200])}")
+            print(f"[SEARCH] DEBUG: Cleaned response length: {len(cleaned_response)}")
+            print(f"[SEARCH] DEBUG: Cleaned response preview: {repr(cleaned_response[:200])}")
             
             # Extract only the "Risposta" section if thinking format is detected
             final_response = extract_answer_section(cleaned_response)
-            print(f"🔍 DEBUG: Final response length: {len(final_response)}")
-            print(f"🔍 DEBUG: Final response preview: {repr(final_response[:200])}")
+            print(f"[SEARCH] DEBUG: Final response length: {len(final_response)}")
+            print(f"[SEARCH] DEBUG: Final response preview: {repr(final_response[:200])}")
             
             if not final_response.strip():
-                print("⚠️ DEBUG: Response is empty after final processing!")
-                print(f"⚠️ DEBUG: Original raw response was: {repr(raw_response)}")
+                print("[WARN] DEBUG: Response is empty after final processing!")
+                print(f"[WARN] DEBUG: Original raw response was: {repr(raw_response)}")
                 # Return cleaned response if final processing made it empty
-                return cleaned_response if cleaned_response.strip() else "⚠️ LLM generated empty response"
+                return cleaned_response if cleaned_response.strip() else "[WARN] LLM generated empty response"
             
             return final_response
         else:
-            print(f"❌ DEBUG: Unexpected output format: {output}")
-            return "⚠️ LLM output format error"
+            print(f"[ERROR] DEBUG: Unexpected output format: {output}")
+            return "[WARN] LLM output format error"
             
     except Exception as e:
-        print(f"❌ DEBUG: LLM generation failed: {e}")
-        return f"⚠️ LLM generation error: {str(e)}"
+        print(f"[ERROR] DEBUG: LLM generation failed: {e}")
+        return f"[WARN] LLM generation error: {str(e)}"
 
 def load_mistral_model():
     """Load the Mistral model if not already loaded."""
     global llm_mistral
     if llm_mistral is not None:
-        print("✅ Mistral model already loaded")
+        print("[OK] Mistral model already loaded")
         return True
     
     # Force garbage collection and unload Gemma if loaded to free GPU memory
-    print("🧹 Cleaning GPU memory before loading Mistral...")
+    print("[CLEAN] Cleaning GPU memory before loading Mistral...")
     
     # Try to unload Gemma model if it's loaded
     try:
@@ -184,14 +220,14 @@ def load_mistral_model():
         mistral_model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'models', 'capybarahermes-2.5-mistral-7b.Q4_K_M.gguf'))
         
         if os.path.exists(mistral_model_path):
-            print("🔄 Loading Mistral model...")
+            print("[LOAD] Loading Mistral model...")
             
             # Optimized settings for RTX 2060S
             PHYSICAL_CORES = max(1, os.cpu_count() // 2)
             
             llm_mistral = Llama(
                 model_path=mistral_model_path,   
-                n_ctx=4096,                      # Reasonable context for 7B model (reduced from 32768)
+                n_ctx=6144,                      # Reasonable context for 7B model (reduced from 32768)
                 n_batch=512,                     # Conservative batch size for stability
                 n_threads=PHYSICAL_CORES,        # Physical cores, not logical
                 n_gpu_layers=12,                 # Reduced to prevent GPU memory conflicts with Gemma
@@ -200,30 +236,30 @@ def load_mistral_model():
                 use_mmap=True,                   # Enable memory mapping for better memory efficiency
                 use_mlock=False                  # Disable memory locking to save RAM
             )
-            print("✅ Mistral model loaded successfully")
+            print("[OK] Mistral model loaded successfully")
             return True
         else:
-            print(f"❌ Mistral model not found at {mistral_model_path}")
+            print(f"[ERROR] Mistral model not found at {mistral_model_path}")
             return False
     except Exception as e:
-        print(f"❌ Failed to load Mistral model: {e}")
+        print(f"[ERROR] Failed to load Mistral model: {e}")
         return False
 
 def unload_mistral_model():
     """Unload the Mistral model to free GPU memory."""
     global llm_mistral
     if llm_mistral is None:
-        print("ℹ️ Mistral model not loaded, nothing to unload")
+        print("[INFO] Mistral model not loaded, nothing to unload")
         return True
     
     try:
-        print("🔄 Unloading Mistral model...")
+        print("[LOAD] Unloading Mistral model...")
         del llm_mistral
         llm_mistral = None
-        print("✅ Mistral model unloaded successfully")
+        print("[OK] Mistral model unloaded successfully")
         return True
     except Exception as e:
-        print(f"❌ Failed to unload Mistral model: {e}")
+        print(f"[ERROR] Failed to unload Mistral model: {e}")
         return False
 
 def ensure_mistral_loaded():
@@ -235,11 +271,11 @@ def ensure_mistral_loaded():
     # Validate that the model is actually functional
     try:
         if not hasattr(llm_mistral, 'model_path') or not hasattr(llm_mistral, '__call__'):
-            print("⚠️ Mistral model exists but is invalid, reloading...")
+            print("[WARN] Mistral model exists but is invalid, reloading...")
             return load_mistral_model()
         return True
     except Exception as e:
-        print(f"⚠️ Mistral model validation failed: {e}, reloading...")
+        print(f"[WARN] Mistral model validation failed: {e}, reloading...")
         return load_mistral_model()
 
 def cleanup_mistral_resources():
@@ -247,13 +283,13 @@ def cleanup_mistral_resources():
     global llm_mistral
     if llm_mistral is not None:
         try:
-            print("🧹 Cleaning up Mistral model resources...")
+            print("[CLEAN] Cleaning up Mistral model resources...")
             del llm_mistral
             llm_mistral = None
             gc.collect()
-            print("✅ Mistral model resources cleaned up")
+            print("[OK] Mistral model resources cleaned up")
         except Exception as e:
-            print(f"⚠️ Error during Mistral cleanup: {e}")
+            print(f"[WARN] Error during Mistral cleanup: {e}")
 
 # Register cleanup function with graceful shutdown system
 # from utils.graceful_shutdown import register_cleanup_function  # DISABLED
@@ -264,12 +300,12 @@ def generate_answer_streaming(context: str, question: str, request_id: str = Non
     Generate an answer token by token using streaming.
     Returns a generator that yields tokens as they are generated.
     """
-    print(f"🔄 LLM streaming called with context length: {len(context)}, question: {question[:50]}...")
+    print(f"[LOAD] LLM streaming called with context length: {len(context)}, question: {question[:50]}...")
     
     if llm_mistral is None:
         if not ensure_mistral_loaded():
-            print("❌ LLM model is None, cannot generate")
-            yield "⚠️ LLM generation is not available. Please install llama-cpp-python and ensure the Mistral model is available."
+            print("[ERROR] LLM model is None, cannot generate")
+            yield "[WARN] LLM generation is not available. Please install llama-cpp-python and ensure the Mistral model is available."
             return
     
     from utils.unified_system_prompt import get_simple_system_prompt
@@ -277,12 +313,13 @@ def generate_answer_streaming(context: str, question: str, request_id: str = Non
     prompt = f"[INST] {system_prompt}\n\nContesto:\n{context}\n\nDomanda:\n{question} [/INST]"
     
     # Use the streaming API
-    print(f"🔄 Starting LLM stream with prompt length: {len(prompt)}")
+    print(f"[LOAD] Starting LLM stream with prompt length: {len(prompt)}")
     try:
-        stream = llm_mistral(prompt, max_tokens=2048, stop=["</s>", "[/INST]", "[INST]"], stream=True, temperature=0.7, top_p=0.9)
+        stop_sequences = ["</s>", "[/INST]", "[INST]", "\nDomanda:", "\nQuestion:"]
+        stream = llm_mistral(prompt, max_tokens=4096, stop=stop_sequences, stream=True, temperature=0.7, top_p=0.9)
     except Exception as e:
-        print(f"❌ Failed to start LLM streaming: {e}")
-        yield f"⚠️ Failed to start text generation: {str(e)}"
+        print(f"[ERROR] Failed to start LLM streaming: {e}")
+        yield f"[WARN] Failed to start text generation: {str(e)}"
         return
     
     chunk_count = 0
@@ -332,10 +369,10 @@ def generate_answer_streaming(context: str, question: str, request_id: str = Non
                     cleaned_content = clean_response_streaming(text_content)
                     print(f"   Cleaned content: {repr(cleaned_content)}")
                     # Yield all content, even if it's just whitespace or single characters
-                    print(f"   ✅ Yielding content: {repr(cleaned_content)}")
+                    print(f"   [OK] Yielding content: {repr(cleaned_content)}")
                     yield cleaned_content
                 else:
-                    print(f"   ❌ No text content to yield")
+                    print(f"   [ERROR] No text content to yield")
             else:
                 # Try alternative chunk structures (llama-cpp-python might use different format)
                 print(f"   Metadata Chunk doesn't have choices, trying alternative structure: {chunk}")
@@ -350,26 +387,27 @@ def generate_answer_streaming(context: str, question: str, request_id: str = Non
                 else:
                     print(f"   No recognizable text content in chunk: {chunk}")
     except Exception as e:
-        print(f"❌ Error during LLM streaming: {e}")
-        yield f"⚠️ Streaming error: {str(e)}"
+        print(f"[ERROR] Error during LLM streaming: {e}")
+        yield f"[WARN] Streaming error: {str(e)}"
 
 def generate_answer_streaming_advanced(prompt: str, request_id: str = None) -> Generator[str, None, None]:
     """Minimal advanced streaming: initialize llama-cpp stream and yield cleaned text only."""
     if llm_mistral is None:
         if not ensure_mistral_loaded():
-            yield "⚠️ LLM generation is not available. Please install llama-cpp-python and ensure the Mistral model is available."
+            yield "[WARN] LLM generation is not available. Please install llama-cpp-python and ensure the Mistral model is available."
             return
     try:
+        stop_sequences = ["</s>", "[/INST]", "\nDomanda:", "\nQuestion:"]
         stream = llm_mistral(
             prompt,
-            max_tokens=2048,
-            stop=["</s>", "[/INST]"],
+            max_tokens=4096,
+            stop=stop_sequences,
             stream=True,
             temperature=0.7,
             top_p=0.9
         )
     except Exception as e:
-        yield f"⚠️ Stream initialization failed: {str(e)}"
+        yield f"[WARN] Stream initialization failed: {str(e)}"
         return
 
     import re as _re
@@ -401,7 +439,7 @@ def generate_answer_streaming_with_metadata(context: str, question: str, request
         if not ensure_mistral_loaded():
             yield {
                 "type": "token",
-                "token": "⚠️ LLM generation is not available. Please install llama-cpp-python and ensure the Mistral model is available."
+                "token": "[WARN] LLM generation is not available. Please install llama-cpp-python and ensure the Mistral model is available."
             }
             yield {
                 "type": "metadata",
@@ -416,8 +454,9 @@ def generate_answer_streaming_with_metadata(context: str, question: str, request
     
     
     # Use the streaming API
-    print(f"🔄 Starting LLM stream with metadata, prompt length: {len(prompt)}")
-    stream = llm_mistral(prompt, max_tokens=2048, stop=["</s>", "[/INST]", "[INST]"], stream=True, temperature=0.7, top_p=0.9)
+    print(f"[LOAD] Starting LLM stream with metadata, prompt length: {len(prompt)}")
+    stop_sequences = ["</s>", "[/INST]", "[INST]", "\nDomanda:", "\nQuestion:"]
+    stream = llm_mistral(prompt, max_tokens=4096, stop=stop_sequences, stream=True, temperature=0.7, top_p=0.9)
     
     # Buffer to collect the full response for thinking extraction
     full_response_buffer = ""

@@ -91,7 +91,7 @@ class EnhancedRetrievalV2:
         self.ragv2_namespaces = get_ragv2_namespaces()
         self.existing_namespaces = get_existing_namespaces()
         
-        print("🚀 Initializing Enhanced Retrieval V2 with Namespace-Aware Selection")
+        print(">>> Initializing Enhanced Retrieval V2 with Namespace-Aware Selection")
         print(f"   Index: {index_name}")
         print(f"   RAGv2 namespaces: {self.ragv2_namespaces}")
         print(f"   Dense top-k: {DENSE_TOP_K}")
@@ -105,13 +105,13 @@ class EnhancedRetrievalV2:
         """Lazy load cross-encoder model."""
         if self._cross_encoder is None and RERANKER_ENABLED:
             try:
-                print(f"🔄 Loading cross-encoder: {CROSS_ENCODER_MODEL}")
+                print(f"[LOAD] Loading cross-encoder: {CROSS_ENCODER_MODEL}")
                 # Force CPU device to avoid conflicts with main LLM on GPU
                 print("RETRIEVER: Forcing CPU for cross-encoder to prevent GPU conflicts.")
                 self._cross_encoder = CrossEncoder(CROSS_ENCODER_MODEL, device='cpu')
-                print("✅ Cross-encoder loaded successfully")
+                print("[OK] Cross-encoder loaded successfully")
             except Exception as e:
-                print(f"❌ Failed to load cross-encoder: {e}")
+                print(f"[ERROR] Failed to load cross-encoder: {e}")
                 self._cross_encoder = None
         
         return self._cross_encoder
@@ -132,7 +132,7 @@ class EnhancedRetrievalV2:
         pdf_matches = sum(1 for kw in PDF_DOCUMENT_KEYWORDS if kw in query_lower)
         db_matches = sum(1 for kw in DATABASE_KEYWORDS if kw in query_lower)
         
-        print(f"🔍 Keyword analysis: {pdf_matches} PDF keywords, {db_matches} database keywords")
+        print(f"[SEARCH] Keyword analysis: {pdf_matches} PDF keywords, {db_matches} database keywords")
         
         # Get actual namespace names from configuration
         pdf_ns = self.ragv2_namespaces["pdf"]
@@ -151,7 +151,7 @@ class EnhancedRetrievalV2:
                 docs_ns: STRONG_DOCS_BOOST,
                 db_ns: DEFAULT_DB_BOOST
             }
-            print(f"📄 Boosting PDF/Documents namespaces (procedural) - PDF: {STRONG_PDF_BOOST}, Docs: {STRONG_DOCS_BOOST}")
+            print(f"[FILE] Boosting PDF/Documents namespaces (procedural) - PDF: {STRONG_PDF_BOOST}, Docs: {STRONG_DOCS_BOOST}")
         elif db_matches >= MIN_KEYWORD_MATCHES:
             # Strong database boost for factual/list questions
             boosts = {
@@ -159,7 +159,7 @@ class EnhancedRetrievalV2:
                 docs_ns: DEFAULT_DOCS_BOOST,
                 db_ns: STRONG_DB_BOOST
             }
-            print(f"🗄️ Boosting database namespace (strong) - DB: {STRONG_DB_BOOST}")
+            print(f"[DB] Boosting database namespace (strong) - DB: {STRONG_DB_BOOST}")
         else:
             # Default boosts
             boosts = {
@@ -167,7 +167,7 @@ class EnhancedRetrievalV2:
                 docs_ns: DEFAULT_DOCS_BOOST,
                 db_ns: DEFAULT_DB_BOOST
             }
-            print(f"⚖️ Using default namespace boosts")
+            print(f"[BALANCE] Using default namespace boosts")
         
         return boosts
     
@@ -214,9 +214,9 @@ class EnhancedRetrievalV2:
                     include_metadata=True
                 )
                 namespace_results[namespace] = results.get('matches', [])
-                print(f"🔍 {namespace_name} namespace: {len(namespace_results[namespace])} results")
+                print(f"[SEARCH] {namespace_name} namespace: {len(namespace_results[namespace])} results")
             except Exception as e:
-                print(f"⚠️ Error searching {namespace}: {e}")
+                print(f"[WARN] Error searching {namespace}: {e}")
                 namespace_results[namespace] = []
         
         # Apply boosts and combine results
@@ -254,7 +254,7 @@ class EnhancedRetrievalV2:
         
         self.retrieval_stats["dense_retrieval_time"] = time.time() - start_time
         
-        print(f"🔍 Dense retrieval with boosting: {len(all_results)} results in {self.retrieval_stats['dense_retrieval_time']:.3f}s")
+        print(f"[SEARCH] Dense retrieval with boosting: {len(all_results)} results in {self.retrieval_stats['dense_retrieval_time']:.3f}s")
         print(f"   Namespace breakdown: {self._get_namespace_breakdown(all_results)}")
         
         return all_results
@@ -313,7 +313,7 @@ class EnhancedRetrievalV2:
         # Enforce minimum results (keep at least 5 even if threshold filters everything)
         MIN_RESULTS = 5
         if len(filtered_results) < MIN_RESULTS:
-            print(f"⚠️ Threshold filtered to {len(filtered_results)} results, keeping top {MIN_RESULTS}")
+            print(f"[WARN] Threshold filtered to {len(filtered_results)} results, keeping top {MIN_RESULTS}")
             # Take top MIN_RESULTS by cross-encoder score regardless of threshold
             all_results_sorted = sorted(results, key=lambda x: x.get('cross_encoder_score', 0), reverse=True)
             filtered_results = all_results_sorted[:MIN_RESULTS]
@@ -323,7 +323,7 @@ class EnhancedRetrievalV2:
         
         self.retrieval_stats["reranking_time"] = time.time() - start_time
         
-        print(f"🎯 Cross-encoder reranking: {len(filtered_results)}/{len(results)} candidates above threshold in {self.retrieval_stats['reranking_time']:.3f}s")
+        print(f"[TARGET] Cross-encoder reranking: {len(filtered_results)}/{len(results)} candidates above threshold in {self.retrieval_stats['reranking_time']:.3f}s")
         
         return filtered_results
     
@@ -383,12 +383,12 @@ class EnhancedRetrievalV2:
             
             self.retrieval_stats["bm25_time"] = time.time() - start_time
             
-            print(f"📚 BM25 hybrid search: {len(bm25_results)} results in {self.retrieval_stats['bm25_time']:.3f}s")
+            print(f"[DOCS] BM25 hybrid search: {len(bm25_results)} results in {self.retrieval_stats['bm25_time']:.3f}s")
             
             return bm25_results
             
         except Exception as e:
-            print(f"❌ BM25 hybrid search failed: {e}")
+            print(f"[ERROR] BM25 hybrid search failed: {e}")
             return []
     
     def bm25_hybrid_search(self, query: str, all_chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -429,7 +429,7 @@ class EnhancedRetrievalV2:
             else:
                 break
         
-        print(f"📏 Context management: {len(selected_results)}/{len(results)} results, {total_tokens}/{MAX_CONTEXT_TOKENS} tokens")
+        print(f"[MEASURE] Context management: {len(selected_results)}/{len(results)} results, {total_tokens}/{MAX_CONTEXT_TOKENS} tokens")
         
         return selected_results
     
@@ -457,7 +457,7 @@ class EnhancedRetrievalV2:
         
         # Step 3: BM25 hybrid enhancement (if enabled)
         if BM25_FALLBACK and all_chunks:
-            print("🔄 Performing BM25 hybrid retrieval...")
+            print("[LOAD] Performing BM25 hybrid retrieval...")
             bm25_results = self.bm25_hybrid_search(query, all_chunks)
             # Combine and deduplicate results
             combined_results = reranked_results + bm25_results
@@ -474,17 +474,17 @@ class EnhancedRetrievalV2:
             
             # Re-sort combined results by score
             reranked_results = sorted(unique_results, key=lambda x: x.get('score', 0), reverse=True)
-            print(f"📚 Hybrid results: {len(reranked_results)} total (Pinecone + BM25)")
+            print(f"[DOCS] Hybrid results: {len(reranked_results)} total (Pinecone + BM25)")
         elif BM25_FALLBACK and not all_chunks:
-            print("⚠️ BM25 enabled but no chunks provided for hybrid retrieval")
+            print("[WARN] BM25 enabled but no chunks provided for hybrid retrieval")
         
         # Step 4: Context token management
         final_results = self.manage_context_tokens(reranked_results)
         
         self.retrieval_stats["total_time"] = time.time() - start_time
         
-        print(f"✅ Enhanced retrieval V2 completed in {self.retrieval_stats['total_time']:.3f}s")
-        print(f"📊 Final results: {len(final_results)}")
+        print(f"[OK] Enhanced retrieval V2 completed in {self.retrieval_stats['total_time']:.3f}s")
+        print(f"[DATA] Final results: {len(final_results)}")
         print(f"   Final namespace breakdown: {self._get_namespace_breakdown(final_results)}")
         
         return final_results

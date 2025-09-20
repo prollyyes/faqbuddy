@@ -51,7 +51,7 @@ class AdvancedAnswerVerification:
             "average_confidence": 0.0
         }
         
-        print("🔍 Initializing Advanced Answer Verification")
+        print("[SEARCH] Initializing Advanced Answer Verification")
     
     def _get_cross_encoder(self):
         """Lazy load the cross-encoder model to save resources."""
@@ -62,7 +62,7 @@ class AdvancedAnswerVerification:
                 print("VERIFIER: Forcing CPU for cross-encoder to prevent GPU conflicts.")
                 self._cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2', device='cpu')
             except ImportError:
-                print("⚠️ sentence-transformers is not installed. Cross-encoder reranking is disabled.")
+                print("[WARN] sentence-transformers is not installed. Cross-encoder reranking is disabled.")
                 return None
         return self._cross_encoder
     
@@ -81,7 +81,7 @@ class AdvancedAnswerVerification:
         Returns:
             VerificationResult with detailed verification metrics
         """
-        print("🔍 Starting comprehensive answer verification...")
+        print("[SEARCH] Starting comprehensive answer verification...")
         
         # Extract claims from answer
         claims = self._extract_claims(answer)
@@ -185,7 +185,7 @@ class AdvancedAnswerVerification:
                             is_supported = True
                             break
                     except Exception as e:
-                        print(f"⚠️ Cross-encoder error: {e}")
+                        print(f"[WARN] Cross-encoder error: {e}")
                         # Fall back to keyword matching
                         if overlap_ratio > 0.3:
                             is_supported = True

@@ -70,7 +70,7 @@ class WebSearchEnhancer:
             }
         }
         
-        print("🌐 Web Search Enhancer initialized")
+        print("[WEB] Web Search Enhancer initialized")
         print(f"   Sapienza keywords: {len(self.sapienza_keywords)}")
         print(f"   Sapienza domains: {len(self.sapienza_domains)}")
         print(f"   Search engines: {list(self.search_engines.keys())}")
@@ -160,7 +160,7 @@ class WebSearchEnhancer:
             # Even if Sapienza is mentioned, ensure it's properly formatted
             enhanced_query = essential_query
             
-        print(f"🔍 Web search enhanced query: '{query}' -> '{enhanced_query}'")
+        print(f"[SEARCH] Web search enhanced query: '{query}' -> '{enhanced_query}'")
         
         return enhanced_query
     
@@ -201,7 +201,7 @@ class WebSearchEnhancer:
             return results
             
         except Exception as e:
-            print(f"⚠️ Google search failed: {e}")
+            print(f"[WARN] Google search failed: {e}")
             return []
     
     
@@ -241,7 +241,7 @@ class WebSearchEnhancer:
             return results
             
         except Exception as e:
-            print(f"⚠️ DuckDuckGo search failed: {e}")
+            print(f"[WARN] DuckDuckGo search failed: {e}")
             return []
     
     def _classify_source(self, url: str) -> str:
@@ -349,7 +349,7 @@ class WebSearchEnhancer:
         
         # Enhance query for Sapienza
         enhanced_query = self._enhance_query_for_sapienza(query)
-        print(f"🔍 Web search: '{query}' → '{enhanced_query}'")
+        print(f"[SEARCH] Web search: '{query}' → '{enhanced_query}'")
         
         # Search across multiple engines
         all_results = []
@@ -371,8 +371,8 @@ class WebSearchEnhancer:
         final_results = unique_results[:max_results]
         
         search_time = time.time() - start_time
-        print(f"✅ Web search completed in {search_time:.3f}s")
-        print(f"📊 Found {len(final_results)} results")
+        print(f"[OK] Web search completed in {search_time:.3f}s")
+        print(f"[DATA] Found {len(final_results)} results")
         
         # Log result breakdown
         source_counts = {}

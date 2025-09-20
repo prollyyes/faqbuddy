@@ -23,13 +23,13 @@ from rag.advanced_rag_pipeline import AdvancedRAGPipeline
 
 def print_banner():
     print("""
-🚀 Unified FAQBuddy CLI - Smart Question Routing
+>>> Unified FAQBuddy CLI - Smart Question Routing
 ================================================
-🧠 ML-Based Question Classification
-📊 Text-to-SQL for Simple Questions  
-🔍 Advanced RAG for Complex Questions
-✅ Automatic Fallback & Error Handling
-🎯 Thesis-Level Research Quality
+[BRAIN] ML-Based Question Classification
+[DATA] Text-to-SQL for Simple Questions  
+[SEARCH] Advanced RAG for Complex Questions
+[OK] Automatic Fallback & Error Handling
+[TARGET] Thesis-Level Research Quality
 
 Optimized for: University FAQ System (La Sapienza)
 """)
@@ -85,7 +85,7 @@ def handle_t2sql_logic(question: str) -> dict:
         prompt = converter.create_prompt(question, schema)
         raw_response = converter.query_llm(prompt)
         sql_query = converter.clean_sql_response(raw_response)
-        print(f"💾 Generated SQL Query: {sql_query}")
+        print(f"[SAVE] Generated SQL Query: {sql_query}")
         
         if not converter.is_sql_safe(sql_query) or sql_query == "INVALID_QUERY":
             print(f"====== Attempt {attempt+1}: Invalid SQL query, retrying...")
@@ -98,7 +98,7 @@ def handle_t2sql_logic(question: str) -> dict:
             if result:
                 natural_response = converter.from_sql_to_text(question, result)
                 db.close_connection()
-                print("✅ SQL execution successful!")
+                print("[OK] SQL execution successful!")
                 return {
                     "result": result,
                     "query": sql_query,
@@ -150,7 +150,7 @@ def process_question_with_switcher(question: str) -> dict:
     try:
         # 1. Initialize ML model
         ml_model = MLModel()
-        print("✅ ML Model loaded successfully")
+        print("[OK] ML Model loaded successfully")
         
         # 2. ML Prediction
         ml_pred, proba = ml_model.inference(question)
@@ -161,11 +161,11 @@ def process_question_with_switcher(question: str) -> dict:
         if proba < threshold:
             final_pred = "complex"
             fallback = True
-            print(f"⚠️ Low confidence ({proba:.3f} < {threshold}), marking as complex")
+            print(f"[WARN] Low confidence ({proba:.3f} < {threshold}), marking as complex")
         else:
             final_pred = ml_pred.strip().lower()
             fallback = False
-            print(f"✅ High confidence ({proba:.3f} >= {threshold}), final tprediction: '{final_pred}'")
+            print(f"[OK] High confidence ({proba:.3f} >= {threshold}), final tprediction: '{final_pred}'")
         
         # 4. Routing decision
         if final_pred == "simple":
@@ -183,16 +183,16 @@ def process_question_with_switcher(question: str) -> dict:
                 print("======= Falling back to RAG...")
                 
                 # Preload Mistral model immediately upon T2SQL failure for better performance
-                print(f"🔄 Preloading Mistral model for RAG fallback...")
+                print(f"[LOAD] Preloading Mistral model for RAG fallback...")
                 try:
                     from utils.llm_mistral import ensure_mistral_loaded
                     model_loaded = ensure_mistral_loaded()
                     if model_loaded:
-                        print(f"✅ Mistral model preloaded successfully for RAG")
+                        print(f"[OK] Mistral model preloaded successfully for RAG")
                     else:
-                        print(f"⚠️ Mistral model preload failed, will load on-demand")
+                        print(f"[WARN] Mistral model preload failed, will load on-demand")
                 except Exception as preload_error:
-                    print(f"⚠️ Mistral preload error: {preload_error}, will load on-demand")
+                    print(f"[WARN] Mistral preload error: {preload_error}, will load on-demand")
                 
                 result = handle_rag_logic(question)
                 result.update({
@@ -217,16 +217,16 @@ def process_question_with_switcher(question: str) -> dict:
         print("======= Emergency fallback to RAG...")
         
         # Preload Mistral model for emergency fallback
-        print(f"🔄 Preloading Mistral model for emergency RAG fallback...")
+        print(f"[LOAD] Preloading Mistral model for emergency RAG fallback...")
         try:
             from utils.llm_mistral import ensure_mistral_loaded
             model_loaded = ensure_mistral_loaded()
             if model_loaded:
-                print(f"✅ Mistral model preloaded successfully for emergency RAG")
+                print(f"[OK] Mistral model preloaded successfully for emergency RAG")
             else:
-                print(f"⚠️ Mistral model preload failed, will load on-demand")
+                print(f"[WARN] Mistral model preload failed, will load on-demand")
         except Exception as preload_error:
-            print(f"⚠️ Mistral preload error: {preload_error}, will load on-demand")
+            print(f"[WARN] Mistral preload error: {preload_error}, will load on-demand")
         
         result = handle_rag_logic(question)
         result.update({
@@ -246,7 +246,7 @@ def main():
     
     # Check required environment variables
     if not os.getenv("PINECONE_API_KEY"):
-        print("❌ PINECONE_API_KEY environment variable is required")
+        print("[ERROR] PINECONE_API_KEY environment variable is required")
         sys.exit(1)
     
     print_help()
@@ -287,20 +287,20 @@ def main():
             
             if result['chosen'] == 'RAG':
                 print(f"   RAG Confidence: {result.get('confidence', 0):.3f}")
-                print(f"   Verified: {'✅ YES' if result.get('verified', False) else '❌ NO'}")
+                print(f"   Verified: {'[OK] YES' if result.get('verified', False) else '[ERROR] NO'}")
             
             if result.get('fallback_reason'):
                 print(f"   Fallback Reason: {result['fallback_reason']}")
             
             if result['chosen'] == 'T2SQL' and 'query' in result:
-                print(f"\n💾 SQL Query Used:")
+                print(f"\n[SAVE] SQL Query Used:")
                 print(f"{result['query']}")
                 
         except KeyboardInterrupt:
             print("\n👋 Goodbye!")
             break
         except Exception as e:
-            print(f"❌ Error: {e}")
+            print(f"[ERROR] Error: {e}")
 
 if __name__ == "__main__":
     main()

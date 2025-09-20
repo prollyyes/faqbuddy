@@ -49,8 +49,8 @@ class AdvancedPromptEngineer:
             "prioritize_recency": True
         }
         
-        print("🧠 Initializing Advanced Prompt Engineer (Modular)")
-        print(f"   Modular system: ✅")
+        print("[BRAIN] Initializing Advanced Prompt Engineer (Modular)")
+        print(f"   Modular system: [OK]")
         print(f"   Self-Verification: {self.config.use_self_verification}")
         print(f"   Source Attribution: {self.config.use_source_attribution}")
         print(f"   Ambiguity handling: {self.modular_config['handle_ambiguity']}")
@@ -136,7 +136,7 @@ class AdvancedPromptEngineer:
         # Update modular config based on query analysis
         if query_analysis is not None:
             # Disable CoT in modular system - keep thinking internal
-            print(f"🧠 Modular CoT: DISABLED (keeping thinking internal for better outputs)")
+            print(f"[BRAIN] Modular CoT: DISABLED (keeping thinking internal for better outputs)")
         
         # Use modular prompt system instead of monolithic approach
         from utils.modular_prompts import build_modular_prompt, get_prompt_stats, validate_prompt_size
@@ -151,11 +151,11 @@ class AdvancedPromptEngineer:
         
         # Get prompt statistics for optimization
         stats = get_prompt_stats(prompt)
-        print(f"📏 Modular prompt: {stats['estimated_tokens']} tokens, {stats['blocks_count']} blocks")
+        print(f"[MEASURE] Modular prompt: {stats['estimated_tokens']} tokens, {stats['blocks_count']} blocks")
         
         # Validate prompt size and warn if too large
         if not validate_prompt_size(prompt, max_tokens=1200):
-            print(f"⚠️ Prompt exceeds recommended size ({stats['estimated_tokens']} tokens)")
+            print(f"[WARN] Prompt exceeds recommended size ({stats['estimated_tokens']} tokens)")
         
         return prompt
 
@@ -229,11 +229,11 @@ Procedo con l'analisi dettagliata..."""
     def _build_verification_section(self) -> str:
         """Build the self-verification section."""
         return """**Verifica della risposta**:
-- ✅ Ogni affermazione è supportata dai frammenti
-- ✅ Le citazioni sono accurate
-- ✅ Non ho aggiunto informazioni non presenti
-- ✅ La risposta è completa e risponde alla domanda
-- ✅ Il tono è appropriato e professionale
+- [OK] Ogni affermazione è supportata dai frammenti
+- [OK] Le citazioni sono accurate
+- [OK] Non ho aggiunto informazioni non presenti
+- [OK] La risposta è completa e risponde alla domanda
+- [OK] Il tono è appropriato e professionale
 
 La risposta è pronta per la consegna."""
 

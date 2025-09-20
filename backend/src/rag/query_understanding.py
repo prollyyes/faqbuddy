@@ -135,7 +135,7 @@ class AdvancedQueryUnderstanding:
             }
         }
         
-        print("🧠 Initializing Advanced Query Understanding")
+        print("[BRAIN] Initializing Advanced Query Understanding")
         print(f"   Intent patterns: {len(self.intent_patterns)}")
         print(f"   Entity patterns: {len(self.entity_patterns)}")
         print(f"   Expansion patterns: {len(self.expansion_patterns)}")
@@ -408,7 +408,7 @@ def test_query_understanding():
     ]
     
     for query in test_queries:
-        print(f"\n🔍 Query: {query}")
+        print(f"\n[SEARCH] Query: {query}")
         analysis = qa_system.analyze_query(query)
         
         print(f"   Intent: {analysis.intent.value}")

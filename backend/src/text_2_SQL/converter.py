@@ -86,19 +86,19 @@ class TextToSQLConverter:
                 sql_response = result.strip()
             return sql_response
         except Exception as e:
-            print(f"❌ Error in query_llm: {e}")
+            print(f"[ERROR] Error in query_llm: {e}")
             return "INVALID_QUERY"
 
     def clean_sql_response(self, sql_response: str) -> str:
         import re
         
-        print(f"🔍 T2SQL CLEANING - Raw response: {repr(sql_response)}")
+        print(f"[SEARCH] T2SQL CLEANING - Raw response: {repr(sql_response)}")
         
         # First, try to find a complete SELECT query with semicolon
         match = re.search(r"(SELECT[\s\S]+?;)", sql_response, re.IGNORECASE)
         if match:
             clean_query = match.group(1).strip()
-            print(f"✅ T2SQL CLEANING - Found query with semicolon: {repr(clean_query)}")
+            print(f"[OK] T2SQL CLEANING - Found query with semicolon: {repr(clean_query)}")
             return clean_query
             
         # Try to find SELECT query that ends at common delimiters (before prompt contamination)
@@ -108,7 +108,7 @@ class TextToSQLConverter:
             clean_query = match.group(1).strip()
             if not clean_query.endswith(';'):
                 clean_query += ';'
-            print(f"✅ T2SQL CLEANING - Found query before prompt markers: {repr(clean_query)}")
+            print(f"[OK] T2SQL CLEANING - Found query before prompt markers: {repr(clean_query)}")
             return clean_query
             
         # Fallback: extract just the first line if it starts with SELECT
@@ -118,10 +118,10 @@ class TextToSQLConverter:
             clean_first_line = re.sub(r'\s*###.*$', '', first_line).strip()
             if not clean_first_line.endswith(';'):
                 clean_first_line += ';'
-            print(f"✅ T2SQL CLEANING - Using cleaned first line: {repr(clean_first_line)}")
+            print(f"[OK] T2SQL CLEANING - Using cleaned first line: {repr(clean_first_line)}")
             return clean_first_line
             
-        print(f"❌ T2SQL CLEANING - No valid SQL found")
+        print(f"[ERROR] T2SQL CLEANING - No valid SQL found")
         return "INVALID_QUERY"
 
     def from_sql_to_text(self, question: str, results: list) -> str:
@@ -233,7 +233,7 @@ class TextToSQLConverter:
             else:
                 return str(output).strip()
         except Exception as e:
-            print(f"❌ Error in sql_results_to_text_llm: {e}")
+            print(f"[ERROR] Error in sql_results_to_text_llm: {e}")
             return f"Errore nella conversione dei risultati: {str(e)}"
 
 
