@@ -1,4 +1,4 @@
-import MaterialsPage from "@/components/pages/Materials";
+import MaterialsPage from "@/components/pages/materials/Materials";
 
 export default function Materials(){
   return (
