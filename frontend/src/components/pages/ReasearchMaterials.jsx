@@ -150,7 +150,7 @@ export default function ReasearchMaterials() {
     }
   }, [selectedCourse, selectedEdition, selectedEditionDate, includeMaterials, includeInfo, includeReviews]);
 
-  return (
+    return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-white px-6 text-[#822433] space-y-8 pt-10 pb-15">
       <motion.div
         key="research"
@@ -323,7 +323,7 @@ export default function ReasearchMaterials() {
                 <div key={idx} className="border rounded-md p-3 text-sm space-y-1 bg-gray-50">
                   <div><strong>Commento:</strong> {descrizione}</div>
                   <div><strong>Valutazione studenti:</strong>{" "}
-                    <span className="flex gap-1 inline-flex align-middle">
+                    <span className="gap-1 inline-flex align-middle">
                       {[...Array(Number(voto))].map((_, idx) => (
                         <FaStar key={idx} color="#991B1B" />
                       ))}
