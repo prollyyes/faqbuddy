@@ -11,8 +11,8 @@ backend/models
 **/__pycache__
 
 #Token && Credentials google
-backend/src/token.json
-backend/src/credentials.json
+backend/token.json
+backend/credentials.json
 backend/token.json
 
 # environment
