@@ -86,11 +86,17 @@ export default function TeacherCourses() {
   return (
     <SwipeWrapperInsegnante>
       <div className="flex flex-col p-4 min-h-screen pb-24 pt-20">
+
         {/* Toggle centrato con stessa UI dello studente */}
         <div className="sticky top-16 z-10 bg-white/90 backdrop-blur px-1 pb-3">
           <div className="grid grid-cols-3 items-center">
             <div className="justify-self-end pr-3">
-              <span className={`text-sm font-semibold ${tab === 'attivi' ? 'text-[#822433]' : 'text-gray-400'}`}>Attivi</span>
+              <span
+                className={`text-sm font-semibold ${tab === 'attivi' ? 'text-[#822433]' : 'text-gray-400'} cursor-pointer`}
+                onClick={() => setTab('attivi')}
+              >
+                Attivi
+              </span>
             </div>
             <div className="justify-self-center">
               <button
@@ -105,7 +111,12 @@ export default function TeacherCourses() {
               </button>
             </div>
             <div className="justify-self-start pl-3">
-              <span className={`text-sm font-semibold ${tab === 'passati' ? 'text-[#822433]' : 'text-gray-400'}`}>Passati</span>
+              <span
+                className={`text-sm font-semibold ${tab === 'passati' ? 'text-[#822433]' : 'text-gray-400'} cursor-pointer`}
+                onClick={() => setTab('passati')}
+              >
+                Passati
+              </span>
             </div>
           </div>
         </div>

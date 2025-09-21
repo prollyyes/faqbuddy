@@ -380,7 +380,7 @@ export default function UploadMaterials() {
                 <button
                   onClick={handleUpload}
                   disabled={isUploading || !selectedFile || (uploadType !== 'tesi' && !selectedCourseEdition) || (uploadType === 'tesi' && !thesisTitle.trim())}
-                  className="w-full sm:w-auto px-4 py-2 bg-[#991B1B] text-white rounded-lg shadow-md hover:bg-[#7e1414] transition disabled:opacity-60 disabled:shadow-none"
+                  className="w-full sm:w-auto px-4 py-2 bg-[#822433] text-white rounded-lg shadow-md hover:bg-[#7e1414] transition disabled:opacity-60 disabled:shadow-none"
                   type="button"
                 >
                   {isUploading ? 'Caricamento...' : 'Carica materiale'}

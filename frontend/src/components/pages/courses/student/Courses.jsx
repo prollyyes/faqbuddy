@@ -333,7 +333,12 @@ export default function CorsiPage() {
         <div className="px-1 pb-3 mt-2">
           <div className="grid grid-cols-3 items-center">
             <div className="justify-self-end pr-3">
-              <span className={`text-sm font-semibold ${tab === 'attivi' ? 'text-[#822433]' : 'text-gray-400'}`}>Attivi</span>
+              <span
+                className={`text-sm font-semibold ${tab === 'attivi' ? 'text-[#822433]' : 'text-gray-400'} cursor-pointer`}
+                onClick={() => setTab('attivi')}
+              >
+                Attivi
+              </span>
             </div>
             <div className="justify-self-center">
               <button
@@ -348,7 +353,12 @@ export default function CorsiPage() {
               </button>
             </div>
             <div className="justify-self-start pl-3">
-              <span className={`text-sm font-semibold ${tab === 'completati' ? 'text-[#822433]' : 'text-gray-400'}`}>Completati</span>
+              <span
+                className={`text-sm font-semibold ${tab === 'completati' ? 'text-[#822433]' : 'text-gray-400'} cursor-pointer`}
+                onClick={() => setTab('completati')}
+              >
+                Completati
+              </span>
             </div>
           </div>
         </div>
