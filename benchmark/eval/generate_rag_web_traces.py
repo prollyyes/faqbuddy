@@ -15,12 +15,11 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Add the project root to sys.path
-project_root = Path(__file__).resolve().parents[2]
-sys.path.append(str(project_root))
-
-# Load environment variables
-load_dotenv()
+# Setup imports
+sys.path.insert(0, str(Path(__file__).parent))  # Add eval directory for import_utils
+from import_utils import setup_backend_imports, load_env_file, get_benchmark_paths
+setup_backend_imports()
+load_env_file()
 
 # Set environment variables for RAG + web enhancement configuration
 os.environ["RERANKER_ENABLED"] = "false"
@@ -29,7 +28,7 @@ os.environ["HALLUCINATION_GUARDS"] = "false"
 os.environ["SCHEMA_AWARE_CHUNKING"] = "false"
 os.environ["INSTRUCTOR_XL_EMBEDDINGS"] = "false"
 
-from backend.src.rag.rag_pipeline_v2 import RAGv2Pipeline
+from rag.rag_pipeline_v2 import RAGv2Pipeline
 
 def generate_rag_web_traces():
     """Generate RAG + Web enhancement traces for evaluation."""

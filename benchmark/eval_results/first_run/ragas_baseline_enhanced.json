@@ -1,0 +1,8 @@
+{
+  "faithfulness": 0.40155714479622656,
+  "answer_relevancy": 0.5524009231552084,
+  "samples_evaluated": 47,
+  "batches_processed": 10,
+  "total_batches": 10,
+  "success_rate": 1.0
+}

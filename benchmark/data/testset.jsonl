@@ -1,10 +1,60 @@
-{"question": "Quali corsi insegna il prof Lenzerini?", "ground_truth": "Basi di Dati"}
-{"question": "Come si chiama di nome il prof Lenzerini?", "ground_truth": "Maurizio"}
-{"question": "Quali sono i corsi insegnati da Ottolino?", "ground_truth": "Sistemi Operativi"}
-{"question": "Quale corso insegna Califano?", "ground_truth": "Sistemi Dinamici"}
-{"question": "Chi è il professore che insegna Sistemi Operativi?", "ground_truth": "Ottolino"}
-{"question": "Ci sono corsi insegnati da più di un professore?", "ground_truth": "No"}
-{"question": "Da quanti crediti è il corso di Basi di Dati?", "ground_truth": "6"}
-{"question": "Da quanti crediti è il corso di Sistemi Operativi?", "ground_truth": "9"}
-{"question": "Da quanti crediti è il corso di Sistemi Dinamici?", "ground_truth": "9"}
-{"question": "Cosa insegna Gabriele Proietti Mattia?", "ground_truth": "Complementi di Programmazione"}
+{"question": "Quali corsi insegna il prof Gabriele Proietti Mattia?", "ground_truth": "** Complementi di Programmazione"}
+{"question": "Quali corsi insegna il prof Emilio De Santis?", "ground_truth": "Elementi di Calcolo delle Probabilita', Statistica"}
+{"question": "Quali corsi insegna il prof Roberto Navigli?", "ground_truth": "** Laboratorio di Ingegneria Informatica"}
+{"question": "Quali corsi insegna il prof Maurizio Lenzerini?", "ground_truth": "** Basi di Dati"}
+{"question": "Quali corsi insegna il prof Massimo Petrarca?", "ground_truth": "** Fisica, Introduzione alla Programmazione"}
+{"question": "Quali corsi insegna il prof Claudia Califano?", "ground_truth": "** Sistemi Dinamici"}
+{"question": "Quali corsi insegna il prof Francesco Leotta?", "ground_truth": "** Progettazione del Software"}
+{"question": "Quali corsi insegna il prof Nicola Galesi?", "ground_truth": "** Fondamenti di Matematica"}
+{"question": "Quali corsi insegna il prof Daniele Cono D’Elia?", "ground_truth": "** Sicurezza, Sistemi di Calcolo"}
+{"question": "Quali corsi insegna il prof Giuseppe Santucci?", "ground_truth": "Introduzione alla Programmazione"}
+{"question": "Quali corsi insegna il prof Paolo Ottolino?", "ground_truth": "Sistemi Operativi"}
+{"question": "Quali corsi insegna il prof Riccardo Lazzeretti?", "ground_truth": "** Sistemi Operativi, Reti di Calcolatori"}
+{"question": "Da quanti crediti è il corso Sistemi Dinamici?", "ground_truth": "9 CFU"}
+{"question": "Da quanti crediti è il corso Laboratorio di Ingegneria Informatica?", "ground_truth": "6 CFU"}
+{"question": "Da quanti crediti è il corso Introduzione alla Programmazione?", "ground_truth": "9 CFU"}
+{"question": "Da quanti crediti è il corso Fisica?", "ground_truth": "12 CFU"}
+{"question": "Da quanti crediti è il corso Programmazione Matematica?", "ground_truth": "9 CFU"}
+{"question": "Da quanti crediti è il corso Fondamenti di Matematica?", "ground_truth": "9 CFU"}
+{"question": "Da quanti crediti è il corso Sicurezza?", "ground_truth": "6 CFU"}
+{"question": "Da quanti crediti è il corso Progettazione del Software?", "ground_truth": "9 CFU"}
+{"question": "Da quanti crediti è il corso Economia?", "ground_truth": "9 CFU"}
+{"question": "Da quanti crediti è il corso Sistemi Operativi?", "ground_truth": "9 CFU"}
+{"question": "Chi insegna il corso Sistemi Dinamici?", "ground_truth": "Claudia Califano"}
+{"question": "Chi insegna il corso Laboratorio di Ingegneria Informatica?", "ground_truth": "Roberto Navigli"}
+{"question": "Chi insegna il corso Introduzione alla Programmazione?", "ground_truth": "Giuseppe Santucci"}
+{"question": "Chi insegna il corso Fisica?", "ground_truth": "Massimo Petrarca"}
+{"question": "Chi insegna il corso Programmazione Matematica?", "ground_truth": "Giampaolo Liuzzi"}
+{"question": "Chi insegna il corso Fondamenti di Matematica?", "ground_truth": "Nicola Galesi"}
+{"question": "Chi insegna il corso Sicurezza?", "ground_truth": "Daniele Cono D’Elia"}
+{"question": "Chi insegna il corso Progettazione del Software?", "ground_truth": "Francesco Leotta"}
+{"question": "Come ci si iscrive al corso di Ingegneria Informatica e Automatica?", "ground_truth": "1) Sostenere il TOLC-I/ENGLISH TOLC-I; 2) Registrarsi a Infostud; 3) Indicare la preferenza del corso; 4) Pagare il contributo; 5) Seguire graduatorie e, se idonei, procedere all’immatricolazione."}
+{"question": "Quali sono le scadenze della seconda selezione?", "ground_truth": "Partecipazione 8 maggio – 21 luglio 2025; pubblicazione posti 15 maggio 2025; esiti 23 luglio 2025."}
+{"question": "Qual è il punteggio minimo TOLC per evitare gli OFA?", "ground_truth": "Almeno 18/50 al TOLC‑I o ENGLISH TOLC‑I."}
+{"question": "Come si indicano le preferenze del corso su Infostud?", "ground_truth": "Da Infostud: Corsi di laurea → gestione preferenze; seleziona codice prova e corso."}
+{"question": "Dove sono pubblicate le graduatorie?", "ground_truth": "Sulla pagina istituzionale indicata nel bando nelle date previste."}
+{"question": "Cosa succede se non rispetto le scadenze di pagamento?", "ground_truth": "Perdi il posto e non puoi immatricolarti per quella selezione."}
+{"question": "Quali tutele sono previste per studenti con DSA o disabilità?", "ground_truth": "Sono previste misure compensative e tempi aggiuntivi secondo l’allegato dedicato."}
+{"question": "Quali requisiti valgono per i candidati non UE con visto di studio?", "ground_truth": "Domanda su Universitaly entro il 30 giugno 2025; partecipazione alla sola terza selezione."}
+{"question": "Quando sono comunicati gli eventuali posti vacanti?", "ground_truth": "Il 4 novembre 2025 tramite il link indicato nel bando."}
+{"question": "È possibile il trasferimento da altro corso?", "ground_truth": "Trasferimenti e abbreviazioni sono consentiti secondo finestra e regole del bando, previa disponibilità posti."}
+{"question": "Come si effettua il pagamento PagoPA?", "ground_truth": "Da Infostud selezionare Pagamento diretto PagoPA nelle finestre di bando."}
+{"question": "Come si rinuncia e si chiede rimborso?", "ground_truth": "La rinuncia comporta le condizioni di rimborso previste dal bando e dalle norme di Ateneo."}
+{"question": "Come funziona la visita BFS?", "ground_truth": "La BFS esplora per livelli con una coda FIFO."}
+{"question": "Come funziona la visita DFS?", "ground_truth": "La DFS esplora in profondità con backtracking e classifica gli archi."}
+{"question": "Come è descritto l’algoritmo di Dijkstra?", "ground_truth": "Calcola cammini minimi con pesi non negativi tramite coda di priorità."}
+{"question": "Qual è la complessità di Dijkstra?", "ground_truth": "O((V+E) log V) con heap binario."}
+{"question": "Come è descritto l’algoritmo di Bellman-Ford?", "ground_truth": "Gestisce pesi negativi e rileva cicli negativi iterando rilassamenti."}
+{"question": "Cosa riportano gli schemi sull’algoritmo di Kruskal?", "ground_truth": "Costruisce MST scegliendo archi crescenti ed evitando cicli (O(E log V))."}
+{"question": "Cosa riportano gli schemi sull’algoritmo di Prim?", "ground_truth": "Espande MST aggiungendo l’arco più leggero verso un nuovo vertice (O(E log V))."}
+{"question": "Come è descritto QuickSort?", "ground_truth": "Divide et impera con pivot e partizione; media O(n log n)."}
+{"question": "Come funzionano le code di priorità basate su heap?", "ground_truth": "Inserimento/estrazione del minimo in O(log n)."}
+{"question": "Cosa dicono gli schemi sulle tabelle hash?", "ground_truth": "Operazioni medie O(1) con buona funzione e gestione collisioni."}
+{"question": "Qual è la differenza tra commutazione di circuito e di pacchetto?", "ground_truth": "Circuito: canale dedicato; Pacchetto: risorse condivise con ritardo/possibile perdita."}
+{"question": "Che differenza c’è tra FDM e TDM?", "ground_truth": "FDM usa bande di frequenza distinte; TDM usa slot temporali distinti."}
+{"question": "Cosa caratterizza il livello di collegamento dati?", "ground_truth": "Framing, controllo di errore, accesso al mezzo tra nodi adiacenti."}
+{"question": "Cosa caratterizza il livello di rete (IP)?", "ground_truth": "Instradamento best effort con indirizzi; nessuna garanzia di consegna né ordine."}
+{"question": "Qual è la differenza tra TCP e UDP?", "ground_truth": "TCP affidabile e connesso; UDP non affidabile e senza connessione."}
+{"question": "Che cos’è il throughput?", "ground_truth": "Velocità effettiva di trasferimento dipendente da banda, ritardi e perdite."}
+{"question": "Che cosa si intende per ritardo di accodamento?", "ground_truth": "Tempo di attesa dei pacchetti nei buffer per congestione."}
+{"question": "Cos’è la finestra scorrevole (sliding window)?", "ground_truth": "Controllo di flusso/congestione che limita i pacchetti non confermati."}

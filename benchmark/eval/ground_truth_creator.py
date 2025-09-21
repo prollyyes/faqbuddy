@@ -441,6 +441,33 @@ class GroundTruthCreator:
         
         return list(set(sections))  # Remove duplicates
 
+def generate_testset_from_ground_truth(ground_truth_file: str, output_file: str):
+    """Generate testset.jsonl from ground_truth.json file."""
+    print(f"🔄 Converting ground truth to testset format...")
+    print(f"+++++++++ Input: {ground_truth_file}")
+    print(f"--------- Output: {output_file}")
+    
+    # Load ground truth
+    with open(ground_truth_file, 'r', encoding='utf-8') as f:
+        ground_truth = json.load(f)
+    
+    # Convert to testset format
+    testset = []
+    for entry in ground_truth:
+        testset_entry = {
+            "question": entry["question"],
+            "ground_truth": entry["ground_truth_answer"]
+        }
+        testset.append(testset_entry)
+    
+    # Save as JSONL
+    with open(output_file, 'w', encoding='utf-8') as f:
+        for entry in testset:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    
+    print(f"========== Testset generated: {output_file}")
+    print(f"========== Generated {len(testset)} test questions")
+
 def create_basic_ground_truth(testset_file: str, output_file: str):
     """Create basic ground truth from testset file."""
     print(f"🏗️ Creating basic ground truth from {testset_file}")
@@ -483,7 +510,7 @@ if __name__ == "__main__":
     import argparse
     
     parser = argparse.ArgumentParser(description="Create and manage ground truth for RAG evaluation")
-    parser.add_argument("--mode", choices=["extract", "template", "validate", "merge", "basic"],
+    parser.add_argument("--mode", choices=["extract", "template", "validate", "merge", "basic", "generate-testset"],
                        required=True, help="Operation mode")
     parser.add_argument("--input", help="Input file or directory")
     parser.add_argument("--output", help="Output file")
@@ -543,5 +570,12 @@ if __name__ == "__main__":
             print("❌ --files and --output required for merge mode")
             exit(1)
         report = creator.merge_ground_truth_files(args.files, args.output)
+
+    elif args.mode == "generate-testset":
+    # Generate testset from ground truth
+        if not args.input or not args.output:
+            print("❌ --input and --output required for generate-testset mode")
+            exit(1)
+        generate_testset_from_ground_truth(args.input, args.output)
         
     print("\n✅ Ground truth operation completed!")

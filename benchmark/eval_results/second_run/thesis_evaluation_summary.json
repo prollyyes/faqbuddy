@@ -1,0 +1,23 @@
+{
+  "timestamp": "2025-09-21T03:03:28.921636",
+  "total_configurations": 3,
+  "configurations": {
+    "full_enhanced": {
+      "faithfulness": 0.5139285714285714,
+      "answer_relevancy": 0.7306800592181035,
+      "composite_score": 0.6223043153233374
+    },
+    "ablation_no_rerank": {
+      "faithfulness": 0.5583333333333333,
+      "answer_relevancy": 0.7188031256807321,
+      "composite_score": 0.6385682295070327
+    },
+    "baseline_enhanced": {
+      "faithfulness": 0.6018518518518519,
+      "answer_relevancy": 0.7013627441853225,
+      "composite_score": 0.6516072980185872
+    }
+  },
+  "best_configuration": "baseline_enhanced",
+  "worst_configuration": "full_enhanced"
+}

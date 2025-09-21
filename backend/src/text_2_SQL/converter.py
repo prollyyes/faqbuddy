@@ -7,58 +7,64 @@ class TextToSQLConverter:
         pass
 
     def create_prompt(self, question: str, schema: str) -> str:
-        prompt = f"""
-    Sei un assistente SQL esperto.
+        prompt = f"""Sei un assistente SQL esperto per database universitari.
 
-    Il tuo compito è: **convertire la domanda seguente in una query SQL valida e corretta**, utilizzando **solo** lo schema fornito.
+TASK: Converti la domanda in una query SQL valida usando SOLO lo schema fornito.
 
-    ### Regole
-    - Solo query di tipo SELECT.
-    - Usa solo colonne e tabelle presenti nello schema.
-    - Non inventare nomi di colonne, ruoli, o filtri.
-    - Se la domanda non è possibile, restituisci: INVALID_QUERY
-    - Niente testo extra, commenti o spiegazioni.
+REGOLE CRITICHE:
+- Solo query SELECT
+- Usa SOLO tabelle e colonne presenti nello schema
+- NON inventare nomi, colonne o relazioni
+- Se impossibile: restituisci INVALID_QUERY
+- Una sola query SQL, niente commenti o spiegazioni
+- Termina sempre con punto e virgola (;)
 
-    ### Esempi
-    
-        Domanda: Elenca tutti i professori
-        SQL: SELECT * FROM Insegnanti_Anagrafici;
-    
-        Domanda: Mostra tutti i corsi di laurea  
-        SQL: SELECT * FROM Corso_di_Laurea;
-    
-        Domanda: Mostra tutti i corsi del primo semestre  
-        SQL: SELECT c.nome FROM Corso c JOIN EdizioneCorso e ON c.id = e.id WHERE e.data LIKE 'S1/%';
-        
-        Domanda: Mostra tutte le informazioni sul corso Fondamenti di Informatica
-        SQL: SELECT * FROM Corso WHERE nome = 'Fondamenti di Informatica';
-        
-        Domanda: Quali sono i corsi di Ingegneria Informatica ?  
-        SQL: SELECT Corso.nome FROM Corso JOIN Corso_di_Laurea ON Corso.id_corso = Corso_di_Laurea.id WHERE Corso_di_Laurea.nome = 'Ingegneria Informatica' OR Corso_di_Laurea.nome = 'Ingegneria Informatica e Automatica';
-    
-        Domanda: Mostra i corsi offerti nel 2023  
-        SQL: SELECT Corso.nome FROM Corso JOIN Corso_di_Laurea ON Corso.id_corso = Corso_di_Laurea.id WHERE Corso.semestre = 'S1/2023' OR Corso.semestre = 'S2/2023';
-    
-        Domanda: Qual'è la mail del professore 'Roberto Baldoni'?
-        SQL: SELECT ir.infoMail FROM Insegnanti_Anagrafici ia LEFT JOIN Insegnanti_Registrati ir ON ia.id = ir.anagrafico_id WHERE ia.nome = 'Roberto' AND ia.cognome = 'Baldoni';
-        
-        Domanda: Elenca tutti i professori di nome Roberto.
-        SQL: SELECT * FROM Insegnanti_Anagrafici WHERE nome = 'Roberto';
-        
-        Domanda: Quali sono i professori che insegnano il corso Fondamenti di algebra e geometria?
-        SQL: SELECT ia.nome, ia.cognome FROM Insegnanti_Anagrafici ia JOIN EdizioneCorso e ON ia.id = e.insegnante_anagrafico JOIN Corso c ON e.id = c.id WHERE c.nome = 'Fondamenti di algebra e geometria';
-    ### SCHEMA
-    {schema}
+RELAZIONI CHIAVE (per JOIN):
+- insegnanti_anagrafici.id → edizionecorso.insegnante_anagrafico
+- corso.id → edizionecorso.id
+- studenti.corso_laurea_id → corso_di_laurea.id
+- studenti.id → utente.id (stesso utente)
+- insegnanti_anagrafici.utente_id → utente.id
+- corso_di_laurea.id_facolta → facolta.id
+- facolta.dipartimento_id → dipartimento.id
+- materiale_didattico.edition_id → edizionecorso.id
+- review.edition_id → edizionecorso.id
 
-    ### DOMANDA:
-    {question}
+ESEMPI CORRETTI (basati su schema reale):
 
-    ### SQL:"""
+Domanda: Elenca tutti i professori
+SQL: SELECT * FROM insegnanti_anagrafici;
+
+Domanda: Mostra tutti i corsi di laurea
+SQL: SELECT * FROM corso_di_laurea;
+
+Domanda: Mostra tutti i corsi del primo semestre
+SQL: SELECT c.* FROM corso c JOIN edizionecorso e ON c.id = e.id WHERE e.data LIKE 'S1/%';
+
+Domanda: Chi insegna il corso di Programmazione?
+SQL: SELECT ia.nome, ia.cognome FROM insegnanti_anagrafici ia JOIN edizionecorso e ON ia.id = e.insegnante_anagrafico JOIN corso c ON e.id = c.id WHERE c.nome ILIKE '%programmazione%';
+
+Domanda: Mostra le informazioni sui materiali didattici verificati
+SQL: SELECT * FROM materiale_didattico WHERE verificato = true;
+
+Domanda: Quali studenti sono iscritti a Ingegneria Informatica?
+SQL: SELECT u.nome, u.cognome, s.matricola FROM studenti s JOIN utente u ON s.id = u.id JOIN corso_di_laurea cdl ON s.corso_laurea_id = cdl.id WHERE cdl.nome ILIKE '%informatica%';
+
+Domanda: Mostra tutte le recensioni con voto superiore a 7
+SQL: SELECT r.*, ia.nome, ia.cognome FROM review r JOIN edizionecorso e ON r.edition_id = e.id JOIN insegnanti_anagrafici ia ON e.insegnante_anagrafico = ia.id WHERE r.voto > 7;
+
+SCHEMA DISPONIBILE:
+{schema}
+
+DOMANDA: {question}
+
+SQL:"""
         return prompt
 
     def query_llm(self, prompt: str) -> str:
         # Ensure Gemma model is loaded
         if not model_manager.load_gemma():
+            print("[ERROR] T2SQL - Failed to load Gemma model")
             return "INVALID_QUERY"
         
         # Import llm_gemma after ensuring it's loaded
@@ -66,27 +72,45 @@ class TextToSQLConverter:
         
         # Check if llm_gemma is None
         if llm_gemma is None:
+            print("[ERROR] T2SQL - Gemma model is None after loading")
             return "INVALID_QUERY"
         
         try:
+            print(f"[SEARCH] T2SQL - Generating SQL with prompt length: {len(prompt)}")
+            
             # Gemma LLM for T2SQL (better for structured tasks)
-            result = llm_gemma(prompt, max_tokens=150, temperature=0.01)
+            # Use slightly higher max_tokens for complex queries
+            result = llm_gemma(prompt, max_tokens=200, temperature=0.05, top_p=0.9)
             
             # Handle None result
             if result is None:
+                print("[ERROR] T2SQL - LLM returned None")
                 return "INVALID_QUERY"
+            
+            print(f"[SEARCH] T2SQL - LLM result type: {type(result)}")
             
             # Compatibilità output (dict o string)
             if isinstance(result, dict):
                 if "choices" in result and len(result["choices"]) > 0:
                     sql_response = result["choices"][0]["text"].strip()
+                    print(f"[OK] T2SQL - Extracted response from choices: {repr(sql_response[:100])}")
                 else:
+                    print(f"[ERROR] T2SQL - Invalid dict structure: {result.keys() if hasattr(result, 'keys') else 'no keys'}")
                     return "INVALID_QUERY"
             else:
-                sql_response = result.strip()
+                sql_response = str(result).strip()
+                print(f"[OK] T2SQL - Direct string response: {repr(sql_response[:100])}")
+            
+            if not sql_response:
+                print("[ERROR] T2SQL - Empty response from LLM")
+                return "INVALID_QUERY"
+                
             return sql_response
+            
         except Exception as e:
             print(f"[ERROR] Error in query_llm: {e}")
+            import traceback
+            traceback.print_exc()
             return "INVALID_QUERY"
 
     def clean_sql_response(self, sql_response: str) -> str:
@@ -94,34 +118,69 @@ class TextToSQLConverter:
         
         print(f"[SEARCH] T2SQL CLEANING - Raw response: {repr(sql_response)}")
         
-        # First, try to find a complete SELECT query with semicolon
-        match = re.search(r"(SELECT[\s\S]+?;)", sql_response, re.IGNORECASE)
+        # Remove common prefixes that might confuse parsing
+        sql_response = re.sub(r'^(SQL:\s*|Query:\s*|Risposta:\s*)', '', sql_response.strip(), flags=re.IGNORECASE)
+        
+        # Strategy 1: Find complete SELECT query with semicolon (most reliable)
+        match = re.search(r"(SELECT[\s\S]*?;)", sql_response, re.IGNORECASE | re.DOTALL)
         if match:
             clean_query = match.group(1).strip()
-            print(f"[OK] T2SQL CLEANING - Found query with semicolon: {repr(clean_query)}")
+            # Remove any trailing prompt contamination after semicolon
+            clean_query = re.sub(r';[\s\S]*$', ';', clean_query)
+            print(f"[OK] T2SQL CLEANING - Found complete query: {repr(clean_query)}")
             return clean_query
-            
-        # Try to find SELECT query that ends at common delimiters (before prompt contamination)
-        # Look for SELECT...WHERE clause that ends before ### or similar prompt markers
-        match = re.search(r"(SELECT[^#]*?)(?:\s*###|\s*\n\s*###|\s*DOMANDA:|\s*SQL:|\s*$)", sql_response, re.IGNORECASE)
+        
+        # Strategy 2: Find SELECT query that ends before prompt markers
+        prompt_markers = [
+            r'\s*###', r'\s*DOMANDA:', r'\s*SQL:', r'\s*SCHEMA:', 
+            r'\s*REGOLE:', r'\s*ESEMPI:', r'\s*TASK:'
+        ]
+        for marker in prompt_markers:
+            pattern = rf"(SELECT[\s\S]*?)(?:{marker}|$)"
+            match = re.search(pattern, sql_response, re.IGNORECASE | re.DOTALL)
+            if match:
+                clean_query = match.group(1).strip()
+                # Clean up and add semicolon if missing
+                clean_query = re.sub(r'\s+', ' ', clean_query)  # Normalize whitespace
+                if not clean_query.endswith(';'):
+                    clean_query += ';'
+                print(f"[OK] T2SQL CLEANING - Found query before marker: {repr(clean_query)}")
+                return clean_query
+        
+        # Strategy 3: Multi-line SELECT (handle JOINs and complex queries)
+        match = re.search(r"(SELECT[\s\S]*?)(?:\n\s*\n|\Z)", sql_response, re.IGNORECASE | re.DOTALL)
         if match:
             clean_query = match.group(1).strip()
+            # Remove common trailing contamination
+            clean_query = re.sub(r'\s*(DOMANDA|SQL|###).*$', '', clean_query, flags=re.IGNORECASE | re.DOTALL)
+            clean_query = re.sub(r'\s+', ' ', clean_query)  # Normalize whitespace
             if not clean_query.endswith(';'):
                 clean_query += ';'
-            print(f"[OK] T2SQL CLEANING - Found query before prompt markers: {repr(clean_query)}")
-            return clean_query
-            
-        # Fallback: extract just the first line if it starts with SELECT
-        first_line = sql_response.split('\n')[0].strip()
-        if first_line.lower().startswith('select'):
-            # Remove any trailing prompt contamination from the first line
-            clean_first_line = re.sub(r'\s*###.*$', '', first_line).strip()
-            if not clean_first_line.endswith(';'):
-                clean_first_line += ';'
-            print(f"[OK] T2SQL CLEANING - Using cleaned first line: {repr(clean_first_line)}")
-            return clean_first_line
-            
-        print(f"[ERROR] T2SQL CLEANING - No valid SQL found")
+            # Validate it's still a proper SELECT
+            if clean_query.lower().startswith('select') and len(clean_query) > 10:
+                print(f"[OK] T2SQL CLEANING - Found multi-line query: {repr(clean_query)}")
+                return clean_query
+        
+        # Strategy 4: Single line fallback
+        lines = sql_response.split('\n')
+        for line in lines:
+            line = line.strip()
+            if line.lower().startswith('select'):
+                # Clean the line of any prompt contamination
+                clean_line = re.sub(r'\s*(###|DOMANDA|SQL).*$', '', line, flags=re.IGNORECASE)
+                clean_line = clean_line.strip()
+                if not clean_line.endswith(';'):
+                    clean_line += ';'
+                if len(clean_line) > 10:  # Minimum viable query length
+                    print(f"[OK] T2SQL CLEANING - Using single line: {repr(clean_line)}")
+                    return clean_line
+        
+        # Check if response contains INVALID_QUERY
+        if 'INVALID_QUERY' in sql_response.upper():
+            print(f"[WARN] T2SQL CLEANING - Model returned INVALID_QUERY")
+            return "INVALID_QUERY"
+        
+        print(f"[ERROR] T2SQL CLEANING - No valid SQL found in response")
         return "INVALID_QUERY"
 
     def from_sql_to_text(self, question: str, results: list) -> str:
@@ -239,11 +298,51 @@ class TextToSQLConverter:
 
     def is_sql_safe(self, sql_query: str) -> bool:
         """
-        Check if the SQL query is safe to execute.
+        Check if the SQL query is safe to execute with enhanced validation.
         Args:
             sql_query: The SQL query to check
         Returns:
             True if the query is safe, False otherwise
         """
+        if not sql_query or sql_query.strip() == "INVALID_QUERY":
+            return False
+            
         sql = sql_query.strip().upper()
-        return sql.startswith("SELECT") or sql.startswith("WITH")
+        
+        # Must start with SELECT or WITH
+        if not (sql.startswith("SELECT") or sql.startswith("WITH")):
+            return False
+        
+        # Must end with semicolon
+        if not sql.endswith(";"):
+            return False
+            
+        # Forbidden keywords that could indicate malicious intent
+        forbidden_keywords = [
+            "DROP", "DELETE", "UPDATE", "INSERT", "ALTER", "CREATE", 
+            "TRUNCATE", "EXEC", "EXECUTE", "GRANT", "REVOKE"
+        ]
+        
+        for keyword in forbidden_keywords:
+            if keyword in sql:
+                print(f"[WARN] T2SQL SAFETY - Forbidden keyword detected: {keyword}")
+                return False
+        
+        # Basic syntax validation
+        # Check for balanced parentheses
+        if sql.count("(") != sql.count(")"):
+            print(f"[WARN] T2SQL SAFETY - Unbalanced parentheses")
+            return False
+        
+        # Check for basic SQL structure (must contain FROM)
+        if "FROM" not in sql:
+            print(f"[WARN] T2SQL SAFETY - No FROM clause detected")
+            return False
+        
+        # Check minimum length (avoid trivial/malformed queries)
+        if len(sql.strip()) < 15:
+            print(f"[WARN] T2SQL SAFETY - Query too short: {len(sql.strip())} chars")
+            return False
+            
+        print(f"[OK] T2SQL SAFETY - Query passed safety checks")
+        return True

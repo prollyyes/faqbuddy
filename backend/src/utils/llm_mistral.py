@@ -16,27 +16,44 @@ def clean_response(response: str) -> str:
     """Clean system tokens and unwanted prefixes from LLM response."""
     import re
     
-    # Remove system tokens
+    # Remove all instruction tags (comprehensive list)
+    response = re.sub(r'\[INST\].*?\[/INST\]', '', response, flags=re.DOTALL | re.IGNORECASE)
+    response = re.sub(r'\[/INST\]', '', response, flags=re.IGNORECASE)
+    response = re.sub(r'\[INST\]', '', response, flags=re.IGNORECASE)
+    
+    # Remove assistant/response tags
+    response = re.sub(r'\[ASSIST\]', '', response, flags=re.IGNORECASE)
+    response = re.sub(r'\[/ASSIST\]', '', response, flags=re.IGNORECASE)
+    response = re.sub(r'\[ASSISTANT\]', '', response, flags=re.IGNORECASE)
+    response = re.sub(r'\[/ASSISTANT\]', '', response, flags=re.IGNORECASE)
+    
+    # Remove response/answer tags
+    response = re.sub(r'\[RIS\]', '', response, flags=re.IGNORECASE)
+    response = re.sub(r'\[/RIS\]', '', response, flags=re.IGNORECASE)
+    response = re.sub(r'\[RISPOSTA\]', '', response, flags=re.IGNORECASE)
+    response = re.sub(r'\[/RISPOSTA\]', '', response, flags=re.IGNORECASE)
+    response = re.sub(r'\[ACC\]', '', response, flags=re.IGNORECASE)
+    response = re.sub(r'\[/ACC\]', '', response, flags=re.IGNORECASE)
+    
+    # Remove other system tokens
     response = re.sub(r'<\|im_start\|>.*?<\|im_end\|>', '', response, flags=re.DOTALL)
     response = re.sub(r'<\|im_start\|>', '', response)
     response = re.sub(r'<\|im_end\|>', '', response)
-    response = re.sub(r'\[/INST\]', '', response)
-    response = re.sub(r'\[INST\]', '', response)
+    response = re.sub(r'\[CITAZIONE\]', '', response, flags=re.IGNORECASE)
+    response = re.sub(r'\[/CITAZIONE\]', '', response, flags=re.IGNORECASE)
+    response = re.sub(r'\[FINE\]', '', response, flags=re.IGNORECASE)
     
-    # Remove custom response tokens
-    response = re.sub(r'\[/risposta\]', '', response, flags=re.IGNORECASE)
-    response = re.sub(r'\[risposta\]', '', response, flags=re.IGNORECASE)
-    response = re.sub(r'\[/answer\]', '', response, flags=re.IGNORECASE)
-    response = re.sub(r'\[answer\]', '', response, flags=re.IGNORECASE)
-    
-    # Remove weird correction tags that sometimes appear
+    # Remove correction tags
     response = re.sub(r'\[COR\]|\[/COR\]', '', response)
     response = re.sub(r'\[CORR\]|\[/CORR\]', '', response)
     response = re.sub(r'\[CORRECTION\]|\[/CORRECTION\]', '', response)
     
-    # Remove common unwanted prefixes
+    # Remove unwanted prefixes
     response = re.sub(r'^Risposta:\s*', '', response, flags=re.IGNORECASE)
     response = re.sub(r'^Assistant:\s*', '', response, flags=re.IGNORECASE)
+    
+    # Clean up multiple whitespace/newlines
+    response = re.sub(r'\n\s*\n\s*\n', '\n\n', response)
     
     return response.strip()
 

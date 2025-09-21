@@ -13,6 +13,10 @@ import time
 from pathlib import Path
 from datetime import datetime
 
+# Setup imports
+from import_utils import get_benchmark_paths
+paths = get_benchmark_paths()
+
 def run_ragas_evaluation(traces_file, output_name):
     """Run Ragas evaluation on a traces file."""
     print(f"🔍 Running Ragas evaluation on {traces_file.name}...")
@@ -139,13 +143,14 @@ def main():
     print("🧪 Comprehensive RAG Pipeline Evaluation")
     print("=" * 60)
     
-    # Check if we're in the right directory
-    benchmark_dir = Path("benchmark")
+    # Use paths from import_utils
+    benchmark_dir = paths['benchmark_dir']
+    logs_dir = paths['benchmark_logs_dir']
+    
     if not benchmark_dir.exists():
         print("❌ Error: benchmark directory not found. Please run from project root.")
         return 1
     
-    logs_dir = benchmark_dir / "logs"
     if not logs_dir.exists():
         print("❌ Error: benchmark/logs directory not found. Run the test generation scripts first.")
         return 1
@@ -181,7 +186,7 @@ def main():
         return 1
     
     # Load all evaluation results
-    results_dir = benchmark_dir / "eval"
+    results_dir = paths['benchmark_eval_dir']
     results = load_evaluation_results(results_dir)
     
     if not results:

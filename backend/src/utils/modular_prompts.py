@@ -304,7 +304,7 @@ def build_modular_prompt(
     context_section = build_context_section(chunks)
     
     # Assemble final prompt
-    prompt = f"[INST] {instruction}\n\n{context_section}\n\nDomanda:\n{query} [/INST]"
+    prompt = f"[INST] {instruction}\n\n{context_section}\n\nDomanda:\n{query}\n\nRispondi direttamente senza usare tag di sistema o prefissi. [/INST]"
     
     return prompt
 

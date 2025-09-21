@@ -92,11 +92,20 @@ class PineconeDataExtractor:
         try:
             index = self.pc.Index(self.index_name)
             stats = index.describe_index_stats()
+            
+            # Convert namespaces to JSON-serializable format
+            namespaces = {}
+            if hasattr(stats, 'namespaces') and stats.namespaces:
+                for namespace_name, namespace_summary in stats.namespaces.items():
+                    namespaces[namespace_name] = {
+                        "vector_count": getattr(namespace_summary, 'vector_count', 0)
+                    }
+            
             return {
-                "dimension": stats.get("dimension"),
-                "metric": stats.get("metric"),
-                "namespaces": stats.get("namespaces", {}),
-                "total_vector_count": stats.get("total_vector_count", 0)
+                "dimension": getattr(stats, "dimension", None),
+                "metric": getattr(stats, "metric", None),
+                "namespaces": namespaces,
+                "total_vector_count": getattr(stats, "total_vector_count", 0)
             }
         except Exception as e:
             print(f"❌ Error getting index info: {e}")
@@ -201,25 +210,16 @@ class PineconeDataExtractor:
             },
             "namespaces": {}
         }
+                # Extract EVERYTHING from specific namespaces only: contextual_db and pdf_v2
+        target_namespaces = {
+            "contextual_db": "contextual_db",  # T2SQL database data (40 vectors)
+            "pdf_v2": "pdf_v2"                # RAG/PDF data (301 vectors)
+        }
         
-        # Extrct from all available namespaces
-        all_namespaces = {}
+        print(f"🎯 Extracting ALL data from specific namespaces: {list(target_namespaces.keys())}")
         
-        # Add RAGv2 namespaces
-        all_namespaces.update(self.ragv2_namespaces)
-        
-        # Add existing namespaces
-        all_namespaces.update(self.existing_namespaces)
-        
-        # Add per-row namespace
-        all_namespaces["per_row"] = self.per_row_namespace
-        
-        # Add advanced DB namespace if enabled
-        if ADVANCED_DB_ENABLED:
-            all_namespaces["advanced_db"] = ADVANCED_DB_NAMESPACE
-        
-        # Extract from each namespace
-        for namespace_type, namespace in all_namespaces.items():
+        # Extract from each target namespace
+        for namespace_type, namespace in target_namespaces.items():
             print(f"\n📂 Processing namespace type: {namespace_type}")
             
             # Check if namespace exists
@@ -238,14 +238,6 @@ class PineconeDataExtractor:
                     "data": [],
                     "status": "namespace_not_found"
                 }
-        
-        # Calculate summary statistics
-        total_vectors = sum(ns["vector_count"] for ns in all_data["namespaces"].values())
-        all_data["extraction_info"]["total_extracted_vectors"] = total_vectors
-        
-        print(f"\n✅ Extraction completed!")
-        print(f"   📊 Total vectors extracted: {total_vectors}")
-        print(f"   📂 Namespaces processed: {len(all_data['namespaces'])}")
         
         return all_data
     

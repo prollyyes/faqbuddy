@@ -1,11 +1,15 @@
-from dotenv import load_dotenv
-load_dotenv(dotenv_path="/Users/Edoardo/Documents/Sapienza ING_INF/Thesis_Actual/faqbuddy/.env")
-
 import argparse
 import json
 import pathlib
 import sys
 import pandas as pd
+from pathlib import Path
+
+# Setup imports and environment
+sys.path.insert(0, str(Path(__file__).parent))  # Add eval directory for import_utils
+from import_utils import load_env_file
+load_env_file()
+
 from datasets import Dataset
 from ragas import evaluate
 from ragas.metrics import faithfulness, answer_relevancy # no context_recall for now

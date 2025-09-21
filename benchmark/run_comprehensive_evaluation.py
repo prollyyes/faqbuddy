@@ -36,8 +36,11 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 
-# Add eval directory to path
+# Add eval directory to path and setup imports
 sys.path.insert(0, str(Path(__file__).parent / "eval"))
+from import_utils import setup_backend_imports, get_benchmark_paths, load_env_file
+setup_backend_imports()
+load_env_file()
 
 from enhanced_trace_generator import (
     EnhancedTraceGenerator, 
@@ -58,28 +61,31 @@ class MasterEvaluator:
     """Master coordinator for comprehensive RAG evaluation."""
     
     def __init__(self, 
-                 traces_dir: str = "benchmark/logs",
-                 results_dir: str = "benchmark/eval_results",
-                 data_dir: str = "benchmark/data"):
+                 traces_dir: str = None,
+                 results_dir: str = None,
+                 data_dir: str = None):
         """
         Initialize the master evaluator.
         
         Args:
-            traces_dir: Directory containing trace files
-            results_dir: Directory to save evaluation results
-            data_dir: Directory containing test data
+            traces_dir: Directory containing trace files (defaults to benchmark/logs)
+            results_dir: Directory to save evaluation results (defaults to benchmark/eval_results)
+            data_dir: Directory containing test data (defaults to benchmark/data)
         """
-        self.traces_dir = Path(traces_dir)
-        self.results_dir = Path(results_dir)
-        self.data_dir = Path(data_dir)
+        # Get proper paths using import_utils
+        paths = get_benchmark_paths()
+        
+        self.traces_dir = Path(traces_dir) if traces_dir else paths['benchmark_logs_dir']
+        self.results_dir = Path(results_dir) if results_dir else paths['benchmark_results_dir']
+        self.data_dir = Path(data_dir) if data_dir else paths['benchmark_data_dir']
         
         # Create directories
         self.traces_dir.mkdir(exist_ok=True)
         self.results_dir.mkdir(exist_ok=True)
         self.data_dir.mkdir(exist_ok=True)
         
-        self.testset_file = self.data_dir / "testset.jsonl"
-        self.ground_truth_file = self.data_dir / "ground_truth.json"
+        self.testset_file = paths['testset_file']
+        self.ground_truth_file = paths['ground_truth_file']
         
         print(f"========== Master Evaluator initialized ==========")
         print(f"   Traces dir: {self.traces_dir}")
@@ -398,12 +404,12 @@ def main():
                        default="full",
                        help="Evaluation mode")
     
-    parser.add_argument("--traces-dir", default="benchmark/logs",
-                       help="Directory containing trace files")
-    parser.add_argument("--results-dir", default="benchmark/eval_results", 
-                       help="Directory to save results")
-    parser.add_argument("--data-dir", default="benchmark/data",
-                       help="Directory containing test data")
+    parser.add_argument("--traces-dir", default=None,
+                       help="Directory containing trace files (defaults to benchmark/logs)")
+    parser.add_argument("--results-dir", default=None, 
+                       help="Directory to save results (defaults to benchmark/eval_results)")
+    parser.add_argument("--data-dir", default=None,
+                       help="Directory containing test data (defaults to benchmark/data)")
     
     # Specific mode options
     parser.add_argument("--trace-file", help="Specific trace file for single evaluation")

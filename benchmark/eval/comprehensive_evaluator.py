@@ -22,6 +22,10 @@ from dataclasses import dataclass, asdict
 from datetime import datetime
 import pandas as pd
 
+# Setup imports
+from import_utils import setup_benchmark_imports, get_benchmark_paths
+setup_benchmark_imports()
+
 # Import custom evaluation modules
 from enhanced_metrics import AdvancedEvaluator, RetrievalMetrics, run_comprehensive_evaluation
 from enhanced_trace_generator import EnhancedTraceGenerator

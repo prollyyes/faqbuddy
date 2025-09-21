@@ -1,0 +1,56 @@
+{
+  "timestamp": "2025-09-21",
+  "results": [
+    {
+      "config_name": "baseline_enhanced",
+      "t2sql": {
+        "questions_count": 30,
+        "answer_correctness": 0.6933333333333334,
+        "sql_success_rate": 0.6,
+        "avg_response_time": 5.450433333333334,
+        "routing_accuracy": 0.6
+      },
+      "rag": {
+        "questions_count": 30,
+        "answer_correctness": 0.24285002035002037,
+        "contexts_available": 0.0,
+        "avg_contexts_per_question": 0.0,
+        "avg_response_time": 33.1659
+      }
+    },
+    {
+      "config_name": "full_enhanced",
+      "t2sql": {
+        "questions_count": 30,
+        "answer_correctness": 0.7016666666666667,
+        "sql_success_rate": 0.6,
+        "avg_response_time": 4.762666666666666,
+        "routing_accuracy": 0.6
+      },
+      "rag": {
+        "questions_count": 30,
+        "answer_correctness": 0.23525594775594774,
+        "contexts_available": 0.0,
+        "avg_contexts_per_question": 0.0,
+        "avg_response_time": 32.224900000000005
+      }
+    },
+    {
+      "config_name": "rag_only_no_t2sql",
+      "t2sql": {
+        "questions_count": 22,
+        "answer_correctness": 0.5628787878787879,
+        "sql_success_rate": 0.0,
+        "avg_response_time": 11.903038946065037,
+        "routing_accuracy": 0.0
+      },
+      "rag": {
+        "questions_count": 0,
+        "answer_correctness": 0.0,
+        "contexts_available": 0.0,
+        "avg_contexts_per_question": 0.0,
+        "avg_response_time": 0.0
+      }
+    }
+  ]
+}

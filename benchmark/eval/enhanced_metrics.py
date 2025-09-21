@@ -98,9 +98,16 @@ class AdvancedEvaluator:
         try:
             with open(ground_truth_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-                for item in data:
-                    gt_info = GroundTruthInfo(**item)
-                    self.ground_truth[gt_info.question] = gt_info
+                
+                # Handle both list and dict formats
+                if isinstance(data, list):
+                    for item in data:
+                        question = item["question"]
+                        self.ground_truth[question] = item
+                else:
+                    for item in data:
+                        gt_info = GroundTruthInfo(**item)
+                        self.ground_truth[gt_info.question] = gt_info
             print(f"✅ Loaded {len(self.ground_truth)} ground truth mappings")
         except Exception as e:
             print(f"⚠️ Could not load ground truth file: {e}")
@@ -332,7 +339,7 @@ class AdvancedEvaluator:
         table_indicators = [
             'docente:', 'corso:', 'crediti:', 'modalità:', 'periodo:',
             'edizione del corso', 'matricola', 'email:', 'anno:',
-            '\t', '|', 'nome\s+cognome', 'codice\s+corso'
+            '\t', '|', r'nome\s+cognome', r'codice\s+corso'
         ]
         
         context_lower = context.lower()

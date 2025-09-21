@@ -1,0 +1,891 @@
+[
+  {
+    "query_id": "q_1",
+    "question": "Quali corsi insegna il prof Gabriele Proietti Mattia?",
+    "ground_truth_answer": "** Complementi di Programmazione",
+    "relevant_chunk_ids": [
+      "professor_profile_4a7e1cd0-a0e8-4a47-b004-849ddcc05671"
+    ],
+    "relevant_sections": [
+      "Docenti",
+      "Corsi"
+    ],
+    "is_table_query": true,
+    "query_type": "list",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_2",
+    "question": "Quali corsi insegna il prof Emilio De Santis?",
+    "ground_truth_answer": "Elementi di Calcolo delle Probabilita', Statistica",
+    "relevant_chunk_ids": [
+      "professor_profile_742a6cc1-45e8-46b2-967f-ced465c03ecf"
+    ],
+    "relevant_sections": [
+      "Docenti",
+      "Corsi"
+    ],
+    "is_table_query": true,
+    "query_type": "list",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_3",
+    "question": "Quali corsi insegna il prof Roberto Navigli?",
+    "ground_truth_answer": "** Laboratorio di Ingegneria Informatica",
+    "relevant_chunk_ids": [
+      "professor_profile_c1955be6-c54d-4495-9b7e-b9be84c4efb1"
+    ],
+    "relevant_sections": [
+      "Docenti",
+      "Corsi"
+    ],
+    "is_table_query": true,
+    "query_type": "list",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_4",
+    "question": "Quali corsi insegna il prof Maurizio Lenzerini?",
+    "ground_truth_answer": "** Basi di Dati",
+    "relevant_chunk_ids": [
+      "professor_profile_36d654ba-dbd3-440c-be76-8bfd1968e28c"
+    ],
+    "relevant_sections": [
+      "Docenti",
+      "Corsi"
+    ],
+    "is_table_query": true,
+    "query_type": "list",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_5",
+    "question": "Quali corsi insegna il prof Massimo Petrarca?",
+    "ground_truth_answer": "** Fisica, Introduzione alla Programmazione",
+    "relevant_chunk_ids": [
+      "professor_profile_f30c5bdf-5493-4fab-8cf6-39b045b77662"
+    ],
+    "relevant_sections": [
+      "Docenti",
+      "Corsi"
+    ],
+    "is_table_query": true,
+    "query_type": "list",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_6",
+    "question": "Quali corsi insegna il prof Claudia Califano?",
+    "ground_truth_answer": "** Sistemi Dinamici",
+    "relevant_chunk_ids": [
+      "professor_profile_164a5698-60af-4d56-9ed3-8596ce218916"
+    ],
+    "relevant_sections": [
+      "Docenti",
+      "Corsi"
+    ],
+    "is_table_query": true,
+    "query_type": "list",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_7",
+    "question": "Quali corsi insegna il prof Francesco Leotta?",
+    "ground_truth_answer": "** Progettazione del Software",
+    "relevant_chunk_ids": [
+      "professor_profile_5388ecc6-8f1a-4be3-9d07-019d407267f2"
+    ],
+    "relevant_sections": [
+      "Docenti",
+      "Corsi"
+    ],
+    "is_table_query": true,
+    "query_type": "list",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_8",
+    "question": "Quali corsi insegna il prof Nicola Galesi?",
+    "ground_truth_answer": "** Fondamenti di Matematica",
+    "relevant_chunk_ids": [
+      "professor_profile_83f07cda-e34a-415d-af43-997f40947b20"
+    ],
+    "relevant_sections": [
+      "Docenti",
+      "Corsi"
+    ],
+    "is_table_query": true,
+    "query_type": "list",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_9",
+    "question": "Quali corsi insegna il prof Daniele Cono D’Elia?",
+    "ground_truth_answer": "** Sicurezza, Sistemi di Calcolo",
+    "relevant_chunk_ids": [
+      "professor_profile_e34c3a8a-a364-4747-8026-c19e56d64882"
+    ],
+    "relevant_sections": [
+      "Docenti",
+      "Corsi"
+    ],
+    "is_table_query": true,
+    "query_type": "list",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_10",
+    "question": "Quali corsi insegna il prof Giuseppe Santucci?",
+    "ground_truth_answer": "Introduzione alla Programmazione",
+    "relevant_chunk_ids": [
+      "professor_profile_3785fbaf-124c-4918-89bc-0b6fc64232da"
+    ],
+    "relevant_sections": [
+      "Docenti",
+      "Corsi"
+    ],
+    "is_table_query": true,
+    "query_type": "list",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_11",
+    "question": "Quali corsi insegna il prof Paolo Ottolino?",
+    "ground_truth_answer": "Sistemi Operativi",
+    "relevant_chunk_ids": [
+      "professor_profile_d4416845-ef8e-4d7d-9706-b2af518761be"
+    ],
+    "relevant_sections": [
+      "Docenti",
+      "Corsi"
+    ],
+    "is_table_query": true,
+    "query_type": "list",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_12",
+    "question": "Quali corsi insegna il prof Riccardo Lazzeretti?",
+    "ground_truth_answer": "** Sistemi Operativi, Reti di Calcolatori",
+    "relevant_chunk_ids": [
+      "professor_profile_552e58a4-8087-42ba-ab42-fdf88e65c0bd"
+    ],
+    "relevant_sections": [
+      "Docenti",
+      "Corsi"
+    ],
+    "is_table_query": true,
+    "query_type": "list",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_13",
+    "question": "Da quanti crediti è il corso Sistemi Dinamici?",
+    "ground_truth_answer": "9 CFU",
+    "relevant_chunk_ids": [
+      "course_profile_f8051a59-2b7e-49a9-924f-3d19c0ef5fb8_S1/2024"
+    ],
+    "relevant_sections": [
+      "Corsi",
+      "Crediti"
+    ],
+    "is_table_query": true,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_14",
+    "question": "Da quanti crediti è il corso Laboratorio di Ingegneria Informatica?",
+    "ground_truth_answer": "6 CFU",
+    "relevant_chunk_ids": [
+      "course_profile_518987eb-27eb-4043-8117-4d5cfb709851_S1/2025"
+    ],
+    "relevant_sections": [
+      "Corsi",
+      "Crediti"
+    ],
+    "is_table_query": true,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_15",
+    "question": "Da quanti crediti è il corso Introduzione alla Programmazione?",
+    "ground_truth_answer": "9 CFU",
+    "relevant_chunk_ids": [
+      "course_profile_930415af-454b-49a3-9fb8-2c4687065cba_S1/2023"
+    ],
+    "relevant_sections": [
+      "Corsi",
+      "Crediti"
+    ],
+    "is_table_query": true,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_16",
+    "question": "Da quanti crediti è il corso Fisica?",
+    "ground_truth_answer": "12 CFU",
+    "relevant_chunk_ids": [
+      "course_profile_1bd0f0d4-c2b3-4e74-9a58-26bd45e94000_S2/2025"
+    ],
+    "relevant_sections": [
+      "Corsi",
+      "Crediti"
+    ],
+    "is_table_query": true,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_17",
+    "question": "Da quanti crediti è il corso Programmazione Matematica?",
+    "ground_truth_answer": "9 CFU",
+    "relevant_chunk_ids": [
+      "course_profile_505fa646-9fa1-4419-b675-fe347cb1a704_S1/2024"
+    ],
+    "relevant_sections": [
+      "Corsi",
+      "Crediti"
+    ],
+    "is_table_query": true,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_18",
+    "question": "Da quanti crediti è il corso Fondamenti di Matematica?",
+    "ground_truth_answer": "9 CFU",
+    "relevant_chunk_ids": [
+      "course_profile_591b637c-2f41-4cff-b8c9-dcb4128b87a7_S1/2023"
+    ],
+    "relevant_sections": [
+      "Corsi",
+      "Crediti"
+    ],
+    "is_table_query": true,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_19",
+    "question": "Da quanti crediti è il corso Sicurezza?",
+    "ground_truth_answer": "6 CFU",
+    "relevant_chunk_ids": [
+      "course_profile_2c774da2-76e1-4348-b84f-b1889d5f7841_S2/2025"
+    ],
+    "relevant_sections": [
+      "Corsi",
+      "Crediti"
+    ],
+    "is_table_query": true,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_20",
+    "question": "Da quanti crediti è il corso Progettazione del Software?",
+    "ground_truth_answer": "9 CFU",
+    "relevant_chunk_ids": [
+      "course_profile_e21961e5-3020-45d4-862b-594d648d00b4_S1/2024"
+    ],
+    "relevant_sections": [
+      "Corsi",
+      "Crediti"
+    ],
+    "is_table_query": true,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_21",
+    "question": "Da quanti crediti è il corso Economia?",
+    "ground_truth_answer": "9 CFU",
+    "relevant_chunk_ids": [
+      "course_profile_43f08883-7b54-40e2-9fc9-3c92ecb1b518_S1/2025"
+    ],
+    "relevant_sections": [
+      "Corsi",
+      "Crediti"
+    ],
+    "is_table_query": true,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_22",
+    "question": "Da quanti crediti è il corso Sistemi Operativi?",
+    "ground_truth_answer": "9 CFU",
+    "relevant_chunk_ids": [
+      "course_profile_1c4d3764-3697-461b-b7be-07e21bcab6d3_S1/2025"
+    ],
+    "relevant_sections": [
+      "Corsi",
+      "Crediti"
+    ],
+    "is_table_query": true,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_23",
+    "question": "Chi insegna il corso Sistemi Dinamici?",
+    "ground_truth_answer": "Claudia Califano",
+    "relevant_chunk_ids": [
+      "course_profile_f8051a59-2b7e-49a9-924f-3d19c0ef5fb8_S1/2024"
+    ],
+    "relevant_sections": [
+      "Corsi",
+      "Docenti"
+    ],
+    "is_table_query": true,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_24",
+    "question": "Chi insegna il corso Laboratorio di Ingegneria Informatica?",
+    "ground_truth_answer": "Roberto Navigli",
+    "relevant_chunk_ids": [
+      "course_profile_518987eb-27eb-4043-8117-4d5cfb709851_S1/2025"
+    ],
+    "relevant_sections": [
+      "Corsi",
+      "Docenti"
+    ],
+    "is_table_query": true,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_25",
+    "question": "Chi insegna il corso Introduzione alla Programmazione?",
+    "ground_truth_answer": "Giuseppe Santucci",
+    "relevant_chunk_ids": [
+      "course_profile_930415af-454b-49a3-9fb8-2c4687065cba_S1/2023"
+    ],
+    "relevant_sections": [
+      "Corsi",
+      "Docenti"
+    ],
+    "is_table_query": true,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_26",
+    "question": "Chi insegna il corso Fisica?",
+    "ground_truth_answer": "Massimo Petrarca",
+    "relevant_chunk_ids": [
+      "course_profile_1bd0f0d4-c2b3-4e74-9a58-26bd45e94000_S2/2025"
+    ],
+    "relevant_sections": [
+      "Corsi",
+      "Docenti"
+    ],
+    "is_table_query": true,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_27",
+    "question": "Chi insegna il corso Programmazione Matematica?",
+    "ground_truth_answer": "Giampaolo Liuzzi",
+    "relevant_chunk_ids": [
+      "course_profile_505fa646-9fa1-4419-b675-fe347cb1a704_S1/2024"
+    ],
+    "relevant_sections": [
+      "Corsi",
+      "Docenti"
+    ],
+    "is_table_query": true,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_28",
+    "question": "Chi insegna il corso Fondamenti di Matematica?",
+    "ground_truth_answer": "Nicola Galesi",
+    "relevant_chunk_ids": [
+      "course_profile_591b637c-2f41-4cff-b8c9-dcb4128b87a7_S1/2023"
+    ],
+    "relevant_sections": [
+      "Corsi",
+      "Docenti"
+    ],
+    "is_table_query": true,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_29",
+    "question": "Chi insegna il corso Sicurezza?",
+    "ground_truth_answer": "Daniele Cono D’Elia",
+    "relevant_chunk_ids": [
+      "course_profile_2c774da2-76e1-4348-b84f-b1889d5f7841_S2/2025"
+    ],
+    "relevant_sections": [
+      "Corsi",
+      "Docenti"
+    ],
+    "is_table_query": true,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_30",
+    "question": "Chi insegna il corso Progettazione del Software?",
+    "ground_truth_answer": "Francesco Leotta",
+    "relevant_chunk_ids": [
+      "course_profile_e21961e5-3020-45d4-862b-594d648d00b4_S1/2024"
+    ],
+    "relevant_sections": [
+      "Corsi",
+      "Docenti"
+    ],
+    "is_table_query": true,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_31",
+    "question": "Come ci si iscrive al corso di Ingegneria Informatica e Automatica?",
+    "ground_truth_answer": "1) Sostenere il TOLC-I/ENGLISH TOLC-I; 2) Registrarsi a Infostud; 3) Indicare la preferenza del corso; 4) Pagare il contributo; 5) Seguire graduatorie e, se idonei, procedere all’immatricolazione.",
+    "relevant_chunk_ids": [
+      "5c3b4850df92_chunk_0003"
+    ],
+    "relevant_sections": [
+      "RICORDA QUESTI PASSAGGI"
+    ],
+    "is_table_query": false,
+    "query_type": "procedural",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_32",
+    "question": "Quali sono le scadenze della seconda selezione?",
+    "ground_truth_answer": "Partecipazione 8 maggio – 21 luglio 2025; pubblicazione posti 15 maggio 2025; esiti 23 luglio 2025.",
+    "relevant_chunk_ids": [
+      "5c3b4850df92_chunk_0016"
+    ],
+    "relevant_sections": [
+      "RICORDA QUESTI PASSAGGI",
+      "3. Selezioni"
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_33",
+    "question": "Qual è il punteggio minimo TOLC per evitare gli OFA?",
+    "ground_truth_answer": "Almeno 18/50 al TOLC‑I o ENGLISH TOLC‑I.",
+    "relevant_chunk_ids": [
+      "5c3b4850df92_chunk_0096"
+    ],
+    "relevant_sections": [
+      "- ING-INF/05"
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_34",
+    "question": "Come si indicano le preferenze del corso su Infostud?",
+    "ground_truth_answer": "Da Infostud: Corsi di laurea → gestione preferenze; seleziona codice prova e corso.",
+    "relevant_chunk_ids": [
+      "5c3b4850df92_chunk_0020"
+    ],
+    "relevant_sections": [
+      "RICORDA QUESTI PASSAGGI",
+      "Attenzione"
+    ],
+    "is_table_query": false,
+    "query_type": "procedural",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_35",
+    "question": "Dove sono pubblicate le graduatorie?",
+    "ground_truth_answer": "Sulla pagina istituzionale indicata nel bando nelle date previste.",
+    "relevant_chunk_ids": [
+      "5c3b4850df92_chunk_0031"
+    ],
+    "relevant_sections": [
+      "RICORDA QUESTI PASSAGGI",
+      "5. Graduatorie"
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_36",
+    "question": "Cosa succede se non rispetto le scadenze di pagamento?",
+    "ground_truth_answer": "Perdi il posto e non puoi immatricolarti per quella selezione.",
+    "relevant_chunk_ids": [
+      "5c3b4850df92_chunk_0064"
+    ],
+    "relevant_sections": [
+      "RICORDA QUESTI PASSAGGI",
+      "9. Obblighi formativi aggiuntivi (OFA)"
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_37",
+    "question": "Quali tutele sono previste per studenti con DSA o disabilità?",
+    "ground_truth_answer": "Sono previste misure compensative e tempi aggiuntivi secondo l’allegato dedicato.",
+    "relevant_chunk_ids": [
+      "5c3b4850df92_chunk_0067"
+    ],
+    "relevant_sections": [
+      "RICORDA QUESTI PASSAGGI",
+      "Sede"
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_38",
+    "question": "Quali requisiti valgono per i candidati non UE con visto di studio?",
+    "ground_truth_answer": "Domanda su Universitaly entro il 30 giugno 2025; partecipazione alla sola terza selezione.",
+    "relevant_chunk_ids": [
+      "5c3b4850df92_chunk_0097"
+    ],
+    "relevant_sections": [
+      "- ING-INF/05"
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_39",
+    "question": "Quando sono comunicati gli eventuali posti vacanti?",
+    "ground_truth_answer": "Il 4 novembre 2025 tramite il link indicato nel bando.",
+    "relevant_chunk_ids": [
+      "5c3b4850df92_chunk_0030"
+    ],
+    "relevant_sections": [
+      "RICORDA QUESTI PASSAGGI",
+      "(Nota 4)"
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_40",
+    "question": "È possibile il trasferimento da altro corso?",
+    "ground_truth_answer": "Trasferimenti e abbreviazioni sono consentiti secondo finestra e regole del bando, previa disponibilità posti.",
+    "relevant_chunk_ids": [
+      "5c3b4850df92_chunk_0109"
+    ],
+    "relevant_sections": [
+      "- ING-INF/05",
+      "Procedura:"
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.7
+  },
+  {
+    "query_id": "q_41",
+    "question": "Come si effettua il pagamento PagoPA?",
+    "ground_truth_answer": "Da Infostud selezionare Pagamento diretto PagoPA nelle finestre di bando.",
+    "relevant_chunk_ids": [
+      "5c3b4850df92_chunk_0002"
+    ],
+    "relevant_sections": [
+      "RICORDA QUESTI PASSAGGI"
+    ],
+    "is_table_query": false,
+    "query_type": "procedural",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_42",
+    "question": "Come si rinuncia e si chiede rimborso?",
+    "ground_truth_answer": "La rinuncia comporta le condizioni di rimborso previste dal bando e dalle norme di Ateneo.",
+    "relevant_chunk_ids": [
+      "5c3b4850df92_chunk_0047"
+    ],
+    "relevant_sections": [
+      "RICORDA QUESTI PASSAGGI",
+      "Attenzione"
+    ],
+    "is_table_query": false,
+    "query_type": "procedural",
+    "confidence": 0.7
+  },
+  {
+    "query_id": "q_43",
+    "question": "Come funziona la visita BFS?",
+    "ground_truth_answer": "La BFS esplora per livelli con una coda FIFO.",
+    "relevant_chunk_ids": [
+      "486ae96fe263_chunk_0086"
+    ],
+    "relevant_sections": [
+      "BFS",
+      "Algorithm Driver(G)"
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_44",
+    "question": "Come funziona la visita DFS?",
+    "ground_truth_answer": "La DFS esplora in profondità con backtracking e classifica gli archi.",
+    "relevant_chunk_ids": [
+      "486ae96fe263_chunk_0080"
+    ],
+    "relevant_sections": [
+      "DFS:",
+      "Algorithm Driver(G)"
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_45",
+    "question": "Come è descritto l’algoritmo di Dijkstra?",
+    "ground_truth_answer": "Calcola cammini minimi con pesi non negativi tramite coda di priorità.",
+    "relevant_chunk_ids": [
+      "486ae96fe263_chunk_0063"
+    ],
+    "relevant_sections": [
+      "FORWARD",
+      " Oppure"
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_46",
+    "question": "Qual è la complessità di Dijkstra?",
+    "ground_truth_answer": "O((V+E) log V) con heap binario.",
+    "relevant_chunk_ids": [
+      "486ae96fe263_chunk_0065"
+    ],
+    "relevant_sections": [
+      "FORWARD",
+      " Oppure"
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_47",
+    "question": "Come è descritto l’algoritmo di Bellman-Ford?",
+    "ground_truth_answer": "Gestisce pesi negativi e rileva cicli negativi iterando rilassamenti.",
+    "relevant_chunk_ids": [
+      "486ae96fe263_chunk_0086"
+    ],
+    "relevant_sections": [
+      "BFS",
+      "Algorithm Driver(G)"
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_48",
+    "question": "Cosa riportano gli schemi sull’algoritmo di Kruskal?",
+    "ground_truth_answer": "Costruisce MST scegliendo archi crescenti ed evitando cicli (O(E log V)).",
+    "relevant_chunk_ids": [
+      "486ae96fe263_chunk_0086"
+    ],
+    "relevant_sections": [
+      "BFS",
+      "Algorithm Driver(G)"
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_49",
+    "question": "Cosa riportano gli schemi sull’algoritmo di Prim?",
+    "ground_truth_answer": "Espande MST aggiungendo l’arco più leggero verso un nuovo vertice (O(E log V)).",
+    "relevant_chunk_ids": [
+      "486ae96fe263_chunk_0028"
+    ],
+    "relevant_sections": [
+      "AVL:"
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_50",
+    "question": "Come è descritto QuickSort?",
+    "ground_truth_answer": "Divide et impera con pivot e partizione; media O(n log n).",
+    "relevant_chunk_ids": [
+      "486ae96fe263_chunk_0033"
+    ],
+    "relevant_sections": [
+      "N.B.",
+      "Quick Sort:"
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_51",
+    "question": "Come funzionano le code di priorità basate su heap?",
+    "ground_truth_answer": "Inserimento/estrazione del minimo in O(log n).",
+    "relevant_chunk_ids": [
+      "486ae96fe263_chunk_0014"
+    ],
+    "relevant_sections": [
+      "N.B.",
+      "Heap"
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_52",
+    "question": "Cosa dicono gli schemi sulle tabelle hash?",
+    "ground_truth_answer": "Operazioni medie O(1) con buona funzione e gestione collisioni.",
+    "relevant_chunk_ids": [
+      "486ae96fe263_chunk_0018"
+    ],
+    "relevant_sections": [
+      "N.B.",
+      "Tabelle Hash:"
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_53",
+    "question": "Qual è la differenza tra commutazione di circuito e di pacchetto?",
+    "ground_truth_answer": "Circuito: canale dedicato; Pacchetto: risorse condivise con ritardo/possibile perdita.",
+    "relevant_chunk_ids": [
+      "6bf487d1ec64_chunk_0074"
+    ],
+    "relevant_sections": [
+      "Livelli:",
+      "520. Se non ricevo nulla per 180 secondi da"
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_54",
+    "question": "Che differenza c’è tra FDM e TDM?",
+    "ground_truth_answer": "FDM usa bande di frequenza distinte; TDM usa slot temporali distinti.",
+    "relevant_chunk_ids": [
+      "6bf487d1ec64_chunk_0002"
+    ],
+    "relevant_sections": [
+      ""
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_55",
+    "question": "Cosa caratterizza il livello di collegamento dati?",
+    "ground_truth_answer": "Framing, controllo di errore, accesso al mezzo tra nodi adiacenti.",
+    "relevant_chunk_ids": [
+      "6bf487d1ec64_chunk_0018"
+    ],
+    "relevant_sections": [
+      "Livelli:"
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_56",
+    "question": "Cosa caratterizza il livello di rete (IP)?",
+    "ground_truth_answer": "Instradamento best effort con indirizzi; nessuna garanzia di consegna né ordine.",
+    "relevant_chunk_ids": [
+      "6bf487d1ec64_chunk_0008"
+    ],
+    "relevant_sections": [
+      ""
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_57",
+    "question": "Qual è la differenza tra TCP e UDP?",
+    "ground_truth_answer": "TCP affidabile e connesso; UDP non affidabile e senza connessione.",
+    "relevant_chunk_ids": [
+      "6bf487d1ec64_chunk_0018"
+    ],
+    "relevant_sections": [
+      "Livelli:"
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_58",
+    "question": "Che cos’è il throughput?",
+    "ground_truth_answer": "Velocità effettiva di trasferimento dipendente da banda, ritardi e perdite.",
+    "relevant_chunk_ids": [
+      "6bf487d1ec64_chunk_0008"
+    ],
+    "relevant_sections": [
+      ""
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_59",
+    "question": "Che cosa si intende per ritardo di accodamento?",
+    "ground_truth_answer": "Tempo di attesa dei pacchetti nei buffer per congestione.",
+    "relevant_chunk_ids": [
+      "6bf487d1ec64_chunk_0005"
+    ],
+    "relevant_sections": [
+      ""
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  },
+  {
+    "query_id": "q_60",
+    "question": "Cos’è la finestra scorrevole (sliding window)?",
+    "ground_truth_answer": "Controllo di flusso/congestione che limita i pacchetti non confermati.",
+    "relevant_chunk_ids": [
+      "6bf487d1ec64_chunk_0074"
+    ],
+    "relevant_sections": [
+      "Livelli:",
+      "520. Se non ricevo nulla per 180 secondi da"
+    ],
+    "is_table_query": false,
+    "query_type": "factual",
+    "confidence": 0.9
+  }
+]

@@ -19,12 +19,35 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 
-# Add the backend src directory to Python path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "backend" / "src"))
+# Setup imports
+from import_utils import setup_backend_imports, safe_import_backend_module, load_env_file
+setup_backend_imports()
+load_env_file()
 
-from rag.advanced_rag_pipeline import AdvancedRAGPipeline
-from rag.feature_flags import set_feature_flag, get_feature_flags
+from backend.src.rag.advanced_rag_pipeline import AdvancedRAGPipeline
+from backend.src.rag.config import get_feature_flags, is_feature_enabled
+import os
 
+
+def set_feature_flag(feature_name: str, enabled: bool):
+    """Set a feature flag by updating environment variables."""
+    # Map feature names to environment variable names
+    feature_env_map = {
+        "enhanced_retrieval": "RERANKER_ENABLED",
+        "cross_encoder_reranking": "RERANKER_ENABLED", 
+        "query_analysis": "OBSERVABILITY_ENABLED",
+        "response_verification": "HALLUCINATION_GUARDS",
+        "web_search_enhancement": "WEB_SEARCH_ENHANCEMENT",
+        "context_compression": "RERANKER_ENABLED",
+        "retrieval_guards": "HALLUCINATION_GUARDS"
+    }
+    
+    env_var = feature_env_map.get(feature_name)
+    if env_var:
+        os.environ[env_var] = "true" if enabled else "false"
+    else:
+        print(f"⚠️ Unknown feature flag: {feature_name}")
+        
 class EnhancedTraceGenerator:
     """Generate enhanced traces with detailed retrieval metadata."""
     
@@ -45,7 +68,13 @@ class EnhancedTraceGenerator:
         # Configure feature flags based on config
         self._configure_features(**kwargs)
         
-        # Initialize pipeline
+        # Initialize pipeline (will be set based on use_t2sql flag)
+        self.use_t2sql = kwargs.get('use_t2sql', True)
+        if self.use_t2sql:
+            print("🔀 Using T2SQL + RAG routing pipeline")
+        else:
+            print("📄 Using RAG-only pipeline")
+            
         self.pipeline = AdvancedRAGPipeline()
         print(f"✅ Pipeline ready with features: {get_feature_flags()}")
     
@@ -64,7 +93,8 @@ class EnhancedTraceGenerator:
         }
         
         for feature, enabled in feature_config.items():
-            set_feature_flag(feature, enabled)
+            if feature != "use_t2sql":  # Skip non-feature flags
+                set_feature_flag(feature, enabled)
     
     def generate_enhanced_traces(self, 
                                testset_file: str,
@@ -158,19 +188,77 @@ class EnhancedTraceGenerator:
         return testset
     
     def _get_enhanced_response(self, question: str) -> Dict[str, Any]:
-        """Get enhanced response with detailed metadata."""
+        """Get enhanced response with detailed metadata, including T2SQL routing."""
         if not self.pipeline:
             raise RuntimeError("Pipeline not initialized. Call setup_pipeline() first.")
         
+        # Use T2SQL routing if enabled
+        if self.use_t2sql:
+            return self._get_t2sql_routed_response(question)
+        else:
+            return self._get_rag_only_response(question)
+    
+    def _get_t2sql_routed_response(self, question: str) -> Dict[str, Any]:
+        """Get response using T2SQL + RAG routing logic."""
+        try:
+            # Import the routing logic
+            from backend.src.api.Chat import decide_route, run_t2sql, call_rag_system
+            
+            # Make routing decision
+            routing_decision = decide_route(question)
+            route_used = routing_decision["route"]
+            
+            print(f"   🧭 Route decision: {route_used} (confidence: {routing_decision['ml_confidence']:.3f})")
+            
+            if route_used == "T2SQL":
+                # Try T2SQL first
+                try:
+                    print(f"   🔄 Executing T2SQL for: {question[:50]}...")
+                    t2sql_result = run_t2sql(question)
+                    print(f"   ✅ T2SQL success: {t2sql_result.get('query', 'No query')}")
+                    
+                    return {
+                        "answer": t2sql_result.get("natural_response", t2sql_result.get("result", "")),
+                        "route_used": "T2SQL",
+                        "ml_confidence": routing_decision["ml_confidence"],
+                        "sql_query": t2sql_result.get("query", ""),
+                        "confidence_score": routing_decision["ml_confidence"],
+                        "processing_time": 0.5,  # Approximate
+                        "features_used": ["t2sql_routing"],
+                        "retrieval_results": [],  # T2SQL doesn't use retrieval
+                        "retrieval_stats": {},
+                        "query_analysis": {"intent": "factual", "complexity": "simple"},
+                        "verification_result": {}
+                    }
+                except Exception as e:
+                    print(f"   T2SQL failed: {e}, falling back to RAG")
+                    # Fall back to RAG
+                    rag_result = call_rag_system(question)
+                    return self._format_rag_response(rag_result, "RAG_FALLBACK", routing_decision["ml_confidence"])
+            else:
+                # Use RAG directly
+                print(f"    Using RAG for: {question[:50]}...")
+                rag_result = call_rag_system(question)
+                return self._format_rag_response(rag_result, "RAG", routing_decision["ml_confidence"])
+                
+        except Exception as e:
+            # Fallback to basic RAG pipeline
+            print(f"    Routing failed: {e}, using basic RAG")
+            return self._get_rag_only_response(question)
+    
+    def _get_rag_only_response(self, question: str) -> Dict[str, Any]:
+        """Get response using RAG-only pipeline."""
         # Get full response with metadata
         response = self.pipeline.answer(question)
         
         # Extract detailed retrieval information
         enhanced_response = {
             "answer": response.answer,
+            "route_used": "RAG_ONLY",
             "confidence_score": response.confidence_score,
             "processing_time": response.processing_time,
             "features_used": response.features_used,
+            "ml_confidence": 0.0,  # No ML routing
             
             # Detailed retrieval metadata
             "retrieval_results": self._extract_retrieval_details(response.retrieval_results),
@@ -195,6 +283,35 @@ class EnhancedTraceGenerator:
         }
         
         return enhanced_response
+    
+    def _format_rag_response(self, rag_result: Dict[str, Any], route_used: str, ml_confidence: float) -> Dict[str, Any]:
+        """Format RAG response for consistency."""
+        # Handle context_used - it might be a list of strings or dicts
+        context_used = rag_result.get("context_used", [])
+        if isinstance(context_used, list) and context_used:
+            # If it's a list of strings, convert to proper format
+            if isinstance(context_used[0], str):
+                retrieval_results = [{"text": ctx, "score": 0.8} for ctx in context_used]
+            else:
+                retrieval_results = context_used
+        else:
+            retrieval_results = []
+            
+        return {
+            "answer": rag_result.get("response", ""),
+            "route_used": route_used,
+            "ml_confidence": ml_confidence,
+            "confidence_score": 0.8,  # Default for RAG
+            "processing_time": rag_result.get("total_time", 0),
+            "features_used": ["rag_pipeline"],
+            "retrieval_results": retrieval_results,
+            "retrieval_stats": {
+                "retrieval_time": rag_result.get("retrieval_time", 0),
+                "generation_time": rag_result.get("generation_time", 0)
+            },
+            "query_analysis": {"intent": "complex", "complexity": "medium"},
+            "verification_result": {}
+        }
     
     def _extract_retrieval_details(self, retrieval_results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Extract detailed information from retrieval results."""
@@ -258,6 +375,11 @@ class EnhancedTraceGenerator:
             "confidence_score": result.get('confidence_score', 0.0),
             "processing_time": result.get('processing_time', 0.0),
             "features_used": result.get('features_used', {}),
+            
+            # T2SQL routing information
+            "route_used": result.get('route_used', 'UNKNOWN'),
+            "ml_confidence": result.get('ml_confidence', 0.0),
+            "sql_query": result.get('sql_query', ''),
             
             # Detailed retrieval information
             "retrieval_results": result.get('retrieval_results', []),
@@ -360,9 +482,34 @@ class EnhancedTraceGenerator:
         
         with open(output_path, 'w', encoding='utf-8') as f:
             for record in records:
-                f.write(json.dumps(record, ensure_ascii=False) + "\n")
+                # Clean record for JSON serialization
+                cleaned_record = self._clean_for_json(record)
+                f.write(json.dumps(cleaned_record, ensure_ascii=False) + "\n")
         
         print(f"💾 Saved {len(records)} enhanced traces to {output_file}")
+    
+    def _clean_for_json(self, obj):
+        """Clean object for JSON serialization, handling None/null values and non-serializable types."""
+        if obj is None:
+            return None
+        elif isinstance(obj, bool):
+            return obj
+        elif isinstance(obj, (int, float, str)):
+            return obj
+        elif isinstance(obj, list):
+            return [self._clean_for_json(item) for item in obj]
+        elif isinstance(obj, dict):
+            cleaned = {}
+            for key, value in obj.items():
+                cleaned_value = self._clean_for_json(value)
+                # Convert None to 0 for numeric fields that can't be null
+                if cleaned_value is None and key in ['avg_heading_level', 'confidence_score', 'processing_time']:
+                    cleaned_value = 0.0
+                cleaned[key] = cleaned_value
+            return cleaned
+        else:
+            # Convert other types to string
+            return str(obj)
 
 def generate_baseline_enhanced_traces():
     """Generate enhanced baseline traces."""
@@ -397,15 +544,61 @@ def generate_full_enhanced_traces():
     )
 
 def generate_ablation_traces():
-    """Generate traces for ablation study."""
+    """Generate comprehensive traces for ablation study including T2SQL testing."""
     configurations = [
+        # Baseline configurations
+        {
+            "name": "baseline_enhanced",
+            "config": {
+                "enhanced_retrieval": False,
+                "cross_encoder_reranking": False,
+                "web_search_enhancement": False,
+                "response_verification": False,
+                "use_t2sql": True  # Enable T2SQL routing
+            }
+        },
+        {
+            "name": "full_enhanced", 
+            "config": {
+                "enhanced_retrieval": True,
+                "cross_encoder_reranking": True,
+                "web_search_enhancement": True,
+                "response_verification": True,
+                "use_t2sql": True  # Enable T2SQL routing
+            }
+        },
+        
+        # T2SQL ablation studies
+        {
+            "name": "rag_only_no_t2sql",
+            "config": {
+                "enhanced_retrieval": True,
+                "cross_encoder_reranking": True,
+                "web_search_enhancement": False,
+                "response_verification": True,
+                "use_t2sql": False  # Disable T2SQL - RAG only
+            }
+        },
+        {
+            "name": "t2sql_baseline_rag",
+            "config": {
+                "enhanced_retrieval": False,
+                "cross_encoder_reranking": False,
+                "web_search_enhancement": False,
+                "response_verification": False,
+                "use_t2sql": True  # T2SQL enabled with basic RAG fallback
+            }
+        },
+        
+        # Feature ablation studies
         {
             "name": "ablation_no_rerank",
             "config": {
                 "enhanced_retrieval": True,
                 "cross_encoder_reranking": False,
                 "web_search_enhancement": False,
-                "response_verification": True
+                "response_verification": True,
+                "use_t2sql": True
             }
         },
         {
@@ -414,7 +607,8 @@ def generate_ablation_traces():
                 "enhanced_retrieval": True,
                 "cross_encoder_reranking": True,
                 "web_search_enhancement": False,
-                "response_verification": False
+                "response_verification": False,
+                "use_t2sql": True
             }
         },
         {
@@ -423,16 +617,20 @@ def generate_ablation_traces():
                 "enhanced_retrieval": False,
                 "cross_encoder_reranking": True,
                 "web_search_enhancement": False,
-                "response_verification": True
+                "response_verification": True,
+                "use_t2sql": True
             }
         },
+        # Additional comprehensive configurations
+
         {
-            "name": "ablation_only_web",
+            "name": "rerank_only",
             "config": {
                 "enhanced_retrieval": False,
-                "cross_encoder_reranking": False,
-                "web_search_enhancement": True,
-                "response_verification": False
+                "cross_encoder_reranking": True,
+                "web_search_enhancement": False,
+                "response_verification": False,
+                "use_t2sql": True
             }
         }
     ]
@@ -495,3 +693,4 @@ if __name__ == "__main__":
         )
     
     print("\n✅ Enhanced trace generation completed successfully!")
+
