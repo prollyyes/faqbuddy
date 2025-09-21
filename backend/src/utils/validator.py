@@ -1,5 +1,6 @@
 from typing import Optional
 from fastapi import HTTPException
+import re
 
 def normalize_nome_corso(nome: str) -> str:
     """
@@ -16,15 +17,10 @@ def normalize_email(email: str) -> str:
 
 def normalize_nome(nome: str) -> str:
     """
-    Capitalizza il nome.
+    Capitalizza un nome.
     """
     return nome.strip().capitalize()
 
-def normalize_cognome(cognome: str) -> str:
-    """
-    Capitalizza il cognome.
-    """
-    return cognome.strip().capitalize()
 
 def validate_voto_materiale(voto: int):
     """
@@ -46,7 +42,6 @@ def validate_semestre(semestre: str):
     """
     Valida che il semestre rispetti il pattern.
     """
-    import re
     if not re.match(r"^S[12]/[0-9]{4}$", semestre):
         raise HTTPException(status_code=400, detail="Il semestre deve avere il formato S1/AAAA o S2/AAAA.")
     return semestre
@@ -58,3 +53,17 @@ def validate_non_empty(value: str, field_name: str):
     if not value or not value.strip():
         raise HTTPException(status_code=400, detail=f"{field_name} non può essere vuoto.")
     return value.strip()
+
+    
+def validate_material_type(material_type: str) -> str:
+    """
+    Valida e normalizza il tipo del materiale didattico aggiunto.
+    """
+    no_spaces = "".join(material_type.split())    # elimina tutti gli spazi
+    normalized = no_spaces.lower().capitalize()
+
+    valid_types = {"Appunti", "Esercizi", "Libro", "Slide"}
+    if normalized not in valid_types:
+        raise HTTPException(status_code=400, detail=f"Tipo non valido: {material_type!r}")
+    return normalized
+

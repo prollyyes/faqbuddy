@@ -1,6 +1,7 @@
 from uuid import uuid4
 from ..utils.db_utils import get_connection, MODE
 from ..utils.db_handler import DBHandler
+from ..utils import validator
 from fastapi import APIRouter, HTTPException, status, UploadFile, File, Form, Depends
 from .BaseModel import LoginRequest, SignupRequest
 from .utils import *
@@ -76,9 +77,15 @@ def signup(data: SignupRequest, db_handler: DBHandler = Depends(get_db_handler))
     # --- SOLO ORA crea l'utente ---
     user_id = str(uuid4())
     hashed_pwd = hash_password(data.password)
+
+    #normalizzazione dati utente
+    nome = validator.normalize_nome(data.nome)
+    cognome = validator.normalize_nome(data.cognome)
+    email = validator.normalize_email(data.email)
+
     db_handler.execute_sql_insertion(
         "INSERT INTO Utente (id, email, pwd_hash, nome, cognome, email_verificata) VALUES (%s, %s, %s, %s, %s, %s)",
-        (user_id, data.email, hashed_pwd, data.nome, data.cognome, False) # di default email non verificata per Production
+        (user_id, email, hashed_pwd, nome, cognome, False) # di default email non verificata per Production
     )
 
     if hasattr(data, "ruolo") and data.ruolo == "insegnante":
@@ -95,9 +102,9 @@ def signup(data: SignupRequest, db_handler: DBHandler = Depends(get_db_handler))
             """,
             (
                 user_id,
-                data.nome,
-                data.cognome,
-                data.email,
+                nome,
+                cognome,
+                email,
                 user_id
             )
         )

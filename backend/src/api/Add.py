@@ -1,5 +1,6 @@
 from ..utils.db_utils import get_connection, MODE
 from ..utils.db_handler import DBHandler
+from ..utils import validator
 from fastapi import APIRouter, HTTPException, UploadFile, Form, File, Depends
 from ..api.BaseModel import *
 from psycopg2 import errors
@@ -91,12 +92,15 @@ def addCorso(corso: AddCorso, db_handler: DBHandler = Depends(get_db_handler)):
     if cdl_id is None:
         raise HTTPException(status_code=400, detail="Corso di Laurea non trovato.")
     
+    #normalizzazione
+    nomeCorso = validator.normalize_nome_corso(corso.nomeCorso)
+
     corso_exists = db_handler.run_query("SELECT * FROM Corso c WHERE c.nome = %s",params=(corso.nomeCorso,),fetch=True)
     if not corso_exists:
         db_handler.execute_sql_insertion("""
             INSERT INTO Corso (id_corso, nome, cfu, idoneità, prerequisiti, frequenza_obbligatoria)
             VALUES (%s, %s, %s, %s, %s, %s)
-            """, params=(cdl_id, corso.nomeCorso, corso.cfu, corso.idoneita, 
+            """, params=(cdl_id, nomeCorso, corso.cfu, corso.idoneita, 
                         corso.prerequisiti, corso.frequenza_obbligatoria))
         
         return {"message": "Corso aggiunto con successo"}
@@ -168,12 +172,15 @@ def addPiattaforma(piattaforma: AddPiattaforma, db_handler: DBHandler = Depends(
     if not piattaforma.nome:
         raise HTTPException(status_code=400, detail="Nome della piattaforma invalido.")
     
-    piattaforma_exists = db_handler.run_query("SELECT * FROM Piattaforme p WHERE p.nome = %s", params=(piattaforma.nome,),fetch=True)
+    #normalizzazione
+    nome = validator.normalize_nome(piattaforma.nome)
+
+    piattaforma_exists = db_handler.run_query("SELECT * FROM Piattaforme p WHERE p.nome = %s", params=(nome,),fetch=True)
     if not piattaforma_exists:
         db_handler.execute_sql_insertion("""
                             INSERT INTO Piattaforme (nome)
                             VALUES (%s)
-                            """, params=(piattaforma.nome,))
+                            """, params=(nome,))
         
         return {"message": "Piattaforma aggiunta con successo"}
     else:
@@ -204,13 +211,14 @@ def addEdizioneCorso_Piattaforma(data: AddEdizioneCorsoPiattaforma, db_handler: 
     
     edizione_id = edizione_corso_info[0][0]
     edizione_data = edizione_corso_info[0][1]
+    nomePiattaforma = validator.normalize_nome(data.nomePiattaforma)
     
-    edizione_linked_piattaforma = db_handler.run_query("SELECT * FROM EdizioneCorso_Piattaforme e WHERE e.edizione_id = %s AND e.edizione_data = %s AND e.piattaforma_nome = %s",params=(edizione_id, edizione_data, data.nomePiattaforma),fetch=True)
+    edizione_linked_piattaforma = db_handler.run_query("SELECT * FROM EdizioneCorso_Piattaforme e WHERE e.edizione_id = %s AND e.edizione_data = %s AND e.piattaforma_nome = %s",params=(edizione_id, edizione_data, nomePiattaforma),fetch=True)
     if not edizione_linked_piattaforma:
         db_handler.execute_sql_insertion("""
             INSERT INTO EdizioneCorso_Piattaforme (edizione_id, edizione_data, piattaforma_nome, codice)
             VALUES (%s, %s, %s, %s)
-        """, params=(edizione_id, edizione_data, data.nomePiattaforma, data.codice))
+        """, params=(edizione_id, edizione_data, nomePiattaforma, data.codice))
         return {"message": "Piattaforma per l'Edzione del Corso aggiunta con successo"}
     else:
         raise HTTPException(status_code=409, detail="Questa piattaforma è già associata a questa edizione di corso.")
@@ -311,7 +319,12 @@ async def addMaterialeDidattico(
         verificato = True
     else:
         verificato = False
-        
+    
+    #validazione e normalizzazione
+    tipo_materiale = validator.validate_material_type(tipo)
+    semester = validator.validate_semestre(semestre)
+
+
     data = await upload_file(file, parent_folder, child_folder, nome, cognome)
     file_id = data["file_id"]
     if file_id:
@@ -325,7 +338,7 @@ async def addMaterialeDidattico(
                                 verificato
                                 )
                     VALUES (%s, %s, %s, %s, %s, %s)""",
-                    params=(user_id, course_id, semestre, file_id, tipo, verificato))
+                    params=(user_id, course_id, semester, file_id, tipo_materiale, verificato))
         
         return {"message": "Materiale Didattico Aggiunto con successo."}
     else:
@@ -353,6 +366,8 @@ def addValutazione(valutazione: AddValutazione, db_handler: DBHandler = Depends(
         raise HTTPException(status_code=400, detail="Materiale Didattico non trovato.")
     id_materiale = material_info[0][0]
 
+    voto = validator.validate_voto_materiale(valutazione.voto)
+
     db_handler.execute_sql_insertion("""
         INSERT INTO Valutazione (
                                 student_id,
@@ -360,7 +375,7 @@ def addValutazione(valutazione: AddValutazione, db_handler: DBHandler = Depends(
                                 voto,
                                 commento)
         VALUES (%s, %s, %s, %s)""",
-        params=(student_id, id_materiale, valutazione.voto, valutazione.commento))
+        params=(student_id, id_materiale, voto, valutazione.commento))
     
     return {"message" : "Valutazione aggiunta con successo."}
 
