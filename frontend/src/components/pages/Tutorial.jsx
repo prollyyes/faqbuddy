@@ -17,7 +17,7 @@ const steps = [
   {
     title: 'Benvenuto in FAQBuddy',
     description: `Chiedi a un Buddy tutto ciò che ti serve sull'università.`,
-    image: '/tutorial_img/step1.1-removebg-preview.png'
+    image: '/tutorial_img/tutorial_img_1.png'
   },
   {
     title: 'Cerca qualsiasi cosa',

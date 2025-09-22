@@ -77,6 +77,11 @@ export default function CorsiPage() {
   const [studentReviews, setStudentReviews] = useState([]);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewCourse, setReviewCourse] = useState(null);
+  const actionCourseHasReview = actionCourse
+    ? studentReviews.some(
+        r => r.edition_id === actionCourse.edition_id && r.edition_data === actionCourse.edition_data
+      )
+    : false;
 
   const handleOpenReviewModal = (corso) => {
     setReviewCourse(corso);
@@ -328,7 +333,12 @@ export default function CorsiPage() {
         <div className="px-1 pb-3 mt-2">
           <div className="grid grid-cols-3 items-center">
             <div className="justify-self-end pr-3">
-              <span className={`text-sm font-semibold ${tab === 'attivi' ? 'text-[#822433]' : 'text-gray-400'}`}>Attivi</span>
+              <span
+                className={`text-sm font-semibold ${tab === 'attivi' ? 'text-[#822433]' : 'text-gray-400'} cursor-pointer`}
+                onClick={() => setTab('attivi')}
+              >
+                Attivi
+              </span>
             </div>
             <div className="justify-self-center">
               <button
@@ -343,7 +353,12 @@ export default function CorsiPage() {
               </button>
             </div>
             <div className="justify-self-start pl-3">
-              <span className={`text-sm font-semibold ${tab === 'completati' ? 'text-[#822433]' : 'text-gray-400'}`}>Completati</span>
+              <span
+                className={`text-sm font-semibold ${tab === 'completati' ? 'text-[#822433]' : 'text-gray-400'} cursor-pointer`}
+                onClick={() => setTab('completati')}
+              >
+                Completati
+              </span>
             </div>
           </div>
         </div>
@@ -351,14 +366,9 @@ export default function CorsiPage() {
           <AddActionModal
             onClose={() => setShowAddActionModal(false)}
             onReview={() => {
-              setShowAddActionModal(false);
               handleOpenReviewModal(actionCourse);
             }}
-            onMaterial={() => {
-              setShowAddActionModal(false);
-              // Qui puoi aprire la modale per l'upload dei materiali
-              alert("Funzionalità aggiungi materiale non ancora implementata!");
-            }}
+            canAddReview={!actionCourseHasReview}
           />
         )}
         
@@ -446,6 +456,7 @@ export default function CorsiPage() {
                           className="w-9 h-9 flex items-center justify-center bg-[#991B1B] text-white rounded-full hover:bg-red-800 text-xl shadow"
                           onClick={e => { e.stopPropagation(); handleOpenActionModal(corso); }}
                           title="Aggiungi"
+                          aria-label="Aggiungi recensione"
                         >
                           +
                         </button>

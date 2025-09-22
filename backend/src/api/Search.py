@@ -91,7 +91,13 @@ async def get_materials(data: SearchMaterials, db_handler: DBHandler = Depends(g
         if data.edizioneCorso == 'all':
             materiali = db_handler.run_query(
                 """
-                SELECT md.path_file, md.tipo, md.verificato, md.rating_medio
+                SELECT md.path_file,
+                       md.tipo,
+                       md.verificato,
+                       md.rating_medio,
+                       md.edition_id,
+                       md.edition_data,
+                       c.nome
                 FROM Materiale_Didattico md
                 JOIN EdizioneCorso ed ON md.edition_id = ed.id AND md.edition_data = ed.data
                 JOIN Corso c ON c.id = ed.id
@@ -103,8 +109,16 @@ async def get_materials(data: SearchMaterials, db_handler: DBHandler = Depends(g
         else:
             materiali = db_handler.run_query(
                 """
-                SELECT md.path_file, md.tipo, md.verificato, md.rating_medio
+                SELECT md.path_file,
+                       md.tipo,
+                       md.verificato,
+                       md.rating_medio,
+                       md.edition_id,
+                       md.edition_data,
+                       c.nome
                 FROM Materiale_Didattico md
+                JOIN EdizioneCorso ed ON md.edition_id = ed.id AND md.edition_data = ed.data
+                JOIN Corso c ON c.id = ed.id
                 WHERE md.edition_id = %s AND md.edition_data = %s
                 """,
                 params=(data.edizioneCorso, data.dataEdizione),
@@ -201,6 +215,5 @@ def getReview(data: SearchMaterials, db_handler: DBHandler = Depends(get_db_hand
         return {"materiale": review}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
 
